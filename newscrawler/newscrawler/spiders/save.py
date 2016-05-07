@@ -4,8 +4,10 @@ import os
 def save_webpage(response):
     filename = get_filename(response)
 
-    with open(get_abs_file_path(filename), 'wb') as f:
-        f.write(response.body)
+    # TODO: catch errors
+    with open(get_abs_file_path(filename), 'wb') as file:
+        file.write(response.body)
+    file.close()
 
 
 def get_filename(response):

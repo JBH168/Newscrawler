@@ -14,3 +14,11 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     def parse(self, response):
         if is_article(response):
             save_webpage(response)
+
+    def closed(self, reason):
+        print reason
+
+        # TODO: write json file
+        # with open('data.json', 'wb') as file:
+        #     json.dump(data, file, indent=4)
+        # file.close()
