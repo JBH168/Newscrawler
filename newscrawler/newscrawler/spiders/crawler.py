@@ -34,7 +34,7 @@ class Crawler(scrapy.Spider):
     #     pass
 
     def parse(self, response):
-        # Recursivly crawles all URLs (on allowed_domains) on the current page
+        # Recursivly crawl all URLs on the current page
         for href in response.css("a::attr('href')"):
             url = response.urljoin(href.extract())
             yield scrapy.Request(url, callback=self.parse)

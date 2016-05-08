@@ -9,9 +9,17 @@ from save import save_webpage
 
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
     name = "sitemap"
+    allowed_domains = ["der-postillon.com"]
     sitemap_urls = ['http://www.der-postillon.com/robots.txt']
 
     def parse(self, response):
+        if False:
+            # Recursivly crawl all URLs on the current page
+            for href in response.css("a::attr('href')"):
+                url = response.urljoin(href.extract())
+                yield scrapy.Request(url, callback=self.parse)
+
+        # heuristics
         if is_article(response):
             save_webpage(response)
 
