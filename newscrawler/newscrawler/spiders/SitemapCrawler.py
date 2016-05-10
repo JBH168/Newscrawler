@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import os
 
 # own files
 from heuristics import is_article
-from save import save_webpage
+from download import save_webpage
 
 
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
@@ -13,6 +12,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     sitemap_urls = ['http://www.der-postillon.com/robots.txt']
 
     def parse(self, response):
+        # recursive crawling should be togglable
         if False:
             # Recursivly crawl all URLs on the current page
             for href in response.css("a::attr('href')"):
@@ -27,6 +27,3 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         print reason
 
         # TODO: write json file
-        # with open('data.json', 'wb') as file:
-        #     json.dump(data, file, indent=4)
-        # file.close()
