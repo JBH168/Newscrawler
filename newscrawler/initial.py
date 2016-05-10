@@ -8,7 +8,15 @@
 #
 #
 import os
+from os import path
 import sys
+
+import scrapy
+from scrapy.crawler import CrawlerProcess
+
+# crawlers
+from newscrawler.spiders.crawler import Crawler
+from newscrawler.spiders.SitemapCrawler import SitemapCrawler
 
 
 # test if the json file path was passed to the script
@@ -30,6 +38,14 @@ else:
     print "json file path missing"
     quit()
 
+
 # TODO: json parser to be called
 
 # decide which webcrawler to call and pass arguments along
+# http://doc.scrapy.org/en/latest/topics/spiders.html#spider-arguments
+#
+# process = CrawlerProcess()
+# process.crawl(Crawler)
+# # possible to run multiple crawlers simultaneously
+# process.crawl(SitemapCrawler)
+# process.start()

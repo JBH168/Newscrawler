@@ -1,5 +1,6 @@
 #
 # some method to write data to a json file
+# we could use a item-pipeline instead
 #
 
 import json
