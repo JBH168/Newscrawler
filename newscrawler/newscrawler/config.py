@@ -42,6 +42,7 @@ class CrawlerConfig(object):
     # Here starts the actual class!
     log = None
     log_output = []
+    __current_section = None
 
     def __init__(self):
         """The constructor (keep in mind: this is a singleton, so just called once),
@@ -112,3 +113,14 @@ class CrawlerConfig(object):
 
     def config(self):
         return deepcopy(self.__config)
+
+    def section(self, section):
+        return deepcopy(self.__config[section])
+
+    def set_section(self, section):
+        self.__current_section = section
+
+    def option(self, option):
+        if self.__current_section is None:
+            raise RuntimeError('No section set in option-getting')
+        return self.__config[self.__current_section][option]
