@@ -14,10 +14,11 @@ import sys
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
+from newscrawler.config import config
+
 # crawlers
 from newscrawler.spiders.crawler import Crawler
 from newscrawler.spiders.SitemapCrawler import SitemapCrawler
-
 
 # test if the json file path was passed to the script
 # argv[0] should be this script's name
