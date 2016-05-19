@@ -1,0 +1,8 @@
+{
+    "base_urls" : [
+        { "url": "http://zeit.de" },
+        { "url": "http://sueddeutsche.de" },
+        { "url": "http://panamapapers.sueddeutsche.de" },
+        { "url": "http://times.com" }
+    ]
+}
