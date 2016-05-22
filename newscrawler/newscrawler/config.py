@@ -174,7 +174,7 @@ class JsonConfig(object):
     def load_json(self, filepath):
         self.__json_object = json.load(open(filepath, 'r'))
 
-    def get(self):
+    def config(self):
         return deepcopy(self.__json_object)
 
     def get_url_array(self):
