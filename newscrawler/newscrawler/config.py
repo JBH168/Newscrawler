@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-This is the config-loading module which loads by default the config in the
-root-folder of the project.
+This is the config-loading and json-loading module which loads and parses the
+config file as well as the json file.
+
 It handles the [General]-Section of the config.
 
-It loads the newscrawler.cfg and parses it with the config-parser-module.
+All object-getters create deepcopies.
 """
 
 from copy import deepcopy
 
 import logging
 import ConfigParser
+import json
 
 
 class CrawlerConfig(object):
@@ -45,11 +47,7 @@ class CrawlerConfig(object):
     __current_section = None
 
     def __init__(self):
-        """The constructor (keep in mind: this is a singleton, so just called once),
-        Arguments:
-            1. self
-            2. filepath: Path to the config-file (including file-name)
-        """
+        """The constructor (keep in mind: this is a singleton, so just called once)"""
 
         if CrawlerConfig.instance is not None:
             self.log_output.append(
@@ -58,6 +56,10 @@ class CrawlerConfig(object):
             raise RuntimeError('Multiple instances of singleton-class')
 
     def setup(self, filepath):
+        """Setup the actual class.
+        Arguments:
+            1. filepath: Path to the config-file (including file-name)
+        """
         if CrawlerConfig.instance is not None:
             self.log.warning("Disallowed multiple setup of config.")
             return
@@ -124,3 +126,59 @@ class CrawlerConfig(object):
         if self.__current_section is None:
             raise RuntimeError('No section set in option-getting')
         return self.__config[self.__current_section][option]
+
+
+class JsonConfig(object):
+    """
+    The actual class. First parameter: config-file.
+    This class is a singleton-class,
+    Usage:
+        First creation and loading of the config-file:
+            c = JsonConfig.get_instance()
+            c.setup(<config_file>)
+        Further using:
+            c = JsonConfig.get_instance()
+    """
+
+    # singleton-helper-class
+    # Source: http://code.activestate.com/recipes/52558-the-singleton-pattern-implemented-with-python/#c4
+    class SingletonHelper:
+        """The singleton-helper-class"""
+        def __call__(self, *args, **kw):
+            if JsonConfig.instance is None:
+                JsonConfig.instance = JsonConfig()
+
+            return JsonConfig.instance
+
+    # singleton-helper-variable + function
+    get_instance = SingletonHelper()
+    instance = None
+
+    # Here starts the actual class!
+    log = None
+    __json_object = None
+
+    def __init__(self):
+        """The constructor (keep in mind: this is a singleton, so just called once),"""
+        self.log = logging.getLogger(__name__)
+        if CrawlerConfig.instance is not None:
+            self.log.error('Multiple instances of singleton-class')
+            raise RuntimeError('Multiple instances of singleton-class')
+
+    def setup(self, filepath):
+        """Setup the class at first usage
+        Arguments:
+            1. filepath: Path to the json-file (including file-name)"""
+        self.load_json(filepath)
+
+    def load_json(self, filepath):
+        self.__json_object = json.load(open(filepath, 'r'))
+
+    def get(self):
+        return deepcopy(self.__json_object)
+
+    def get_url_array(self):
+        urlarray = []
+        for urlobjects in self.__json_object["base_urls"]:
+            urlarray.append(urlobjects["url"])
+        return urlarray
