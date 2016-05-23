@@ -60,7 +60,7 @@ class CrawlerConfig(object):
         Arguments:
             1. filepath: Path to the config-file (including file-name)
         """
-        if CrawlerConfig.instance is not None:
+        if self.log is not None:
             self.log.warning("Disallowed multiple setup of config.")
             return
 
@@ -161,7 +161,7 @@ class JsonConfig(object):
     def __init__(self):
         """The constructor (keep in mind: this is a singleton, so just called once),"""
         self.log = logging.getLogger(__name__)
-        if CrawlerConfig.instance is not None:
+        if JsonConfig.instance is not None:
             self.log.error('Multiple instances of singleton-class')
             raise RuntimeError('Multiple instances of singleton-class')
 
@@ -169,6 +169,7 @@ class JsonConfig(object):
         """Setup the class at first usage
         Arguments:
             1. filepath: Path to the json-file (including file-name)"""
+        self.log.debug("Loading JSON-file (" + filepath + ")")
         self.load_json(filepath)
 
     def load_json(self, filepath):
