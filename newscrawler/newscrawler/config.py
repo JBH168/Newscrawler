@@ -47,7 +47,8 @@ class CrawlerConfig(object):
     __current_section = None
 
     def __init__(self):
-        """The constructor (keep in mind: this is a singleton, so just called once)"""
+        """The constructor
+        (keep in mind: this is a singleton, so just called once)"""
 
         if CrawlerConfig.instance is not None:
             self.log_output.append(
@@ -159,7 +160,8 @@ class JsonConfig(object):
     __json_object = None
 
     def __init__(self):
-        """The constructor (keep in mind: this is a singleton, so just called once),"""
+        """The constructor
+        (keep in mind: this is a singleton, so just called once),"""
         self.log = logging.getLogger(__name__)
         if JsonConfig.instance is not None:
             self.log.error('Multiple instances of singleton-class')

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
+
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
     name = "SitemapCrawler"
     allowed_domains = ["der-postillon.com"]
@@ -25,7 +26,6 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         if self.helper.heuristics.is_article(response):
             self.helper.download.save_webpage(response)
 
-    def closed(self, reason):
-        print reason
-
-        # TODO: write json file
+    # in case anything needs to be done after a crawler is done
+    # def closed(self, reason):
+    #     print reason

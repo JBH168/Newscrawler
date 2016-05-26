@@ -5,6 +5,7 @@ import scrapy
 from ..heuristics import is_article
 from ..download import save_webpage
 
+
 class Crawler(scrapy.Spider):
     name = "crawler"
     allowed_domains = ["der-postillon.com"]
@@ -40,7 +41,6 @@ class Crawler(scrapy.Spider):
         if is_article(response):
             save_webpage(response)
 
-    def closed(self, reason):
-        print reason
-
-        # TODO: write json file
+    # in case anything needs to be done after a crawler is done
+    # def closed(self, reason):
+    #     print reason
