@@ -11,33 +11,50 @@ import os
 from os import path
 import sys
 
+import logging
+
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
-from newscrawler.config import config
+from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
 
-# crawlers
-from newscrawler.spiders.crawler import Crawler
-from newscrawler.spiders.SitemapCrawler import SitemapCrawler
+from newscrawler.config import CrawlerConfig
+from newscrawler.config import JsonConfig
 
-# test if the json file path was passed to the script
-# argv[0] should be this script's name
-# argv[1] should be the json file path
-#   for path names with spaces, use "path"
-if len(sys.argv) > 1:
-    input_json_file_path = os.path.abspath(sys.argv[1])
+from newscrawler.crawler.helper import helper
 
-    if not os.path.exists(input_json_file_path):
-        print input_json_file_path + " does not exist"
-        quit()
+class initial(object):
+    cfg = None
+    json = None
+    log = None
+    process = None
+    helper = None
+    def __init__(self):
+        self.cfg = CrawlerConfig.get_instance()
+        self.cfg.setup("./newscrawler.cfg")
+        self.log = logging.getLogger(__name__)
+        self.log.info("Config initalized - Further initialisation.")
+        self.json = JsonConfig.get_instance()
+        self.json.setup("./input_data.json")
 
-    if not os.path.splitext(input_json_file_path)[1] == ".json":
-        print input_json_file_path + " if not a valid json file path"
-        quit()
+        self.helper = helper()
 
-else:
-    print "json file path missing"
-    quit()
+        self.loadCrawler(SitemapCrawler)
+        self.process.start()
+
+    def loadCrawler(self, crawler):
+        if self.process is None:
+            self.process = CrawlerProcess()
+        self.process.crawl(
+            crawler,
+            self.helper,
+            config=self.cfg,
+            json=self.json)
+
+
+
+if __name__ == "__main__":
+    initial()
 
 
 # TODO: json parser to be called

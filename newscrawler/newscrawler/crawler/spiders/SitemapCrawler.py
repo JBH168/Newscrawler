@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-# own files
-from heuristics import is_article
-from download import save_webpage
-
-
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
-    name = "sitemap"
+    name = "SitemapCrawler"
     allowed_domains = ["der-postillon.com"]
     sitemap_urls = ['http://www.der-postillon.com/robots.txt']
+
+    helper = None
+
+    def __init__(self, helper, config=None, json=None, *args, **kwargs):
+        self.logger.info(config.config())
+        self.helper = helper
+        super(SitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         # recursive crawling should be togglable
@@ -20,8 +22,8 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
                 yield scrapy.Request(url, callback=self.parse)
 
         # heuristics
-        if is_article(response):
-            save_webpage(response)
+        if self.helper.heuristics.is_article(response):
+            self.helper.download.save_webpage(response)
 
     def closed(self, reason):
         print reason

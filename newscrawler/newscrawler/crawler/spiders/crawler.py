@@ -2,9 +2,8 @@
 import scrapy
 
 # own files
-from heuristics import is_article
-from download import save_webpage
-
+from ..heuristics import is_article
+from ..download import save_webpage
 
 class Crawler(scrapy.Spider):
     name = "crawler"
