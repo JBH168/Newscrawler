@@ -11,7 +11,6 @@ class download(object):
             file.write(response.body)
         file.close()
 
-
     def get_filename(self, response):
         filename = response.url.split("/")[-1]
 
@@ -23,14 +22,13 @@ class download(object):
 
         return filename
 
-
     def get_abs_file_path(self, filename):
         # for the following three lines of code, see:
         # http://stackoverflow.com/questions/7165749/open-file-in-a-relative-location-in-python
         #
         # may be replaced with a file path given in a json file
         script_dir = os.path.dirname(__file__)  # absolute dir the script is in
-        rel_path = "../../data/" + filename
+        rel_path = "../../../data/" + filename
         abs_file_path = os.path.abspath(os.path.join(script_dir, rel_path))
 
         # ensure the directory actually exists, if it doesn't, create it
