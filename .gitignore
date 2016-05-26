@@ -1,1 +1,4 @@
 *.pyc
+
+# the download folder for any saved, crawled data (testing)
+newscrawler/data/
