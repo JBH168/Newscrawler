@@ -31,6 +31,7 @@ class CrawlerConfig(object):
     # Source: http://code.activestate.com/recipes/52558-the-singleton-pattern-implemented-with-python/#c4
     class SingletonHelper:
         """The singleton-helper-class"""
+        # https://pythontips.com/2013/08/04/args-and-kwargs-in-python-explained/
         def __call__(self, *args, **kw):
             if CrawlerConfig.instance is None:
                 CrawlerConfig.instance = CrawlerConfig()

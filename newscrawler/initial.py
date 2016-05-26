@@ -8,7 +8,6 @@
 #
 #
 import os
-from os import path
 import sys
 
 import logging
@@ -33,13 +32,16 @@ class initial(object):
 
     def __init__(self):
         self.cfg = CrawlerConfig.get_instance()
-        self.cfg.setup(self.get_abs_file_path("./newscrawler.cfg"))
+        self.cfg.setup(self.get_config_file_path())
+
+        # TODO-log: move the following line up to line #35
+        # >>No handlers could be found for logger "__main__"<<
         self.log = logging.getLogger(__name__)
         self.log.info("Config initalized - Further initialisation.")
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
-        self.json.setup(self.get_abs_file_path(urlinput_file_path))
+        self.json.setup(self.get_abs_file_path(urlinput_file_path, True))
 
         self.helper = helper()
 
@@ -55,7 +57,29 @@ class initial(object):
             config=self.cfg,
             json=self.json)
 
-    def get_abs_file_path(self, rel_file_path):
+    def get_config_file_path(self):
+        # test if the config file path was passed to this script
+        # argv[0] should be this script's name
+        # argv[1] should be the config file path
+        #   for path names with spaces, use "path"
+        if len(sys.argv) > 1:
+            input_config_file_path = os.path.abspath(sys.argv[1])
+
+            if not os.path.isabs(input_config_file_path):
+                abs_file_path = self.get_abs_file_path(input_config_file_path)
+            else:
+                abs_file_path = input_config_file_path
+            if os.path.exists(abs_file_path) and os.path.splitext(
+                            abs_file_path)[1] == ".cfg":
+                return abs_file_path
+            # TODO: uncomment once TODO-log is fixed
+            # else:
+            #     self.log.error("first argument passed to initial.py is not the config file")
+
+        # Default
+        return self.get_abs_file_path("./newscrawler.cfg", True)
+
+    def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         # for the following three lines of code, see:
         # http://stackoverflow.com/questions/7165749/open-file-in-a-relative-location-in-python
         script_dir = os.path.dirname(__file__)  # absolute dir the script is in
@@ -63,7 +87,10 @@ class initial(object):
                             os.path.join(script_dir, rel_file_path))
 
         if not os.path.exists(abs_file_path):
-            self.log.error(abs_file_path + " does not exist")
+            # TODO: uncomment once TODO-log is fixed
+            # self.log.error(abs_file_path + " does not exist")
+            if quit_on_error is True:
+                quit()
 
         return abs_file_path
 
