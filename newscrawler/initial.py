@@ -16,6 +16,7 @@ import scrapy
 from scrapy.crawler import CrawlerProcess
 
 from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
+# from newscrawler.crawler.spiders.Crawler import Crawler
 
 from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
@@ -41,21 +42,24 @@ class initial(object):
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
-        self.json.setup(self.get_abs_file_path(urlinput_file_path, True))
+        self.json.setup(self.get_abs_file_path(
+            urlinput_file_path, quit_on_error=True))
 
         self.helper = helper()
 
-        self.loadCrawler(SitemapCrawler)
+        # TODO: decide what crawler to call
+        for url in self.json.get_url_array():
+            self.loadCrawler(SitemapCrawler, url)
         self.process.start()
 
-    def loadCrawler(self, crawler):
+    def loadCrawler(self, crawler, url):
         if self.process is None:
             self.process = CrawlerProcess()
         self.process.crawl(
             crawler,
             self.helper,
-            config=self.cfg,
-            json=self.json)
+            url=url,
+            config=self.cfg)
 
     def get_config_file_path(self):
         # test if the config file path was passed to this script
@@ -77,7 +81,7 @@ class initial(object):
             #     self.log.error("first argument passed to initial.py is not the config file")
 
         # Default
-        return self.get_abs_file_path("./newscrawler.cfg", True)
+        return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
 
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         # for the following three lines of code, see:

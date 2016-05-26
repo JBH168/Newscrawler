@@ -7,7 +7,7 @@ from ..download import save_webpage
 
 
 class Crawler(scrapy.Spider):
-    name = "crawler"
+    name = "Crawler"
     allowed_domains = ["der-postillon.com"]
     start_urls = (
         'http://www.der-postillon.com/',
@@ -38,8 +38,8 @@ class Crawler(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse)
 
         # heuristics
-        if is_article(response):
-            save_webpage(response)
+        if self.helper.heuristics.is_article(response):
+            self.helper.download.save_webpage(response)
 
     # in case anything needs to be done after a crawler is done
     # def closed(self, reason):
