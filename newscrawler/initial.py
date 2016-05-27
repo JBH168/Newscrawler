@@ -15,8 +15,8 @@ import logging
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
-from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
-# from newscrawler.crawler.spiders.Crawler import Crawler
+# from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
+from newscrawler.crawler.spiders.Crawler import Crawler
 
 from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
@@ -47,9 +47,13 @@ class initial(object):
 
         self.helper = helper()
 
-        # TODO: decide what crawler to call
-        for url in self.json.get_url_array():
-            self.loadCrawler(SitemapCrawler, url)
+        if self.cfg.section('Crawler')['sitemap'] is True:
+            for url in self.json.get_url_array():
+                self.loadCrawler(SitemapCrawler, url)
+        else:
+            for url in self.json.get_url_array():
+                self.loadCrawler(Crawler, url)
+
         self.process.start()
 
     def loadCrawler(self, crawler, url):

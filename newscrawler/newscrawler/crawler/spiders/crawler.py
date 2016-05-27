@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-# own files
-from ..heuristics import is_article
-from ..download import save_webpage
-
 
 class Crawler(scrapy.Spider):
     name = "Crawler"
@@ -12,6 +8,18 @@ class Crawler(scrapy.Spider):
     start_urls = (
         'http://www.der-postillon.com/',
     )
+
+    helper = None
+
+    def __init__(self, helper, url, config, *args, **kwargs):
+        self.logger.info(config.config())
+        self.helper = helper
+
+        self.allowed_domains = self.helper.url_extractor.get_allowed_domains(
+                url)
+        self.start_urls = self.helper.url_extractor.get_start_urls(url)
+
+        super(Crawler, self).__init__(*args, **kwargs)
 
     # http://doc.scrapy.org/en/latest/topics/spiders.html
     #

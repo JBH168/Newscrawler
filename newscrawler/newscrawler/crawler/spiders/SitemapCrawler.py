@@ -8,7 +8,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     sitemap_urls = None
 
     helper = None
-    resurive = False
+    recursive = False
 
     def __init__(self, helper, url, config, *args, **kwargs):
         self.logger.info(config.config())
@@ -19,13 +19,13 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         self.sitemap_urls = self.helper.url_extractor.get_sitemap_urls(
                 url, config.section('Crawler')['sitemapallowsubdomains'])
 
-        # TODO self.recursive = config.section('Crawler')['crawlingheuristics']
+        self.recursive = config.section('Crawler')['recursive']
 
         super(SitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         # recursive crawling should be togglable
-        if recursive:
+        if self.recursive:
             # Recursivly crawl all URLs on the current page
             for href in response.css("a::attr('href')"):
                 url = response.urljoin(href.extract())
