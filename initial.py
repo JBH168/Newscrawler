@@ -21,7 +21,7 @@ from newscrawler.crawler.spiders.Crawler import Crawler
 from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
 
-from newscrawler.crawler.helper import helper
+from newscrawler.helper import helper
 
 
 class initial(object):
