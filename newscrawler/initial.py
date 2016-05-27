@@ -15,7 +15,7 @@ import logging
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
-# from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
+from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
 from newscrawler.crawler.spiders.Crawler import Crawler
 
 from newscrawler.config import CrawlerConfig
@@ -32,12 +32,16 @@ class initial(object):
     helper = None
 
     def __init__(self):
+
+        logging.basicConfig(format="[%(pathname)s:%(lineno)d] %(message)s",
+                            level="ERROR")
+        self.log = logging.getLogger(__name__)
+
         self.cfg = CrawlerConfig.get_instance()
         self.cfg.setup(self.get_config_file_path())
 
-        # TODO-log: move the following line up to line #35
-        # >>No handlers could be found for logger "__main__"<<
         self.log = logging.getLogger(__name__)
+
         self.log.info("Config initalized - Further initialisation.")
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
@@ -80,9 +84,9 @@ class initial(object):
             if os.path.exists(abs_file_path) and os.path.splitext(
                             abs_file_path)[1] == ".cfg":
                 return abs_file_path
-            # TODO: uncomment once TODO-log is fixed
-            # else:
-            #     self.log.error("first argument passed to initial.py is not the config file")
+            else:
+                self.log.error("First argument passed to initial.py is not the"\
+                               " config file. Falling back to newscrawler.cfg.")
 
         # Default
         return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
@@ -95,10 +99,9 @@ class initial(object):
                             os.path.join(script_dir, rel_file_path))
 
         if not os.path.exists(abs_file_path):
-            # TODO: uncomment once TODO-log is fixed
-            # self.log.error(abs_file_path + " does not exist")
+            self.log.error(abs_file_path + " does not exist.")
             if quit_on_error is True:
-                quit()
+                raise RuntimeError("Importet file not found. Quit.")
 
         return abs_file_path
 
