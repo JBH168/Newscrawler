@@ -40,18 +40,16 @@ class initial(object):
         self.cfg = CrawlerConfig.get_instance()
         self.cfg.setup(self.get_config_file_path())
 
-        self.log = logging.getLogger(__name__)
-
         self.log.info("Config initalized - Further initialisation.")
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
         self.json.setup(self.get_abs_file_path(
-            urlinput_file_path, quit_on_error=True))
+                                urlinput_file_path, quit_on_error=True))
 
-        self.helper = helper()
+        self.helper = helper(self.cfg.section('Heuristics'))
 
-        if self.cfg.section('Crawler')['sitemap'] is True:
+        if self.cfg.section('Crawler')['sitemap'] == "True":
             for url in self.json.get_url_array():
                 self.loadCrawler(SitemapCrawler, url)
         else:
@@ -85,8 +83,9 @@ class initial(object):
                             abs_file_path)[1] == ".cfg":
                 return abs_file_path
             else:
-                self.log.error("First argument passed to initial.py is not the"\
-                               " config file. Falling back to newscrawler.cfg.")
+                self.log.error("First argument passed to initial.py is not"
+                               " the config file. Falling back to"
+                               " newscrawler.cfg.")
 
         # Default
         return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
@@ -108,13 +107,3 @@ class initial(object):
 
 if __name__ == "__main__":
     initial()
-
-
-# decide which webcrawler to call and pass arguments along
-# http://doc.scrapy.org/en/latest/topics/spiders.html#spider-arguments
-#
-# process = CrawlerProcess()
-# process.crawl(Crawler)
-# # possible to run multiple crawlers simultaneously
-# process.crawl(SitemapCrawler)
-# process.start()

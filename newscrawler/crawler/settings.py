@@ -29,6 +29,9 @@ NEWSPIDER_MODULE = 'newscrawler.crawler.spiders'
 #CONCURRENT_REQUESTS_PER_DOMAIN=16
 #CONCURRENT_REQUESTS_PER_IP=16
 
+# Respect robots.txt policies (disabled by default)
+#ROBOTSTXT_OBEY=True
+
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED=False
 

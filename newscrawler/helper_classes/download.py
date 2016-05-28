@@ -28,7 +28,7 @@ class download(object):
         #
         # may be replaced with a file path given in a json file
         script_dir = os.path.dirname(__file__)  # absolute dir the script is in
-        rel_path = "../../../data/" + filename
+        rel_path = "../../data/" + filename
         abs_file_path = os.path.abspath(os.path.join(script_dir, rel_path))
 
         # ensure the directory actually exists, if it doesn't, create it

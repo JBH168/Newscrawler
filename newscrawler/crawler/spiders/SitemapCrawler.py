@@ -11,15 +11,17 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     recursive = False
 
     def __init__(self, helper, url, config, *args, **kwargs):
-        self.logger.info(config.config())
+        # self.logger.info(config.config())
         self.helper = helper
 
-        self.allowed_domains = self.helper.url_extractor.get_allowed_domains(
-                url)
-        self.sitemap_urls = self.helper.url_extractor.get_sitemap_urls(
-                url, config.section('Crawler')['sitemapallowsubdomains'])
+        self.allowed_domains = self.helper.url_extractor \
+            .get_allowed_domains(url)
+        self.sitemap_urls = self.helper.url_extractor \
+            .get_sitemap_urls(url, config.section('Crawler')
+                              ['sitemapallowsubdomains'] == "True")
 
-        self.recursive = config.section('Crawler')['recursive']
+        self.recursive = config \
+            .section('Crawler')['recursivesitemap'] == "True"
 
         super(SitemapCrawler, self).__init__(*args, **kwargs)
 
