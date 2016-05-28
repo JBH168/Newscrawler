@@ -1,7 +1,31 @@
 import os
+import re
+import time
 
 
 class download(object):
+    cfg_savepath = None
+    timestamp_execution = None
+    savepath_dict = {"timestamp_execution": "self.timestamp_execution",
+                     "timestamp_download": "int(time.time())",
+                     "domain": "",
+                     "full_domain": "",
+                     "directory_string": "",
+                     "file_name": ""}
+
+    def __init__(self, cfg_savepath):
+        timestamp_execution = int(time.time())
+        cfg_savepath = re.sub(r'%time_execution\(([^\)]+)\)',
+                              self.time_replacer, cfg_savepath)
+        for item in self.savepath_dict.keys():
+            cfg_savepath = re.sub(r'%' + item, r'{' + item + '}', cfg_savepath)
+        self.cfg_savepath = cfg_savepath
+
+    def time_replacer(self, match):
+        # match.group(0) = entire match
+        # match.group(1) = match in braces #1
+        return time.strftime(match.group(1))
+
     def save_webpage(self, response):
         filename = self.get_filename(response)
 

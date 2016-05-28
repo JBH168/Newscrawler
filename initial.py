@@ -32,7 +32,7 @@ class initial(object):
     helper = None
 
     def __init__(self):
-
+        print ("-----------------------------------------------------------")
         logging.basicConfig(format="[%(pathname)s:%(lineno)d] %(message)s",
                             level="ERROR")
         self.log = logging.getLogger(__name__)
@@ -47,7 +47,8 @@ class initial(object):
         self.json.setup(self.get_abs_file_path(
                                 urlinput_file_path, quit_on_error=True))
 
-        self.helper = helper(self.cfg.section('Heuristics'))
+        self.helper = helper(self.cfg.section('Heuristics'),
+                             self.cfg.section('Crawler')['savepath'])
 
         if self.cfg.section('Crawler')['sitemap'] == "True":
             for url in self.json.get_url_array():
@@ -56,7 +57,7 @@ class initial(object):
             for url in self.json.get_url_array():
                 self.loadCrawler(Crawler, url)
 
-        self.process.start()
+        # self.process.start()
 
     def loadCrawler(self, crawler, url):
         if self.process is None:

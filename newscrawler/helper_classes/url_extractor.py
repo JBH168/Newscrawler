@@ -6,7 +6,7 @@ class url_extractor(object):
         # not looking out for any leading "www."
         return [re.search('[^/]+\.[^/]+', url).group(0)]
 
-    def get_sitemap_urls(self, url, allow_subdomains=True):
+    def get_sitemap_urls(self, url, allow_subdomains):
         allowed_domains = self.get_allowed_domains(url)[0]
         if allow_subdomains:
             return ["http://" + allowed_domains + "/robots.txt"]

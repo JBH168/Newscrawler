@@ -10,7 +10,7 @@ class helper(object):
     heuristics = None
     url_extractor = None
 
-    def __init__(self, cfg_heuristics):
-        self.download = download()
+    def __init__(self, cfg_heuristics, cfg_savepath):
+        self.download = download(cfg_savepath)
         self.heuristics = heuristics(cfg_heuristics)
         self.url_extractor = url_extractor()
