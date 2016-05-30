@@ -8,10 +8,10 @@ class download(object):
         self.helper = helper
 
     def save_webpage(self, response):
-        filename = self.get_filename(response)
-
         file_path = self.helper.savepath_parser.get_savepath(response.url)
+
         self.ensure_directory_exists(file_path)
+
         with open(file_path, 'wb') as file:
             file.write(response.body)
         file.close()
