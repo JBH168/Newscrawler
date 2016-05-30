@@ -30,15 +30,17 @@ class initial(object):
     log = None
     process = None
     helper = None
+    cfg_file_path = None
 
     def __init__(self):
-        print ("-----------------------------------------------------------")
+
         logging.basicConfig(format="[%(pathname)s:%(lineno)d] %(message)s",
                             level="ERROR")
         self.log = logging.getLogger(__name__)
 
         self.cfg = CrawlerConfig.get_instance()
-        self.cfg.setup(self.get_config_file_path())
+        self.cfg_file_path = self.get_config_file_path()
+        self.cfg.setup(self.cfg_file_path)
 
         self.log.info("Config initalized - Further initialisation.")
 
@@ -48,7 +50,8 @@ class initial(object):
                                 urlinput_file_path, quit_on_error=True))
 
         self.helper = helper(self.cfg.section('Heuristics'),
-                             self.cfg.section('Crawler')['savepath'])
+                             self.cfg.section('Crawler')['savepath'],
+                             self.cfg_file_path)
 
         if self.cfg.section('Crawler')['sitemap'] == "True":
             for url in self.json.get_url_array():
@@ -86,7 +89,7 @@ class initial(object):
             else:
                 self.log.error("First argument passed to initial.py is not"
                                " the config file. Falling back to"
-                               " newscrawler.cfg.")
+                               " ./newscrawler.cfg.")
 
         # Default
         return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
