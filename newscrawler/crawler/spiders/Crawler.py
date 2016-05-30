@@ -13,9 +13,9 @@ class Crawler(scrapy.Spider):
         # self.logger.info(config.config())
         self.helper = helper
 
-        self.allowed_domains = self.helper.url_extractor \
-            .get_allowed_domains(url)
-        self.start_urls = self.helper.url_extractor.get_start_urls(url)
+        self.allowed_domains = [self.helper.url_extractor
+                                .get_allowed_domains(url)]
+        self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
 
         super(Crawler, self).__init__(*args, **kwargs)
 

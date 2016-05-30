@@ -14,11 +14,11 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         # self.logger.info(config.config())
         self.helper = helper
 
-        self.allowed_domains = self.helper.url_extractor \
-            .get_allowed_domains(url)
-        self.sitemap_urls = self.helper.url_extractor \
-            .get_sitemap_urls(url, config.section('Crawler')
-                              ['sitemapallowsubdomains'] == "True")
+        self.allowed_domains = [self.helper.url_extractor
+                                .get_allowed_domains(url)]
+        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(url,
+                             config.section('Crawler')
+                             ['sitemapallowsubdomains'] == "True")]
 
         self.recursive = config \
             .section('Crawler')['recursivesitemap'] == "True"

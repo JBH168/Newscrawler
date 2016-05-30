@@ -57,7 +57,7 @@ class initial(object):
             for url in self.json.get_url_array():
                 self.loadCrawler(Crawler, url)
 
-        # self.process.start()
+        self.process.start()
 
     def loadCrawler(self, crawler, url):
         if self.process is None:
