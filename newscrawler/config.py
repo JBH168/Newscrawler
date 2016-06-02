@@ -29,7 +29,7 @@ class CrawlerConfig(object):
 
     # singleton-helper-class
     # Source: http://code.activestate.com/recipes/52558-the-singleton-pattern-implemented-with-python/#c4
-    class SingletonHelper:
+    class SingletonHelper(object):
         """The singleton-helper-class"""
         # https://pythontips.com/2013/08/04/args-and-kwargs-in-python-explained/
         def __call__(self, *args, **kw):
@@ -98,7 +98,7 @@ class CrawlerConfig(object):
                         self.__config[section][option] = opt
                         self.log_output.append(
                             {"level": "debug",
-                             "msg": "Option not literal_eval-parsable: %s"
+                             "msg": "Option not literal_eval-parsable (maybe string): %s"
                              % option})
 
 
@@ -114,6 +114,8 @@ class CrawlerConfig(object):
 
     def handle_general(self):
         """Handle the General-section of the config."""
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
         logging.basicConfig(format=self.__config["General"]["logformat"],
                             level=self.__config["General"]["loglevel"])
 

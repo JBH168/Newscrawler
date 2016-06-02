@@ -12,7 +12,6 @@ import sys
 
 import logging
 
-import scrapy
 from scrapy.crawler import CrawlerProcess
 
 from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
@@ -22,7 +21,7 @@ from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
 
 from newscrawler.helper import helper
-from collections import Counter
+
 
 class initial(object):
     cfg = None
@@ -35,8 +34,8 @@ class initial(object):
 
     def __init__(self):
 
-        logging.basicConfig(format="[%(pathname)s:%(lineno)d] %(message)s",
-                            level="INFO")
+        logging.basicConfig(format="[%(name)s:%(lineno)d|%(levelname)s] %(message)s",
+                            level="DEBUG")
         self.log = logging.getLogger(__name__)
 
         self.cfg = CrawlerConfig.get_instance()
@@ -48,7 +47,7 @@ class initial(object):
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
         self.json.setup(self.get_abs_file_path(
-                                urlinput_file_path, quit_on_error=True))
+                        urlinput_file_path, quit_on_error=True))
 
         self.helper = helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
@@ -61,7 +60,7 @@ class initial(object):
             for url in self.json.get_url_array():
                 self.loadCrawler(Crawler, url)
 
-        # self.process.start()
+        self.process.start()
 
     def loadCrawler(self, crawler, url):
         if self.process is None:
