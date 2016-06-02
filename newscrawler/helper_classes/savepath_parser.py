@@ -66,7 +66,14 @@ class savepath_parser(object):
                                                                    url),
                           savepath)
 
-        return savepath
+        return remove_not_allowed_chars(savepath)
+
+    def remove_not_allowed_chars(self, savepath):
+        split_savepath = os.path.splitdrive(savepath)
+        # https://msdn.microsoft.com/en-us/library/aa365247.aspx
+        savepath_without_invalid_chars = re.sub(r'<|>|:|\"|\||\?|\*|/', '_',
+                                                split_savepath[1])
+        return split_savepath[0] + savepath_without_invalid_chars
 
     def get_abs_path(self, savepath):
         if os.path.isabs(savepath):
