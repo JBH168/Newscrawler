@@ -13,7 +13,7 @@ from copy import deepcopy
 import logging
 import ConfigParser
 import json
-
+from ast import literal_eval
 
 class CrawlerConfig(object):
     """
@@ -90,8 +90,18 @@ class CrawlerConfig(object):
             for option in options:
 
                 try:
-                    self.__config[section][option] = self.parser \
+                    opt = self.parser \
                         .get(section, option)
+                    try:
+                        self.__config[section][option] = literal_eval(opt)
+                    except (SyntaxError, ValueError) as error:
+                        self.__config[section][option] = opt
+                        self.log_output.append(
+                            {"level": "debug",
+                             "msg": "Option not literal_eval-parsable: %s"
+                             % option})
+
+
                     if self.__config[section][option] == -1:
                         self.log_output.append(
                             {"level": "debug", "msg": "Skipping: %s" % option})
@@ -100,6 +110,7 @@ class CrawlerConfig(object):
                         {"level": "error",
                          "msg": "Exception on %s: %s" % (option, exc)})
                     self.__config[section][option] = None
+
 
     def handle_general(self):
         """Handle the General-section of the config."""

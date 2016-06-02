@@ -22,7 +22,7 @@ from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
 
 from newscrawler.helper import helper
-
+from collections import Counter
 
 class initial(object):
     cfg = None
@@ -31,11 +31,12 @@ class initial(object):
     process = None
     helper = None
     cfg_file_path = None
+    __scrapy_options = None
 
     def __init__(self):
 
         logging.basicConfig(format="[%(pathname)s:%(lineno)d] %(message)s",
-                            level="ERROR")
+                            level="INFO")
         self.log = logging.getLogger(__name__)
 
         self.cfg = CrawlerConfig.get_instance()
@@ -60,11 +61,11 @@ class initial(object):
             for url in self.json.get_url_array():
                 self.loadCrawler(Crawler, url)
 
-        self.process.start()
+        # self.process.start()
 
     def loadCrawler(self, crawler, url):
         if self.process is None:
-            self.process = CrawlerProcess()
+            self.process = CrawlerProcess(self.get_scrapy_options())
         self.process.crawl(
             crawler,
             self.helper,
@@ -93,6 +94,16 @@ class initial(object):
 
         # Default
         return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
+
+    def get_scrapy_options(self):
+        if self.__scrapy_options is None:
+            self.__scrapy_options = {}
+            options = self.cfg.section("Scrapy")
+
+            for key, value in options.items():
+                self.__scrapy_options[key.upper()] = value
+
+        return self.__scrapy_options
 
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         # for the following three lines of code, see:
