@@ -15,6 +15,7 @@ import ConfigParser
 import json
 from ast import literal_eval
 
+
 class CrawlerConfig(object):
     """
     The actual class. First parameter: config-file.
@@ -101,7 +102,6 @@ class CrawlerConfig(object):
                              "msg": "Option not literal_eval-parsable (maybe string): %s"
                              % option})
 
-
                     if self.__config[section][option] == -1:
                         self.log_output.append(
                             {"level": "debug", "msg": "Skipping: %s" % option})
@@ -110,7 +110,6 @@ class CrawlerConfig(object):
                         {"level": "error",
                          "msg": "Exception on %s: %s" % (option, exc)})
                     self.__config[section][option] = None
-
 
     def handle_general(self):
         """Handle the General-section of the config."""
@@ -157,7 +156,7 @@ class JsonConfig(object):
 
     # singleton-helper-class
     # Source: http://code.activestate.com/recipes/52558-the-singleton-pattern-implemented-with-python/#c4
-    class SingletonHelper:
+    class SingletonHelper(object):
         """The singleton-helper-class"""
         def __call__(self, *args, **kw):
             if JsonConfig.instance is None:
