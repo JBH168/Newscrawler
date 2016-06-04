@@ -64,9 +64,12 @@ NEWSPIDER_MODULE = 'newscrawler.crawler.spiders'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'newscrawler.pipelines.SomePipeline': 300,
-#}
+# Format: <relative location>.<pipeline class name> : <order of execution 0-1000>,
+ITEM_PIPELINES = {
+	'newscrawler.pipeline.Heuristics': 200,
+    'newscrawler.pipelines.DatabaseStorage': 300,
+	'newscrawler.pipelines.LocalStorage': 400
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
