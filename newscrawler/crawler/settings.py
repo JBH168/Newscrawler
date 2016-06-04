@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+# This is the scrapy settings which is only used for executing crawlers
+# from the commandline via `scrapy crawl <crawler>`
+# The newscrawler does NOT allow that per default.
+# This is for testing and developing usage only!
+
 # Scrapy settings for newscrawler project
 #
 # For simplicity, this file contains only settings considered important or
@@ -11,8 +16,8 @@
 
 BOT_NAME = 'newscrawler'
 
-SPIDER_MODULES = ['newscrawler.crawler.spiders']
-NEWSPIDER_MODULE = 'newscrawler.crawler.spiders'
+SPIDER_MODULES = ['spiders']
+NEWSPIDER_MODULE = 'spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
