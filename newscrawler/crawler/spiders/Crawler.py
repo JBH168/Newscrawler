@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import shutil
+import os
 
 
 class Crawler(scrapy.Spider):
@@ -7,11 +9,15 @@ class Crawler(scrapy.Spider):
     allowed_domains = None
     start_urls = None
 
+    config = None
     helper = None
+    cwd = None
 
-    def __init__(self, helper, url, config, *args, **kwargs):
-        # self.logger.info(config.config())
+    def __init__(self, helper, url, config, cwd, *args, **kwargs):
+        self.config = config
         self.helper = helper
+
+        self.cwd = cwd
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -29,6 +35,8 @@ class Crawler(scrapy.Spider):
         if self.helper.heuristics.is_article(response):
             self.helper.download.save_webpage(response)
 
-    # in case anything needs to be done after a crawler is done
-    # def closed(self, reason):
-    #     print reason
+    def closed(self, reason):
+        if self.config.section('Files')['removejobdironfinishedsignal'] \
+                and reason == 'finished':
+            shutil.rmtree(os.path.abspath(os.path.join(
+                self.cwd, self.config.section('Scrapy')['jobdir'])))

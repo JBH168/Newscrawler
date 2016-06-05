@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import shutil
+import os
 
 
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
@@ -7,12 +9,15 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     allowed_domains = None
     sitemap_urls = None
 
+    config = None
     helper = None
-    recursive = False
+    cwd = None
 
-    def __init__(self, helper, url, config, *args, **kwargs):
-        # self.logger.info(config.config())
+    def __init__(self, helper, url, config, cwd, *args, **kwargs):
+        self.config = config
         self.helper = helper
+
+        self.cwd = cwd
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -20,14 +25,10 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
                              config.section('Crawler')
                              ['sitemapallowsubdomains'])]
 
-        self.recursive = config \
-            .section('Crawler')['recursivesitemap']
-
         super(SitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
-        # recursive crawling should be togglable
-        if self.recursive:
+        if self.config.section('Crawler')['recursivesitemap']:
             # Recursivly crawl all URLs on the current page
             for href in response.css("a::attr('href')"):
                 url = response.urljoin(href.extract())
@@ -37,6 +38,8 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         if self.helper.heuristics.is_article(response):
             self.helper.download.save_webpage(response)
 
-    # in case anything needs to be done after a crawler is done
-    # def closed(self, reason):
-    #     print reason
+    def closed(self, reason):
+        if self.config.section('Files')['removejobdironfinishedsignal'] \
+                and reason == 'finished':
+            shutil.rmtree(os.path.abspath(os.path.join(
+                self.cwd, self.config.section('Scrapy')['jobdir'])))

@@ -31,6 +31,7 @@ class initial(object):
     helper = None
     cfg_file_path = None
     __scrapy_options = None
+    cwd = None
 
     def __init__(self):
 
@@ -54,6 +55,8 @@ class initial(object):
                              self.cfg.section('Crawler')['savepath'],
                              self.cfg_file_path)
 
+        self.cwd = os.getcwd()
+
         if self.cfg.section('Crawler')['sitemap']:
             for url in self.json.get_url_array():
                 self.loadCrawler(SitemapCrawler, url)
@@ -70,7 +73,8 @@ class initial(object):
             crawler,
             self.helper,
             url=url,
-            config=self.cfg)
+            config=self.cfg,
+            cwd = self.cwd)
 
     def get_config_file_path(self):
         # test if the config file path was passed to this script
