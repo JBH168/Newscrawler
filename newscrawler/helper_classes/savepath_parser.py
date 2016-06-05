@@ -66,7 +66,7 @@ class savepath_parser(object):
                                                                    url),
                           savepath)
 
-        return remove_not_allowed_chars(savepath)
+        return self.remove_not_allowed_chars(savepath)
 
     def remove_not_allowed_chars(self, savepath):
         split_savepath = os.path.splitdrive(savepath)

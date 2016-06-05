@@ -18,10 +18,10 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
                                 .get_allowed_domains(url)]
         self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(url,
                              config.section('Crawler')
-                             ['sitemapallowsubdomains'] == "True")]
+                             ['sitemapallowsubdomains'])]
 
         self.recursive = config \
-            .section('Crawler')['recursivesitemap'] == "True"
+            .section('Crawler')['recursivesitemap']
 
         super(SitemapCrawler, self).__init__(*args, **kwargs)
 

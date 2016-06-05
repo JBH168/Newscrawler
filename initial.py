@@ -34,7 +34,8 @@ class initial(object):
 
     def __init__(self):
 
-        logging.basicConfig(format="[%(name)s:%(lineno)d|%(levelname)s] %(message)s",
+        logging.basicConfig(format="[%(name)s:%(lineno)d|"
+                            "%(levelname)s] %(message)s",
                             level="DEBUG")
         self.log = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class initial(object):
                              self.cfg.section('Crawler')['savepath'],
                              self.cfg_file_path)
 
-        if self.cfg.section('Crawler')['sitemap'] == "True":
+        if self.cfg.section('Crawler')['sitemap']:
             for url in self.json.get_url_array():
                 self.loadCrawler(SitemapCrawler, url)
         else:
