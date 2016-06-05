@@ -108,7 +108,13 @@ class initial(object):
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         # for the following three lines of code, see:
         # http://stackoverflow.com/questions/7165749/open-file-in-a-relative-location-in-python
-        script_dir = os.path.dirname(__file__)  # absolute dir the script is in
+        if self.cfg_file_path is not None and \
+                not self.cfg.section('General')['relativetoinitial']:
+            script_dir = os.path.dirname(self.cfg_file_path)
+        else:
+            # absolute dir this script is in
+            script_dir = os.path.dirname(__file__)
+
         abs_file_path = os.path.abspath(
                             os.path.join(script_dir, rel_file_path))
 
