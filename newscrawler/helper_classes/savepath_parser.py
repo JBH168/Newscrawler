@@ -71,7 +71,7 @@ class savepath_parser(object):
     def remove_not_allowed_chars(self, savepath):
         split_savepath = os.path.splitdrive(savepath)
         # https://msdn.microsoft.com/en-us/library/aa365247.aspx
-        savepath_without_invalid_chars = re.sub(r'<|>|:|\"|\||\?|\*|/', '_',
+        savepath_without_invalid_chars = re.sub(r'<|>|:|\"|\||\?|\*', '_',
                                                 split_savepath[1])
         return split_savepath[0] + savepath_without_invalid_chars
 
