@@ -8,8 +8,6 @@ from scrapy.exceptions import DropItem
 import mysql.connector
 import datetime
 import os.path
-#import hashlib
-#from newscrawler.helper_classes import savepath_parser 
 import logging
 
 ################

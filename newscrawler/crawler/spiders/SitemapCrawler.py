@@ -4,28 +4,7 @@ from scrapy.item import Item, Field
 from scrapy.exceptions import DropItem
 import shutil
 import os
-
-
-class NewscrawlerItem(scrapy.Item):
-    ## ID of the article in the DB
-    id = scrapy.Field()
-    ## Path of the file on the local filesystem
-    localPath = scrapy.Field()
-    ## When the article was last modified
-    modifiedDate = scrapy.Field()
-    ## When the article was downloaded
-    downloadDate = scrapy.Field()
-    ## Root domain from which the article came
-    sourceDomain = scrapy.Field()
-    url = scrapy.Field()
-    ## Hashed filename for local storage
-    filename = scrapy.Field()
-    ## Title of the article
-    title = scrapy.Field()
-    ## Older version of the article in the DB, if exists
-    ancestor = scrapy.Field()
-    ## Reponse object from crawler
-    spiderResponse = scrapy.Field()
+from newscrawler.crawler.items import NewscrawlerItem
 
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
     name = "SitemapCrawler"
@@ -68,7 +47,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
 		article['sourceDomain'] = self.allowed_domains[0].encode("utf-8") 
 		article['url'] = response.url 
         	article['filename'] = '123123' #######DO we need this?? 
-        	article['title'] = 'temp_entry' ######Filler 
+        	article['title'] = response.selector.xpath("//h1/text()").extract() 
         	article['ancestor'] = 'NULL' 
 		article['spiderResponse'] = response
 		return article
