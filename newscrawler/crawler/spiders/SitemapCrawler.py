@@ -4,6 +4,7 @@ from scrapy.item import Item, Field
 from scrapy.exceptions import DropItem
 import shutil
 import os
+import time
 from newscrawler.crawler.items import NewscrawlerItem
 
 
@@ -51,6 +52,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
             article['downloadDate'] = timestamp
             article['sourceDomain'] = self.allowed_domains[0].encode("utf-8")
             article['url'] = response.url
+            article['filename'] = '123123'  # DO we need this??
             # TODO: response.selector.xpath("//h1/text()").extract()
             article['title'] = 'temp_title'
             article['ancestor'] = 'NULL'
