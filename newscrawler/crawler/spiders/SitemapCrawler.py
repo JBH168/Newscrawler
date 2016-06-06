@@ -52,12 +52,12 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
             article['downloadDate'] = timestamp
             article['sourceDomain'] = self.allowed_domains[0].encode("utf-8")
             article['url'] = response.url
-            article['filename'] = '123123'  # DO we need this??
+            article['filename'] = '123123'  # TODO: remove this
             # TODO: response.selector.xpath("//h1/text()").extract()
             article['title'] = 'temp_title'
             article['ancestor'] = 'NULL'
             article['spiderResponse'] = response
-        return article
+            return article
 
     # TODO: Causes errors on *nix
     # def closed(self, reason):
