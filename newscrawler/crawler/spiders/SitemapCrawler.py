@@ -47,7 +47,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
 		article['sourceDomain'] = self.allowed_domains[0].encode("utf-8") 
 		article['url'] = response.url 
         	article['filename'] = '123123' #######DO we need this?? 
-        	article['title'] = response.selector.xpath("//h1/text()").extract() 
+        	article['title'] = 'temp_title' #response.selector.xpath("//h1/text()").extract() 
         	article['ancestor'] = 'NULL' 
 		article['spiderResponse'] = response
 		return article
