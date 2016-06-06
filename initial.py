@@ -9,6 +9,7 @@
 #
 import os
 import sys
+import shutil
 
 import logging
 
@@ -31,7 +32,6 @@ class initial(object):
     helper = None
     cfg_file_path = None
     __scrapy_options = None
-    cwd = None
 
     def __init__(self):
 
@@ -55,7 +55,7 @@ class initial(object):
                              self.cfg.section('Crawler')['savepath'],
                              self.cfg_file_path)
 
-        self.cwd = os.getcwd()
+        self.remove_jobdir_if_not_resume()
 
         if self.cfg.section('Crawler')['sitemap']:
             for url in self.json.get_url_array():
@@ -73,8 +73,7 @@ class initial(object):
             crawler,
             self.helper,
             url=url,
-            config=self.cfg,
-            cwd = self.cwd)
+            config=self.cfg)
 
     def get_config_file_path(self):
         # test if the config file path was passed to this script
@@ -88,8 +87,9 @@ class initial(object):
                 abs_file_path = self.get_abs_file_path(input_config_file_path)
             else:
                 abs_file_path = input_config_file_path
+
             if os.path.exists(abs_file_path) and os.path.splitext(
-                            abs_file_path)[1] == ".cfg":
+                    abs_file_path)[1] == ".cfg":
                 return abs_file_path
             else:
                 self.log.error("First argument passed to initial.py is not"
@@ -98,6 +98,14 @@ class initial(object):
 
         # Default
         return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
+
+    def remove_jobdir_if_not_resume(self):
+        jobdir = os.path.abspath(self.cfg.section('Scrapy')['jobdir'])
+        if len([arg for arg in sys.argv if arg == '--resume']) == 0 \
+                and os.path.exists(jobdir):
+            shutil.rmtree(jobdir)
+            self.log.info("Removed JOBDIR since '--resume' was not passed to"
+                          " initial.py")
 
     def get_scrapy_options(self):
         if self.__scrapy_options is None:

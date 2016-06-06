@@ -2,10 +2,10 @@
 import scrapy
 from scrapy.item import Item, Field
 from scrapy.exceptions import DropItem
-import shutil
-import os
-import time
+
 from newscrawler.crawler.items import NewscrawlerItem
+
+import time
 
 
 class SitemapCrawler(scrapy.spiders.SitemapSpider):
@@ -17,11 +17,9 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     helper = None
     cwd = None
 
-    def __init__(self, helper, url, config, cwd, *args, **kwargs):
+    def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
         self.helper = helper
-
-        self.cwd = cwd
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -58,10 +56,3 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
             article['ancestor'] = 'NULL'
             article['spiderResponse'] = response
             return article
-
-    # TODO: Causes errors on *nix
-    # def closed(self, reason):
-    #     if self.config.section('Files')['removejobdironfinishedsignal'] \
-    #             and reason == 'finished':
-    #         shutil.rmtree(os.path.abspath(os.path.join(
-    #             self.cwd, self.config.section('Scrapy')['jobdir'])))
