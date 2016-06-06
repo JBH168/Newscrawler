@@ -9,12 +9,14 @@ import mysql.connector
 import datetime
 import os.path
 #import hashlib
-#from newscrawler.helper_classes import savepath_parser 
+#from newscrawler.helper_classes import savepath_parser
 import logging
+
+from ..config import CrawlerConfig
 
 ################
 #
-# Handles reponses to HTML responses other than 200 (accept). 
+# Handles reponses to HTML responses other than 200 (accept).
 #
 ################
 
@@ -22,8 +24,8 @@ class HTMLCodeHandling(object):
 
 	def process_item(self, item, spider):
 		## For the case where something goes wrong
-		if item['spiderResponse'].status != 200:	
-			## Item is no longer processed in the pipeline	
+		if item['spiderResponse'].status != 200:
+			## Item is no longer processed in the pipeline
 			raise DropItem("%s responded with a non-200 response" % item['url'])
 		else:
 			return item
@@ -39,10 +41,11 @@ class DatabaseStorage(object):
 	#init database connection
         #doc: http://mysql-python.sourceforge.net/MySQLdb.html#functions-and-attributes
         def __init__(self):
-
+                self.cfg = CrawlerConfig.get_instance()
+                self.db = self.cfg.section("Database")
                 ## Establish DB connection
-		## Closing of the connection is handled once the spider closes
-                self.conn = mysql.connector.connect(host='db.dbvis.de', port=3306, db='ccolon', user='ccolon', passwd='b3eY7Tep2F7Pg559Vg0W', buffered=True)
+                ## Closing of the connection is handled once the spider closes
+                self.conn = mysql.connector.connect(host=self.db["host"], port=self.db["port"], db=self.db["db"], user=self.db["username"], passwd=self.db["password"], buffered=True)
                 self.cursor = self.conn.cursor()
 
                 ## Init all necessary DB queries for this pipeline
@@ -82,14 +85,14 @@ class DatabaseStorage(object):
                                 'title': oldVersion[7],
                                 'ancestor': oldVersion[8],
                         }
-			## Delete the old version of the article from the CurrentVerion table
+            ## Delete the old version of the article from the CurrentVerion table
                         try:
                                 self.cursor.execute(self.deleteFromCurrent, (oldVersion[5],))
                                 self.conn.commit()
                         except mysql.connector.Error as err:
                                 print("Something went wrong in delete: {}".format(err))
 
-			## Add the old version to the ArchiveVersion table
+            ## Add the old version to the ArchiveVersion table
                         try:
                                 self.cursor.execute(self.insertArchive, oldVersionList)
                                 self.conn.commit()
@@ -137,7 +140,7 @@ class LocalStorage(object):
 	#Save the html and filename to the local storage folder
 	def process_item(self, item, spider):
 
-        	## Add a log entry confirming the save 
+        	## Add a log entry confirming the save
 		logging.info("Saving to %s" % item['localPath'])
 
         	## Ensure path exists
@@ -149,6 +152,6 @@ class LocalStorage(object):
         	with open(item['localPath'], 'wb') as file_:
             		file_.write(item['spiderResponse'].body)
         		file_.close()
-		
+
 
 		return item
