@@ -1,16 +1,34 @@
+"""
+helper class for url extraction
+"""
+
 import re
 import os
 
 
 class url_extractor(object):
+    """
+    This class contains methods to extract parts of any given url
+    """
     def get_allowed_domains(self, url):
-        return re.sub(r'^(www.)', '', re.search('[^/]+\.[^/]+', url).group(0))
+        """
+        returns subdomains.domain.topleveldomain of url
+        """
+        return re.sub(r'^(www.)', '', re.search(r'[^/]+\.[^/]+', url).group(0))
 
     def get_allowed_domains_without_subdomains(self, url):
-        return re.search('[^/.]+\.[^/.]+$',
+        """
+        returns domain.topleveldomain of url
+        """
+        return re.search(r'[^/.]+\.[^/.]+$',
                          self.get_allowed_domains(url)).group(0)
 
     def get_sitemap_urls(self, url, allow_subdomains):
+        """
+        returns http://subdomains.domain.topleveldomain/robots.txt of url
+
+        allow_subdomains decides if the return contains the subdomains
+        """
         if allow_subdomains:
             return "http://" + self.get_allowed_domains(url) + "/robots.txt"
         else:
@@ -19,10 +37,16 @@ class url_extractor(object):
                     "/robots.txt"
 
     def get_start_urls(self, url):
+        """
+        returns http://subdomains.domain.topleveldomain/ of url
+        """
         allowed_domains = self.get_allowed_domains(url)
         return "http://" + allowed_domains + "/"
 
     def get_url_directory_string(self, url):
+        """
+        returns the directory string on the server
+        """
         domain = self.get_allowed_domains(url)
 
         splitted_url = url.split('/')
@@ -42,6 +66,9 @@ class url_extractor(object):
         return '_'.join(splitted_url)
 
     def get_url_file_name(self, url):
+        """
+        returns the filename (without the file extension) on the server
+        """
         url_root_ext = os.path.splitext(url)
 
         # len(".markdown") = 9

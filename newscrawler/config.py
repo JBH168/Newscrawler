@@ -99,8 +99,8 @@ class CrawlerConfig(object):
                         self.__config[section][option] = opt
                         self.log_output.append(
                             {"level": "debug",
-                             "msg": "Option not literal_eval-parsable (maybe string): %s"
-                             % option})
+                             "msg": "Option not literal_eval-parsable"
+                             " (maybe string): %s" % option})
 
                     if self.__config[section][option] == -1:
                         self.log_output.append(

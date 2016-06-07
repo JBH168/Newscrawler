@@ -1,3 +1,8 @@
+"""
+helper class for parsing the in the config defined savepath
+"""
+
+
 import re
 import time
 import hashlib
@@ -5,6 +10,9 @@ import os
 
 
 class savepath_parser(object):
+    """
+    This class contains methods to parse the given savepath
+    """
     helper = None
     cfg_savepath = None
     cfg_file_path = None
@@ -12,7 +20,11 @@ class savepath_parser(object):
     def __init__(self, cfg_savepath, cfg_file_path, helper):
         self.helper = helper
 
+        # this part can be replaced right now; no need to replace it over and
+        # over every time get_savepath is called
         timestamp_execution = int(time.time())
+
+        # lambda is used for lazy evalutation
         cfg_savepath = re.sub(r'%time_execution\(([^\)]+)\)',
                               lambda match: self.time_replacer
                               (match, timestamp_execution), cfg_savepath)
@@ -23,15 +35,23 @@ class savepath_parser(object):
         self.cfg_file_path = cfg_file_path
 
     def time_replacer(self, match, timestamp):
+        """
+        returns the timestamp formated with strftime the way the regex-match
+        within the first set of braces defines
+        """
         # match.group(0) = entire match
         # match.group(1) = match in braces #1
         return time.strftime(match.group(1), time.gmtime(timestamp))
 
     def get_savepath(self, url):
+        """
+        returns the evaluated savepath for the given url
+        """
         timestamp = int(time.time())
 
         savepath = self.cfg_savepath
 
+        # lambda is used for lazy evalutation
         savepath = re.sub(r'%time_download\(([^\)]+)\)',
                           lambda match: self.time_replacer(match, timestamp),
                           savepath)
@@ -66,9 +86,13 @@ class savepath_parser(object):
                                                                    url),
                           savepath)
 
+        # ensure the savepath doesn't contain any invalid characters
         return self.remove_not_allowed_chars(savepath)
 
     def remove_not_allowed_chars(self, savepath):
+        """
+        returns the given savepath without invalid savepath characters
+        """
         split_savepath = os.path.splitdrive(savepath)
         # https://msdn.microsoft.com/en-us/library/aa365247.aspx
         savepath_without_invalid_chars = re.sub(r'<|>|:|\"|\||\?|\*', '_',
@@ -76,6 +100,10 @@ class savepath_parser(object):
         return split_savepath[0] + savepath_without_invalid_chars
 
     def get_abs_path(self, savepath):
+        """
+        returns an absolute version of savepath
+        relative paths are relative to the config file
+        """
         if os.path.isabs(savepath):
             return os.path.abspath(savepath)
         else:
@@ -84,11 +112,16 @@ class savepath_parser(object):
                                                 (savepath)))
 
     def get_max_url_file_name(self, savepath, url):
+        """
+        returns the first max. allowed number of chars of the url_file_name
+        """
         number_occurrences = savepath.count('%max_url_file_name')
         savepath_copy = savepath
         size_without_max_url_file_name = len(savepath_copy
                                              .replace('%max_url_file_name',
                                                       ''))
+        # Windows: max file path length is 260 characters including
+        # NULL (string end)
         max_size = 260 - 1 - size_without_max_url_file_name
         max_size_per_occurrence = max_size / number_occurrences
 

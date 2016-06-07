@@ -1,3 +1,7 @@
+"""
+This file's only purpose is to bundle all helper classes in ./helper_classes
+so they can be passed to other classes easily
+"""
 
 from helper_classes.heuristics import heuristics
 from helper_classes.url_extractor import url_extractor
@@ -5,7 +9,9 @@ from helper_classes.savepath_parser import savepath_parser
 
 
 class helper(object):
-
+    """
+    This class contains helper classes from ./helper_classes
+    """
     heuristics = None
     url_extractor = None
     savepath_parser = None

@@ -15,7 +15,6 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
 
     config = None
     helper = None
-    cwd = None
 
     def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
