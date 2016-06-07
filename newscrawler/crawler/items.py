@@ -20,11 +20,13 @@ class NewscrawlerItem(scrapy.Item):
     # Root domain from which the article came
     sourceDomain = scrapy.Field()
     url = scrapy.Field()
-    # Hashed filename for local storage
-    filename = scrapy.Field()
     # Title of the article
     title = scrapy.Field()
     # Older version of the article in the DB, if exists
     ancestor = scrapy.Field()
+    # Newer version of the article in the DB, if exists
+    descendant = scrapy.Field()
+    # Number of versions of the article in the DB
+    version = scrapy.Field()
     # Reponse object from crawler
     spiderResponse = scrapy.Field()
