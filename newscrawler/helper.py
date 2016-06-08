@@ -17,7 +17,7 @@ class helper(object):
     savepath_parser = None
 
     def __init__(self, cfg_heuristics, cfg_savepath, cfg_file_path):
-        self.heuristics = heuristics(cfg_heuristics)
         self.url_extractor = url_extractor()
+        self.heuristics = heuristics(cfg_heuristics, self.url_extractor)
         self.savepath_parser = savepath_parser(cfg_savepath,
                                                cfg_file_path, self)

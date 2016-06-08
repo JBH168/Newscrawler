@@ -78,90 +78,90 @@ class DatabaseStorage(object):
     # Second store the new article in the current version table
     def process_item(self, item, spider):
 
-            # Search the CurrentVersion table for a version of the article
-            try:
-                self.cursor.execute(self.compareVersions, (item['url'],))
+        # Search the CurrentVersion table for a version of the article
+        try:
+            self.cursor.execute(self.compareVersions, (item['url'],))
 
+        except mysql.connector.Error as err:
+            print("Something went wrong in query: {}".format(err))
+
+        # Save the result of the query. Must be done before the add,
+        #   otherwise the result will be overwritten in the buffer
+        oldVersion = self.cursor.fetchone()
+
+        currentVersionList = {
+            'localPath': item['localPath'],
+            'modifiedDate': item['modifiedDate'],
+            'downloadDate': item['downloadDate'],
+            'sourceDomain': item['sourceDomain'],
+            'url': item['url'],
+            'title': item['title'],
+            'ancestor': item['ancestor'],
+            'descendant': item['descendant'],
+            'version': item['version'], }
+
+        # Add the new version of the article to
+        # the CurrentVersion table
+        try:
+            self.cursor.execute(self.insertCurrent, currentVersionList)
+            self.conn.commit()
+
+        except mysql.connector.Error as err:
+            print("Something went wrong in commit: {}".format(err))
+
+        logging.info("Article inserted into the database.")
+
+        # Retrieve the auto_id from the new article for the old version's
+        #   descendant attribute
+        try:
+            item['id'] = self.cursor.lastrowid
+        except mysql.connector.Error as err:
+            print("Something went wrong in id query: {}".format(err))
+
+        print(item['id'])
+
+        # If there is an existing article with the same URL, then move
+        #   it to the ArchiveVersion table, and delete it from the
+        #   CurrentVersion table
+        if oldVersion is not None:
+            oldVersionList = {
+                'id': oldVersion[0],
+                'localPath': oldVersion[1],
+                'modifiedDate': oldVersion[2],
+                'downloadDate': oldVersion[3],
+                'sourceDomain': oldVersion[4],
+                'url': oldVersion[5],
+                'title': oldVersion[6],
+                'ancestor': oldVersion[7],
+                'descendant': item['id'],
+                'version': oldVersion[9], }
+
+            # Link the new version with the old
+            item['ancestor'] = oldVersion[0]
+
+            # Increment version number for the article
+            try:
+                self.cursor.execute("UPDATE CurrentVersion SET version=%s WHERE id=%s", ((oldVersion[9]+1), item['id'], ))
             except mysql.connector.Error as err:
-                print("Something went wrong in query: {}".format(err))
+                print("Something went wrong in version update: {}".format(err))
 
-            # Save the result of the query. Must be done before the add, 
-            #   otherwise the result will be overwritten in the buffer
-            oldVersion = self.cursor.fetchone()
-
-            currentVersionList = {
-                'localPath': item['localPath'],
-                'modifiedDate': item['modifiedDate'],
-                'downloadDate': item['downloadDate'],
-                'sourceDomain': item['sourceDomain'],
-                'url': item['url'],
-                'title': item['title'],
-                'ancestor': item['ancestor'],
-                'descendant': item['descendant'],
-                'version': item['version'],}
-
-            # Add the new version of the article to
-            # the CurrentVersion table
+            # Delete the old version of the article from the
+            # CurrentVerion table
             try:
-                self.cursor.execute(self.insertCurrent, currentVersionList)
+                self.cursor.execute(self.deleteFromCurrent,
+                                    (oldVersion[5], ))
                 self.conn.commit()
-
             except mysql.connector.Error as err:
-                print("Something went wrong in commit: {}".format(err))
+                print("Something went wrong in delete: {}".format(err))
 
-            logging.info("Article inserted into the database.")
-
-            # Retrieve the auto_id from the new article for the old version's
-            #   descendant attribute 
+            # Add the old version to the ArchiveVersion table
             try:
-                item['id'] = self.cursor.lastrowid
+                self.cursor.execute(self.insertArchive, oldVersionList)
+                self.conn.commit()
             except mysql.connector.Error as err:
-                print("Something went wrong in id query: {}".format(err))
+                print("Something went wrong in archive: {}".format(err))
 
-            print(item['id'])
-
-            # If there is an existing article with the same URL, then move
-            #   it to the ArchiveVersion table, and delete it from the
-            #   CurrentVersion table
-            if oldVersion is not None:
-                    oldVersionList = {
-                            'id': oldVersion[0],
-                            'localPath': oldVersion[1],
-                            'modifiedDate': oldVersion[2],
-                            'downloadDate': oldVersion[3],
-                            'sourceDomain': oldVersion[4],
-                            'url': oldVersion[5],
-                            'title': oldVersion[6],
-                            'ancestor': oldVersion[7],
-                            'descendant': item['id'],
-                            'version': oldVersion[9],}
-
-                    # Link the new version with the old
-                    item['ancestor'] = oldVersion[0]
-
-                    # Increment version number for the article
-                    try:
-                        self.cursor.execute("UPDATE CurrentVersion SET version=%s WHERE id=%s", ((oldVersion[9]+1),item['id'],))
-                    except mysql.connector.Error as err:
-                        print("Something went wrong in version update: {}".format(err))
-
-                    # Delete the old version of the article from the
-                    # CurrentVerion table
-                    try:
-                        self.cursor.execute(self.deleteFromCurrent,
-                                               (oldVersion[5],))
-                        self.conn.commit()
-                    except mysql.connector.Error as err:
-                        print("Something went wrong in delete: {}".format(err))
-
-                    # Add the old version to the ArchiveVersion table
-                    try:
-                        self.cursor.execute(self.insertArchive, oldVersionList)
-                        self.conn.commit()
-                    except mysql.connector.Error as err:
-                        print("Something went wrong in archive: {}".format(err))
-
-            return item
+        return item
 
     def close_spider(self, spider):
         # Close DB connection - garbage collection

@@ -6,13 +6,13 @@ helper class for testing heuristics
 class heuristics(object):
     """
     helper class
-
-    contains a method that tests if a given response is an article
     """
     cfg_heuristics = None
+    url_extractor = None
 
-    def __init__(self, cfg_heuristics):
+    def __init__(self, cfg_heuristics, url_extractor):
         self.cfg_heuristics = cfg_heuristics
+        self.url_extractor = url_extractor
 
     def is_article(self, response):
         """
@@ -34,3 +34,9 @@ class heuristics(object):
 
         # no more heuristics -> probably an article
         return True
+
+    def is_from_subdomain(self, url, allowed_domains):
+        """
+        ensures the given url isn't from a subdomain
+        """
+        return self.url_extractor.get_allowed_domains(url) == allowed_domains

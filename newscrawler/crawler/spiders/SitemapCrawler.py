@@ -39,6 +39,14 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
                 # url = response.urljoin(href.extract())
                 # yield scrapy.Request(url, callback=self.parse)
 
+        if self.config.section('Crawler')['ignoresubdomains'] and \
+                not self.helper.heuristics.is_from_subdomain(
+                response.url, self.allowed_domains[0]):
+            # TODO: DropItem: why do we raise DropItem?
+            #       it creates an error
+            # raise DropItem("From a subdomain:{}".format(response.url))
+            return
+
         if self.helper.heuristics.is_article(response):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
@@ -58,4 +66,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
             return article
 
         else:
-            raise DropItem("Not an article:{}".format(reponse.url))
+            # TODO: DropItem: why do we raise DropItem?
+            #       it creates an error
+            # raise DropItem("Not an article:{}".format(response.url))
+            return
