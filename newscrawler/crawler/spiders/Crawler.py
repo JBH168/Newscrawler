@@ -6,6 +6,7 @@ class Crawler(scrapy.Spider):
     name = "Crawler"
     allowed_domains = None
     start_urls = None
+    original_url = None
 
     config = None
     helper = None
@@ -13,6 +14,7 @@ class Crawler(scrapy.Spider):
     def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
         self.helper = helper
+        self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -27,5 +29,5 @@ class Crawler(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse)
 
         # heuristics
-        if self.helper.heuristics.is_article(response):
+        if self.helper.heuristics.is_article(response, self.original_url):
             self.helper.download.save_webpage(response)

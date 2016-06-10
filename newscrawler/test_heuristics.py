@@ -53,8 +53,8 @@ class test_heursitics(object):
     def test_content(self, content):
         selector = Selector(text=content)
         results = {}
-        results["og_type"] = self.heuristics.og_test(selector)
-        results["linked_headlines"] = self.heuristics.linked_headlines(selector)
+        results["og_type"] = self.heuristics.og_type(selector)
+        results["linked_headlines"] = self.heuristics.__linked_headlines(selector)
         return results
 
 if __name__ == "__main__":

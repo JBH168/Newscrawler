@@ -1,8 +1,20 @@
 {
     "base_urls" : [
-        { "url": "http://zeit.de" },
-        { "url": "http://sueddeutsche.de" },
-        { "url": "http://panamapapers.sueddeutsche.de" },
-        { "url": "http://times.com" }
+        {
+          "url": "http://zeit.de",
+          "crawler": "sitemap",
+          "overwrite_heuristics": {
+            "og_type": true,
+            "linked_headlines": "<=0.5"
+          }
+        },
+        {
+          "url": "http://sueddeutsche.de",
+          "crawler": "recursive",
+          "overwrite_heuristics": {
+            "og_type": true,
+            "linked_headlines": false
+          }
+        }
     ]
 }

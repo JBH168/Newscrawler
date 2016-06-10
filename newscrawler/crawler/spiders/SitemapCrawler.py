@@ -16,9 +16,12 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     config = None
     helper = None
 
+    original_url = None
+
     def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
         self.helper = helper
+        self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -39,7 +42,7 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
                 # url = response.urljoin(href.extract())
                 # yield scrapy.Request(url, callback=self.parse)
 
-        if self.helper.heuristics.is_article(response):
+        if self.helper.heuristics.is_article(response, self.original_url):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
             article = NewscrawlerItem()

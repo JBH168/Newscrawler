@@ -41,6 +41,7 @@ class initial(object):
     helper = None
     cfg_file_path = None
     __scrapy_options = None
+    __site_objects = None
 
     def __init__(self):
         # set up logging before it's defined via the config file
@@ -60,10 +61,12 @@ class initial(object):
         self.json = JsonConfig.get_instance()
         self.json.setup(self.get_abs_file_path(
             urlinput_file_path, quit_on_error=True))
+        self.__site_objects = self.json.get_site_objects()
 
         self.helper = helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
-                             self.cfg_file_path)
+                             self.cfg_file_path,
+                             self.__site_objects)
 
         # make sure the crawler does not resume crawling
         # if not stated otherwise in the arguments passed to this script
@@ -72,16 +75,19 @@ class initial(object):
         """
         starts a cralwer for each url in the read-in file
         """
-        if self.cfg.section('Crawler')['sitemap']:
-            for url in self.json.get_url_array():
-                self.loadCrawler(SitemapCrawler, url)
-        else:
-            for url in self.json.get_url_array():
-                self.loadCrawler(Crawler, url)
+        for site in self.__site_objects:
+            if (("crawler" in site and site["crawler"] == "sitemap") or
+                ("crawler" not in site and
+                 self.cfg.section("Crawler")["sitemap"])):
+                self.loadCrawler(SitemapCrawler, site)
+                self.log.debug("Loading SitemapCrawler for %s" % site["url"])
+            else:
+                self.loadCrawler(Crawler, site)
+                self.log.debug("Loading RecursiveCrawler for %s" % site["url"])
 
         self.process.start()
 
-    def loadCrawler(self, crawler, url):
+    def loadCrawler(self, crawler, site_object):
         """
         loads the given crawler with the given url
         """
@@ -90,7 +96,7 @@ class initial(object):
         self.process.crawl(
             crawler,
             self.helper,
-            url=url,
+            url=site_object["url"],
             config=self.cfg)
 
     def get_config_file_path(self):

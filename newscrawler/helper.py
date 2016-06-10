@@ -18,9 +18,15 @@ class helper(object):
     savepath_parser = None
     download = None
 
-    def __init__(self, cfg_heuristics, cfg_savepath, cfg_file_path):
+    def __init__(
+        self,
+        cfg_heuristics,
+        cfg_savepath,
+        cfg_file_path,
+        sites_object
+    ):
         self.download = download(self)
-        self.heuristics = heuristics(cfg_heuristics)
+        self.heuristics = heuristics(cfg_heuristics, sites_object)
         self.url_extractor = url_extractor()
         self.savepath_parser = savepath_parser(cfg_savepath,
                                                cfg_file_path, self)
