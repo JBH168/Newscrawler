@@ -30,22 +30,17 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
 
-        # TODO: this code-block breaks the pipeline (cause of yield),
-        #       can be replaced with a Rule && LinkExtractor
-        # http://doc.scrapy.org/en/latest/topics/link-extractors.html#topics-link-extractors
-        # if self.config.section('Crawler')['recursivesitemap']:
-        # Recursivly crawl all URLs on the current page
-            # for href in response.css("a::attr('href')"):
-                # url = response.urljoin(href.extract())
-                # yield scrapy.Request(url, callback=self.parse)
+        if self.config.section('Crawler')['recursivesitemap']:
+            # Recursivly crawl all URLs on the current page
+            for href in response.css("a::attr('href')"):
+                url = response.urljoin(href.extract())
+                yield scrapy.Request(url, callback=self.parse)
 
         if self.config.section('Crawler')['ignoresubdomains'] and \
                 not self.helper.heuristics.is_from_subdomain(
                 response.url, self.allowed_domains[0]):
-            # TODO: DropItem: why do we raise DropItem?
-            #       it creates an error
-            # raise DropItem("From a subdomain:{}".format(response.url))
-            return
+            # TODO: Move to heuristics
+            pass 
 
         if self.helper.heuristics.is_article(response):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
@@ -63,10 +58,4 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
             article['descendant'] = 'NULL'
             article['version'] = '1'
             article['spiderResponse'] = response
-            return article
-
-        else:
-            # TODO: DropItem: why do we raise DropItem?
-            #       it creates an error
-            # raise DropItem("Not an article:{}".format(response.url))
-            return
+            yield article

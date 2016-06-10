@@ -144,20 +144,21 @@ class DatabaseStorage(object):
 
         logging.info("Article inserted into the database.")
 
-        # Retrieve the auto_id from the new article for the old version's
-        #   descendant attribute
-        try:
-            item['dbID'] = self.cursor.lastrowid
-        except mysql.connector.Error as err:
-            print("Something went wrong in id query: {}".format(err))
+        if oldVersion is not None:
+            # Retrieve the auto_id from the new article for the old version's
+            #   descendant attribute
+            try:
+                item['dbID'] = self.cursor.lastrowid
+            except mysql.connector.Error as err:
+                print("Something went wrong in id query: {}".format(err))
 
-        # Update the old version's descendant attribute
-        try:
-            self.cursor.execute("UPDATE ArchiveVersion SET descendant=%s WHERE\
-                                id=%s", (item['dbID'], oldVersion[0],))
-        except mysql.connector.Error as err:
-            print("Something went wrong in version update: {}"
-                  .format(err))
+            # Update the old version's descendant attribute
+            try:
+                self.cursor.execute("UPDATE ArchiveVersion SET descendant=%s WHERE\
+                                    id=%s", (item['dbID'], oldVersion[0],))
+            except mysql.connector.Error as err:
+                print("Something went wrong in version update: {}"
+                      .format(err))
 
         return item
 
