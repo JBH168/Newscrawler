@@ -10,7 +10,7 @@ import scrapy
 
 class NewscrawlerItem(scrapy.Item):
     # ID of the article in the DB
-    id = scrapy.Field()
+    dbID = scrapy.Field()
     # Path of the file on the local filesystem
     localPath = scrapy.Field()
     # When the article was last modified

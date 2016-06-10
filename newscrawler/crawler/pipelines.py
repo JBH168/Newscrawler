@@ -6,7 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from scrapy.exceptions import DropItem
 import mysql.connector
-import datetime
+# import datetime
 import os.path
 import logging
 from ..config import CrawlerConfig
@@ -65,7 +65,7 @@ class DatabaseStorage(object):
         self.insertArchive = ("INSERT INTO ArchiveVersion(id, localPath,\
                               modifiedDate, downloadDate, sourceDomain, url,\
                               title, ancestor, descendant, version) VALUES (\
-                              %(id)s, %(localPath)s, %(modifiedDate)s,\
+                              %(dbID)s, %(localPath)s, %(modifiedDate)s,\
                               %(downloadDate)s, %(sourceDomain)s, %(url)s,\
                               %(title)s, %(ancestor)s, %(descendant)s,\
                               %(version)s)")
@@ -81,13 +81,46 @@ class DatabaseStorage(object):
         # Search the CurrentVersion table for a version of the article
         try:
             self.cursor.execute(self.compareVersions, (item['url'],))
-
         except mysql.connector.Error as err:
             print("Something went wrong in query: {}".format(err))
 
         # Save the result of the query. Must be done before the add,
         #   otherwise the result will be overwritten in the buffer
         oldVersion = self.cursor.fetchone()
+
+        # If there is an existing article with the same URL, then move
+        #   it to the ArchiveVersion table, and delete it from the
+        #   CurrentVersion table
+        if oldVersion is not None:
+            oldVersionList = {
+                'dbID': oldVersion[0],
+                'localPath': oldVersion[1],
+                'modifiedDate': oldVersion[2],
+                'downloadDate': oldVersion[3],
+                'sourceDomain': oldVersion[4],
+                'url': oldVersion[5],
+                'title': oldVersion[6],
+                'ancestor': oldVersion[7],
+                'descendant': oldVersion[8],
+                'version': oldVersion[9], }
+
+            # Update the version number of the new article
+            item['version'] = (oldVersion[9] + 1)
+
+            # Delete the old version of the article from the
+            # CurrentVerion table
+            try:
+                self.cursor.execute(self.deleteFromCurrent, (oldVersion[5], ))
+                self.conn.commit()
+            except mysql.connector.Error as err:
+                print("Something went wrong in delete: {}".format(err))
+
+            # Add the old version to the ArchiveVersion table
+            try:
+                self.cursor.execute(self.insertArchive, oldVersionList)
+                self.conn.commit()
+            except mysql.connector.Error as err:
+                print("Something went wrong in archive: {}".format(err))
 
         currentVersionList = {
             'localPath': item['localPath'],
@@ -114,52 +147,17 @@ class DatabaseStorage(object):
         # Retrieve the auto_id from the new article for the old version's
         #   descendant attribute
         try:
-            item['id'] = self.cursor.lastrowid
+            item['dbID'] = self.cursor.lastrowid
         except mysql.connector.Error as err:
             print("Something went wrong in id query: {}".format(err))
 
-        print(item['id'])
-
-        # If there is an existing article with the same URL, then move
-        #   it to the ArchiveVersion table, and delete it from the
-        #   CurrentVersion table
-        if oldVersion is not None:
-            oldVersionList = {
-                'id': oldVersion[0],
-                'localPath': oldVersion[1],
-                'modifiedDate': oldVersion[2],
-                'downloadDate': oldVersion[3],
-                'sourceDomain': oldVersion[4],
-                'url': oldVersion[5],
-                'title': oldVersion[6],
-                'ancestor': oldVersion[7],
-                'descendant': item['id'],
-                'version': oldVersion[9], }
-
-            # Link the new version with the old
-            item['ancestor'] = oldVersion[0]
-
-            # Increment version number for the article
-            try:
-                self.cursor.execute("UPDATE CurrentVersion SET version=%s WHERE id=%s", ((oldVersion[9]+1), item['id'], ))
-            except mysql.connector.Error as err:
-                print("Something went wrong in version update: {}".format(err))
-
-            # Delete the old version of the article from the
-            # CurrentVerion table
-            try:
-                self.cursor.execute(self.deleteFromCurrent,
-                                    (oldVersion[5], ))
-                self.conn.commit()
-            except mysql.connector.Error as err:
-                print("Something went wrong in delete: {}".format(err))
-
-            # Add the old version to the ArchiveVersion table
-            try:
-                self.cursor.execute(self.insertArchive, oldVersionList)
-                self.conn.commit()
-            except mysql.connector.Error as err:
-                print("Something went wrong in archive: {}".format(err))
+        # Update the old version's descendant attribute
+        try:
+            self.cursor.execute("UPDATE ArchiveVersion SET descendant=%s WHERE\
+                                id=%s", (item['dbID'], oldVersion[0],))
+        except mysql.connector.Error as err:
+            print("Something went wrong in version update: {}"
+                  .format(err))
 
         return item
 

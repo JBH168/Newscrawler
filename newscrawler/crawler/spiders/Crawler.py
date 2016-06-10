@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
+from newscrawler.crawler.items import NewscrawlerItem
+
+import time
+
 
 class Crawler(scrapy.Spider):
     name = "Crawler"
@@ -22,10 +26,25 @@ class Crawler(scrapy.Spider):
 
     def parse(self, response):
         # Recursivly crawl all URLs on the current page
-        for href in response.css("a::attr('href')"):
-            url = response.urljoin(href.extract())
-            yield scrapy.Request(url, callback=self.parse)
+        # for href in response.css("a::attr('href')"):
+        #    url = response.urljoin(href.extract())
+        #    yield scrapy.Request(url, callback=self.parse)
 
         # heuristics
         if self.helper.heuristics.is_article(response):
-            self.helper.download.save_webpage(response)
+            timestamp = time.strftime('%y-%m-%d %H:%M:%S',
+                                      time.gmtime(time.time()))
+            article = NewscrawlerItem()
+            article['localPath'] = self.helper.savepath_parser \
+                .get_savepath(response.url)
+            article['modifiedDate'] = timestamp
+            article['downloadDate'] = timestamp
+            article['sourceDomain'] = self.allowed_domains[0].encode("utf-8")
+            article['url'] = response.url
+            # TODO: response.selector.xpath("//h1/text()").extract()
+            article['title'] = 'temp_title'
+            article['ancestor'] = 'NULL'
+            article['descendant'] = 'NULL'
+            article['version'] = '1'
+            article['spiderResponse'] = response
+            return article
