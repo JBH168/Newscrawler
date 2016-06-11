@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from newscrawler.crawler.items import NewscrawlerItem
-
-import time
 
 
 class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
@@ -30,37 +27,15 @@ class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
 
     def parse(self, response):
 
-        # Recursivly crawl all URLs on the current page
-        for href in response.css("a::attr('href')"):
-            url = response.urljoin(href.extract())
-            # http://www.yourhtmlsource.com/starthere/fileformats.html
-            if re.match('.*\.(pdf)|(docx?)|(xlsx?)|(pptx?)|(epub)|'
-                        '(jpe?g)|(png)|(bmp)|(gif)|(tiff)|(webp)|'
-                        '(avi)|(mpe?g)|(mov)|(qt)|(webm)|(ogg)|'
-                        '(midi)|(mid)|(mp3)|(wav)|'
-                        '(zip)|(rar)|(exe)|(apk)|'
-                        '(css)$', url, re.IGNORECASE) is None:
-                yield scrapy.Request(url, callback=self.parse)
+        for request in self.helper.parse_crawler \
+                .recursive_requests(response, self):
+            yield request
 
-        #if self.config.section('Crawler')['ignoresubdomains'] and \
-        #        not self.helper.heuristics.is_from_subdomain(
-        #        response.url, self.allowed_domains[0]):
-            # TODO: Move to heuristics
-        #    pass
+        # if self.config.section('Crawler')['ignoresubdomains'] and \
+        #         not self.helper.heuristics.is_from_subdomain(
+        #         response.url, self.allowed_domains[0]):
+        #     # TODO: Move to heuristics
+        #     pass
 
-        if self.helper.heuristics.is_article(response, self.original_url):
-            timestamp = time.strftime('%y-%m-%d %H:%M:%S',
-                                      time.gmtime(time.time()))
-            article = NewscrawlerItem()
-            article['localPath'] = self.helper.savepath_parser \
-                .get_savepath(response.url)
-            article['modifiedDate'] = timestamp
-            article['downloadDate'] = timestamp
-            article['sourceDomain'] = self.allowed_domains[0].encode("utf-8")
-            article['url'] = response.url
-            article['title'] = response.selector.xpath('//title/text()').extract_first().encode("utf-8")
-            article['ancestor'] = 'NULL'
-            article['descendant'] = 'NULL'
-            article['version'] = '1'
-            article['spiderResponse'] = response
-            yield article
+        yield self.helper.parse_crawler.pass_to_pipeline_if_article(
+            response, self.allowed_domains[0], self.original_url)

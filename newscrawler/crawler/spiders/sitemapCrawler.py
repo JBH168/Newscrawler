@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-from scrapy.spiders import Rule
-from scrapy.linkextractors import LinkExtractor
-from scrapy.selector import HtmlXPathSelector
 
-
-class recursiveCrawler(scrapy.Spider):
-    name = "recursiveCrawler"
+class sitemapCrawler(scrapy.spiders.SitemapSpider):
+    name = "sitemapCrawler"
     allowed_domains = None
-    start_urls = None
+    sitemap_urls = None
     original_url = None
 
     config = None
@@ -18,24 +14,17 @@ class recursiveCrawler(scrapy.Spider):
     def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
         self.helper = helper
-
         self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
-        self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
+        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(url,
+                             config.section('Crawler')
+                             ['sitemapallowsubdomains'])]
 
-        super(recursiveCrawler, self).__init__(*args, **kwargs)
-
-        rules = [Rule(LinkExtractor(allow=('')),
-                 callback='parse',
-                 follow=True)]
+        super(sitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
-
-        for request in self.helper.parse_crawler \
-                .recursive_requests(response, self):
-            yield request
 
         # if self.config.section('Crawler')['ignoresubdomains'] and \
         #         not self.helper.heuristics.is_from_subdomain(
@@ -44,4 +33,4 @@ class recursiveCrawler(scrapy.Spider):
         #     pass
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
-            response, self.allowed_domains[0])
+            response, self.allowed_domains[0], self.original_url)

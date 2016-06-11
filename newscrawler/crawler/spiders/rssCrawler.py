@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from newscrawler.crawler.items import NewscrawlerItem
-
-import time
 
 
 class rssCrawler(scrapy.Spider):
     name = "rssCrawler"
-    allowed_domains = None
+    ignored_allowed_domains = None
     start_urls = None
+    original_url = None
 
     config = None
     helper = None
@@ -17,8 +15,10 @@ class rssCrawler(scrapy.Spider):
         self.config = config
         self.helper = helper
 
-        self.allowed_domains = [self.helper.url_extractor
-                                .get_allowed_domains(url)]
+        self.original_url = url
+
+        self.ignored_allowed_domains = [self.helper.url_extractor
+                                        .get_allowed_domains(url)]
         self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
 
         super(rssCrawler, self).__init__(*args, **kwargs)
@@ -32,26 +32,12 @@ class rssCrawler(scrapy.Spider):
             yield scrapy.Request(url, callback=self.article_parse)
 
     def article_parse(self, response):
-        #if self.config.section('Crawler')['ignoresubdomains'] and \
-        #        not self.helper.heuristics.is_from_subdomain(
-        #        response.url, self.allowed_domains[0]):
-            # TODO: Move to heuristics
-        #    pass
 
-        # heuristics
-        if self.helper.heuristics.is_article(response):
-            timestamp = time.strftime('%y-%m-%d %H:%M:%S',
-                                      time.gmtime(time.time()))
-            article = NewscrawlerItem()
-            article['localPath'] = self.helper.savepath_parser \
-                .get_savepath(response.url)
-            article['modifiedDate'] = timestamp
-            article['downloadDate'] = timestamp
-            article['sourceDomain'] = self.allowed_domains[0].encode("utf-8")
-            article['url'] = response.url
-            article['title'] = response.selector.xpath('//title/text()').extract_first().encode("utf-8")
-            article['ancestor'] = 'NULL'
-            article['descendant'] = 'NULL'
-            article['version'] = '1'
-            article['spiderResponse'] = response
-            yield article
+        # if self.config.section('Crawler')['ignoresubdomains'] and \
+        #         not self.helper.heuristics.is_from_subdomain(
+        #         response.url, self.allowed_domains[0]):
+        #     # TODO: Move to heuristics
+        #     pass
+
+        yield self.helper.parse_crawler.pass_to_pipeline_if_article(
+            response, self.ignored_allowed_domains[0], self.original_url)
