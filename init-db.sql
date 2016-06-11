@@ -1,60 +1,64 @@
 -- Re-initalize DB-schema for the ccolon web-crawler
--- Updated: 29.05.2016 17:49
+-- Updated: 11.06.2016 16:11
 
 --
--- Table structure for table `Heritage`
+-- Table structure for table `ArchiveVersion`
 --
 
-DROP TABLE IF EXISTS `Heritage`;
+DROP TABLE IF EXISTS `ArchiveVersion`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Heritage` (
+CREATE TABLE `ArchiveVersion` (
   `id` int(10) unsigned NOT NULL,
-  `version` smallint(5) unsigned NOT NULL,
+  `localPath` varchar(255) NOT NULL,
+  `modifiedDate` datetime NOT NULL,
+  `downloadDate` datetime NOT NULL,
+  `sourceDomain` varchar(255) NOT NULL,
+  `url` varchar(2000) NOT NULL,
+  `title` varchar(255) NOT NULL,
   `ancestor` int(10) unsigned DEFAULT NULL,
-  `decendant` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `ancestor` (`ancestor`),
-  KEY `decendant` (`decendant`),
-  CONSTRAINT `Heritage_ibfk_1` FOREIGN KEY (`ancestor`) REFERENCES `Heritage` (`id`),
-  CONSTRAINT `Heritage_ibfk_2` FOREIGN KEY (`decendant`) REFERENCES `Heritage` (`id`)
+  `descendant` int(10) unsigned DEFAULT NULL,
+  `version` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Heritage`
+-- Dumping data for table `ArchiveVersion`
 --
 
-LOCK TABLES `Heritage` WRITE;
-/*!40000 ALTER TABLE `Heritage` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Heritage` ENABLE KEYS */;
+LOCK TABLES `ArchiveVersion` WRITE;
+/*!40000 ALTER TABLE `ArchiveVersion` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ArchiveVersion` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `MetaData`
+-- Table structure for table `CurrentVersion`
 --
 
-DROP TABLE IF EXISTS `MetaData`;
+DROP TABLE IF EXISTS `CurrentVersion`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `MetaData` (
+CREATE TABLE `CurrentVersion` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `localPath` varchar(255) NOT NULL,
   `modifiedDate` datetime NOT NULL,
   `downloadDate` datetime NOT NULL,
   `sourceDomain` varchar(255) NOT NULL,
   `url` varchar(2000) NOT NULL,
-  `hashedName` varchar(32) NOT NULL,
   `title` varchar(255) NOT NULL,
+  `ancestor` int(10) unsigned DEFAULT NULL,
+  `descendant` int(10) unsigned DEFAULT NULL,
+  `version` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `MetaData`
+-- Dumping data for table `CurrentVersion`
 --
 
-LOCK TABLES `MetaData` WRITE;
-/*!40000 ALTER TABLE `MetaData` DISABLE KEYS */;
-/*!40000 ALTER TABLE `MetaData` ENABLE KEYS */;
+LOCK TABLES `CurrentVersion` WRITE;
+/*!40000 ALTER TABLE `CurrentVersion` DISABLE KEYS */;
+/*!40000 ALTER TABLE `CurrentVersion` ENABLE KEYS */;
 UNLOCK TABLES;
