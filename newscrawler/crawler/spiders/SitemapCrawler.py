@@ -46,8 +46,7 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
             article['downloadDate'] = timestamp
             article['sourceDomain'] = self.allowed_domains[0].encode("utf-8")
             article['url'] = response.url
-            # TODO: response.selector.xpath("//h1/text()").extract()
-            article['title'] = 'temp_title'
+            article['title'] = response.selector.xpath('//title/text()').extract_first().encode("utf-8") 
             article['ancestor'] = 'NULL'
             article['descendant'] = 'NULL'
             article['version'] = '1'

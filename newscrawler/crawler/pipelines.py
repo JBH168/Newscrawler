@@ -107,6 +107,9 @@ class DatabaseStorage(object):
             # Update the version number of the new article
             item['version'] = (oldVersion[9] + 1)
 
+            # Update the ancestor attribute of the new article
+            item['ancestor'] = oldVersion[0]
+
             # Delete the old version of the article from the
             # CurrentVerion table
             try:
