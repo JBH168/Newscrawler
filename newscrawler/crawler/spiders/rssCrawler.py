@@ -32,11 +32,11 @@ class rssCrawler(scrapy.Spider):
             yield scrapy.Request(url, callback=self.article_parse)
 
     def article_parse(self, response):
-        if self.config.section('Crawler')['ignoresubdomains'] and \
-                not self.helper.heuristics.is_from_subdomain(
-                response.url, self.allowed_domains[0]):
+        #if self.config.section('Crawler')['ignoresubdomains'] and \
+        #        not self.helper.heuristics.is_from_subdomain(
+        #        response.url, self.allowed_domains[0]):
             # TODO: Move to heuristics
-            pass
+        #    pass
 
         # heuristics
         if self.helper.heuristics.is_article(response):

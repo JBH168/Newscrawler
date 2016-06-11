@@ -19,7 +19,7 @@ import logging
 
 from scrapy.crawler import CrawlerProcess
 
-from newscrawler.crawler.spiders.sitemapCrawler import sitemapCrawler
+from newscrawler.crawler.spiders.SitemapCrawler import sitemapCrawler
 from newscrawler.crawler.spiders.recursiveSitemapCrawler import recursiveSitemapCrawler
 from newscrawler.crawler.spiders.recursiveCrawler import recursiveCrawler
 from newscrawler.crawler.spiders.rssCrawler import rssCrawler

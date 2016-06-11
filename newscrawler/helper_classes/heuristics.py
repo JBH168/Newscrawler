@@ -10,8 +10,9 @@ class heuristics(heuristics_manager):
     """
     url_extractor = None
 
-    def __init__(self, url_extractor):
-        self.url_extractor = url_extractor
+    # TO FIX: Needs to be updated to the new heuristic functionality
+    #def __init__(self, url_extractor):
+    #    self.url_extractor = url_extractor
 
     #
     # HEURISTICS
@@ -62,8 +63,9 @@ class heuristics(heuristics_manager):
 
         return float(hAll_linked) / float(hAll_all)
 
-    def is_from_subdomain(self, url, allowed_domains):
-        """
-        ensures the given url isn't from a subdomain
-        """
-        return self.url_extractor.get_allowed_domains(url) == allowed_domains
+    # TO FIX: Needs to be updated to the new heuristic functionality
+    #def is_from_subdomain(self, url, allowed_domains):
+    #    """
+    #    ensures the given url isn't from a subdomain
+    #    """
+    #    return self.url_extractor.get_allowed_domains(url) == allowed_domains

@@ -49,11 +49,11 @@ class recursiveCrawler(scrapy.Spider):
                         '(css)$', url, re.IGNORECASE) is None:
                 yield scrapy.Request(url, callback=self.parse)
 
-        if self.config.section('Crawler')['ignoresubdomains'] and \
-                not self.helper.heuristics.is_from_subdomain(
-                response.url, self.allowed_domains[0]):
+        #if self.config.section('Crawler')['ignoresubdomains'] and \
+        #        not self.helper.heuristics.is_from_subdomain(
+        #        response.url, self.allowed_domains[0]):
             # TODO: Move to heuristics
-            pass
+        #    pass
 
         # heuristics
         if self.helper.heuristics.is_article(response, self.original_url):
