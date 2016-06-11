@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
-
-from scrapy.spiders import Rule
-from scrapy.linkextractors import LinkExtractor
-from scrapy.selector import HtmlXPathSelector
-
 from newscrawler.crawler.items import NewscrawlerItem
 
 import time
 
 
-class Crawler(scrapy.Spider):
-    name = "Crawler"
+class rssCrawler(scrapy.Spider):
+    name = "rssCrawler"
     allowed_domains = None
     start_urls = None
 
@@ -26,21 +21,22 @@ class Crawler(scrapy.Spider):
                                 .get_allowed_domains(url)]
         self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
 
-        super(Crawler, self).__init__(*args, **kwargs)
-
-        rules = [Rule(LinkExtractor(allow = ('')), callback = 'parse', follow = True)]
-
-    #def parse(self,response):
-    #    hxs = HtmlXPathSelector(response)
-    #    urls = hxs.select('//a[contains(@href)]/@href').extract() 
-    #    for i in urls:
-    #       yield Request(urlparse.urljoin(response.url, i[1:]),callback=self.parse_url)
+        super(rssCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
-        # Recursivly crawl all URLs on the current page
-        for href in response.css("a::attr('href')"):
-            url = response.urljoin(href.extract())
-            yield scrapy.Request(url, callback=self.parse)
+        yield scrapy.Request(self.helper.url_extractor.get_rss_url(response),
+                             callback=self.rss_parse)
+
+    def rss_parse(self, response):
+        for url in response.xpath('//item/link/text()').extract():
+            yield scrapy.Request(url, callback=self.article_parse)
+
+    def article_parse(self, response):
+        if self.config.section('Crawler')['ignoresubdomains'] and \
+                not self.helper.heuristics.is_from_subdomain(
+                response.url, self.allowed_domains[0]):
+            # TODO: Move to heuristics
+            pass
 
         # heuristics
         if self.helper.heuristics.is_article(response):
@@ -60,6 +56,3 @@ class Crawler(scrapy.Spider):
             article['version'] = '1'
             article['spiderResponse'] = response
             yield article
-
-    #def parse_url(self,url):
-    #    yield scrapy.Request(url, callback=self.parse)

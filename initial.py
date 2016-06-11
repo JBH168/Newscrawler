@@ -19,8 +19,10 @@ import logging
 
 from scrapy.crawler import CrawlerProcess
 
-from newscrawler.crawler.spiders.SitemapCrawler import SitemapCrawler
-from newscrawler.crawler.spiders.Crawler import Crawler
+from newscrawler.crawler.spiders.sitemapCrawler import sitemapCrawler
+from newscrawler.crawler.spiders.recursiveSitemapCrawler import recursiveSitemapCrawler
+from newscrawler.crawler.spiders.recursiveCrawler import recursiveCrawler
+from newscrawler.crawler.spiders.rssCrawler import rssCrawler
 
 from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
@@ -74,10 +76,10 @@ class initial(object):
         """
         if self.cfg.section('Crawler')['sitemap']:
             for url in self.json.get_url_array():
-                self.loadCrawler(SitemapCrawler, url)
+                self.loadCrawler(sitemapCrawler, url)
         else:
             for url in self.json.get_url_array():
-                self.loadCrawler(Crawler, url)
+                self.loadCrawler(recursiveCrawler, url)
 
         self.process.start()
 

@@ -22,12 +22,18 @@ class heuristics(object):
         returns True if all (in the config file) enabled heuristics succeed
         """
         # heuristic 1
-        if self.cfg_heuristics["og_type_article"]:
-            og_type_article = response.xpath('//meta') \
-                .re('(property="og:type" content="article")|'
-                    '(content="article" property="og:type")')
-            if not og_type_article:
-                return False
+        #     og:typ instead of og:type and articl instead of article
+        #     since, for whatever reason, some webpages seem to forget about
+        #     the last letter of some words...
+        if self.cfg_heuristics["og_type_article"] \
+            and not response.xpath('//meta[contains(@property, "og:typ")]'
+                                   '[contains(@content, "articl")]'):
+            return False
+            # og_type_article = response.xpath('//meta') \
+            #     .re('(property="og:type" content="article")|'
+            #         '(content="article" property="og:type")')
+            # if not og_type_article:
+            #     return False
 
         # # heuristic 2
         # if self.cfg_heuristics[""]:

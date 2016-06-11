@@ -36,6 +36,16 @@ class url_extractor(object):
                     self.get_allowed_domains_without_subdomains(url) + \
                     "/robots.txt"
 
+    def get_rss_url(self, response):
+        """
+        return the rss url
+        a link of type "application/rss+rml" of the webpage to the given url
+        """
+        # if this throws an IndexError, then the webpage with the given url
+        # does not contain a link of type "application/rss+xml"
+        return response.xpath('//link[contains(@type, "application/rss+xml")]'
+                              ).xpath('@href').extract()[0]
+
     def get_start_urls(self, url):
         """
         returns http://subdomains.domain.topleveldomain/ of url

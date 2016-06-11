@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 import scrapy
+
+from scrapy.spiders import Rule
+from scrapy.linkextractors import LinkExtractor
+from scrapy.selector import HtmlXPathSelector
+
 from newscrawler.crawler.items import NewscrawlerItem
 
 import time
 
 
-class sitemapCrawler(scrapy.spiders.SitemapSpider):
-    name = "sitemapCrawler"
+class recursiveCrawler(scrapy.Spider):
+    name = "recursiveCrawler"
     allowed_domains = None
-    sitemap_urls = None
+    start_urls = None
 
     config = None
     helper = None
@@ -19,13 +24,27 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
-        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(url,
-                             config.section('Crawler')
-                             ['sitemapallowsubdomains'])]
+        self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
 
-        super(sitemapCrawler, self).__init__(*args, **kwargs)
+        super(recursiveCrawler, self).__init__(*args, **kwargs)
+
+        rules = [Rule(LinkExtractor(allow=('')),
+                 callback='parse',
+                 follow=True)]
 
     def parse(self, response):
+
+        # Recursivly crawl all URLs on the current page
+        for href in response.css("a::attr('href')"):
+            url = response.urljoin(href.extract())
+            # http://www.yourhtmlsource.com/starthere/fileformats.html
+            if re.match('.*\.(pdf)|(docx?)|(xlsx?)|(pptx?)|(epub)|'
+                        '(jpe?g)|(png)|(bmp)|(gif)|(tiff)|(webp)|'
+                        '(avi)|(mpe?g)|(mov)|(qt)|(webm)|(ogg)|'
+                        '(midi)|(mid)|(mp3)|(wav)|'
+                        '(zip)|(rar)|(exe)|(apk)|'
+                        '(css)$', url, re.IGNORECASE) is None:
+                yield scrapy.Request(url, callback=self.parse)
 
         if self.config.section('Crawler')['ignoresubdomains'] and \
                 not self.helper.heuristics.is_from_subdomain(
@@ -33,6 +52,7 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
             # TODO: Move to heuristics
             pass
 
+        # heuristics
         if self.helper.heuristics.is_article(response):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))

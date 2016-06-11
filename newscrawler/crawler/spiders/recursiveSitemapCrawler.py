@@ -5,8 +5,8 @@ from newscrawler.crawler.items import NewscrawlerItem
 import time
 
 
-class sitemapCrawler(scrapy.spiders.SitemapSpider):
-    name = "sitemapCrawler"
+class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
+    name = "recursiveSitemapCrawler"
     allowed_domains = None
     sitemap_urls = None
 
@@ -23,9 +23,21 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
                              config.section('Crawler')
                              ['sitemapallowsubdomains'])]
 
-        super(sitemapCrawler, self).__init__(*args, **kwargs)
+        super(recursiveSitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
+
+        # Recursivly crawl all URLs on the current page
+        for href in response.css("a::attr('href')"):
+            url = response.urljoin(href.extract())
+            # http://www.yourhtmlsource.com/starthere/fileformats.html
+            if re.match('.*\.(pdf)|(docx?)|(xlsx?)|(pptx?)|(epub)|'
+                        '(jpe?g)|(png)|(bmp)|(gif)|(tiff)|(webp)|'
+                        '(avi)|(mpe?g)|(mov)|(qt)|(webm)|(ogg)|'
+                        '(midi)|(mid)|(mp3)|(wav)|'
+                        '(zip)|(rar)|(exe)|(apk)|'
+                        '(css)$', url, re.IGNORECASE) is None:
+                yield scrapy.Request(url, callback=self.parse)
 
         if self.config.section('Crawler')['ignoresubdomains'] and \
                 not self.helper.heuristics.is_from_subdomain(
