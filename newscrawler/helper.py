@@ -12,6 +12,7 @@ from helper_classes.download import download
 class helper(object):
     """
     This class contains helper classes from ./helper_classes
+    This class and its helper-classes is passed to all crawlers
     """
     heuristics = None
     url_extractor = None
@@ -19,11 +20,11 @@ class helper(object):
     download = None
 
     def __init__(
-        self,
-        cfg_heuristics,
-        cfg_savepath,
-        cfg_file_path,
-        sites_object
+            self,
+            cfg_heuristics,
+            cfg_savepath,
+            cfg_file_path,
+            sites_object
     ):
         self.download = download(self)
         self.heuristics = heuristics(cfg_heuristics, sites_object)
