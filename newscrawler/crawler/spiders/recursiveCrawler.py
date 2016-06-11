@@ -14,6 +14,7 @@ class recursiveCrawler(scrapy.Spider):
     name = "recursiveCrawler"
     allowed_domains = None
     start_urls = None
+    original_url = None
 
     config = None
     helper = None
@@ -21,6 +22,8 @@ class recursiveCrawler(scrapy.Spider):
     def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
         self.helper = helper
+
+        self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -53,7 +56,7 @@ class recursiveCrawler(scrapy.Spider):
             pass
 
         # heuristics
-        if self.helper.heuristics.is_article(response):
+        if self.helper.heuristics.is_article(response, self.original_url):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
             article = NewscrawlerItem()

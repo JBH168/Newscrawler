@@ -193,6 +193,9 @@ class JsonConfig(object):
     def config(self):
         return deepcopy(self.__json_object)
 
+    def get_site_objects(self):
+        return deepcopy(self.__json_object["base_urls"])
+
     def get_url_array(self):
         urlarray = []
         for urlobjects in self.__json_object["base_urls"]:

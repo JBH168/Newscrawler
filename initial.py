@@ -65,7 +65,8 @@ class initial(object):
 
         self.helper = helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
-                             self.cfg_file_path)
+                             self.cfg_file_path,
+                             self.json.get_site_objects())
 
         # make sure the crawler does not resume crawling
         # if not stated otherwise in the arguments passed to this script

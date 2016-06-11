@@ -1,45 +1,66 @@
 """
 helper class for testing heuristics
 """
+from sub_classes.heuristics_manager import heuristics_manager
 
 
-class heuristics(object):
+class heuristics(heuristics_manager):
     """
     helper class
     """
-    cfg_heuristics = None
     url_extractor = None
 
-    def __init__(self, cfg_heuristics, url_extractor):
-        self.cfg_heuristics = cfg_heuristics
+    def __init__(self, url_extractor):
         self.url_extractor = url_extractor
 
-    def is_article(self, response):
-        """
-        tests if the given response is an article
+    #
+    # HEURISTICS
 
-        returns False if any (in the config file) enabled heuritic fails
-        returns True if all (in the config file) enabled heuristics succeed
+    def og_type(self, response):
         """
-        # heuristic 1
-        #     og:typ instead of og:type and articl instead of article
-        #     since, for whatever reason, some webpages seem to forget about
-        #     the last letter of some words...
-        if self.cfg_heuristics["og_type_article"] \
-            and not response.xpath('//meta[contains(@property, "og:typ")]'
-                                   '[contains(@content, "articl")]'):
+        Check if the site contains a meta-tag which contains
+        property="og:type" and content="article"
+
+        :return bool: true if the tag is contained.
+        """
+        og_type_article = response.xpath('//meta') \
+            .re('(property="og:type".*content="article")|'
+                '(content="article".*property="og:type")')
+        if not og_type_article:
             return False
-            # og_type_article = response.xpath('//meta') \
-            #     .re('(property="og:type" content="article")|'
-            #         '(content="article" property="og:type")')
-            # if not og_type_article:
-            #     return False
 
-        # # heuristic 2
-        # if self.cfg_heuristics[""]:
-
-        # no more heuristics -> probably an article
         return True
+
+    def linked_headlines(self, response):
+        """
+        Checks how many of the headlines on the site contain links.
+
+        :return float: ration headlines/headlines_containing_link
+        """
+        # hcount = {}
+        hAll_all = 0
+        hAll_linked = 0
+        for i in range(1, 7):
+            # h_all = 0
+            # h_linked = 0
+            for h in response.xpath('//h%s' % i).extract():
+                # h_all += 1
+                hAll_all += 1
+                if "href" in h:
+                    # h_linked += 1
+                    hAll_linked +=1
+
+            # hcount['h%s' % i] = (h_all, h_linked)
+        self.log.info("Linked headlines test: headlines = %s, linked = %s" %
+                      (hAll_all, hAll_linked))
+
+        min_headlines = self.cfg_heuristics["min_headlines_for_linked_test"]
+        if min_headlines > hAll_all:
+            self.log.info("Linked headlines test: Not enough headlines "
+                          "(%s < %s): Passing!" % (hAll_all, min_headlines))
+            return True
+
+        return float(hAll_linked) / float(hAll_all)
 
     def is_from_subdomain(self, url, allowed_domains):
         """

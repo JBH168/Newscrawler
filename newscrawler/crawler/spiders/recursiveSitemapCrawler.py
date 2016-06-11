@@ -9,6 +9,7 @@ class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
     name = "recursiveSitemapCrawler"
     allowed_domains = None
     sitemap_urls = None
+    original_url = None
 
     config = None
     helper = None
@@ -16,6 +17,8 @@ class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
     def __init__(self, helper, url, config, *args, **kwargs):
         self.config = config
         self.helper = helper
+
+        self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -45,7 +48,7 @@ class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
             # TODO: Move to heuristics
             pass
 
-        if self.helper.heuristics.is_article(response):
+        if self.helper.heuristics.is_article(response, self.original_url):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
             article = NewscrawlerItem()
