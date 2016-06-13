@@ -6,7 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from scrapy.exceptions import DropItem
 import mysql.connector
-# import datetime
+import datetime
 import os.path
 import logging
 from ..config import CrawlerConfig
@@ -27,6 +27,58 @@ class HTMLCodeHandling(object):
             raise DropItem("%s: Non-200 response" % item['url'])
         else:
             return item
+
+################
+#
+# Compares the item's age to the current version in the DB.
+# If the difference is greater than deltaTime, then save the newer version.
+#
+###############
+
+class RSSCrawlCompare(object):
+
+    def __init__(self):
+        self.cfg = CrawlerConfig.get_instance()
+        self.deltaTime = self.cfg.section("Crawler")["deltatime"]
+        self.db = self.cfg.section("Database")
+
+        # Establish DB connection
+        # Closing of the connection is handled once the spider closes
+        self.conn = mysql.connector.connect(host=self.db["host"],
+                                            port=self.db["port"],
+                                            db=self.db["db"],
+                                            user=self.db["username"],
+                                            passwd=self.db["password"],
+                                            buffered=True)
+        self.cursor = self.conn.cursor()
+
+        # Defined DB query to retrieve the last version of the article
+        self.compareVersions = ("SELECT * FROM CurrentVersion WHERE url=%s")
+
+    def process_item(self, item, spider):
+        if spider.name == 'rssCrawler':
+            # Search the CurrentVersion table for a version of the article
+            try:
+                self.cursor.execute(self.compareVersions, (item['url'],))
+            except mysql.connector.Error as err:
+                print("Something went wrong in rss query: {}".format(err))
+
+            # Save the result of the query. Must be done before the add,
+            #   otherwise the result will be overwritten in the buffer
+            oldVersion = self.cursor.fetchone()
+
+            if oldVersion is not None:
+                # Compare the two download dates. index 3 of oldVersion
+                #   corresponds to the downloadDate attribute in the DB
+                if (item['downloadDate'] - oldVersion[3])\
+                    < datetime.timedelta(self.deltaTime):
+                    raise DropItem("Article in DB too recent. Not saving.")
+
+        return item
+
+    def close_spider(self, spider):
+        # Close DB connection - garbage collection
+        self.conn.close()
 
 ################
 #
