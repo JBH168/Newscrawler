@@ -11,6 +11,7 @@ Another parameter that can be passed to this script is '--resume'
    defined in the config file if it does exist
  - otherwise, any crawler will be called with this JOBDIR and resume crawling
 """
+
 import os
 import sys
 import shutil
@@ -29,6 +30,8 @@ from newscrawler.config import JsonConfig
 
 from newscrawler.helper import helper
 
+from scrapy.utils.log import configure_logging
+
 
 class initial(object):
     """
@@ -45,10 +48,10 @@ class initial(object):
     __scrapy_options = None
 
     def __init__(self):
-        # set up logging before it's defined via the config file
-        logging.basicConfig(format="[%(name)s:%(lineno)d|"
-                            "%(levelname)s] %(message)s",
-                            level="DEBUG")
+        # set up logging before it's defined via the config file,
+        # this will be overwritten and all other levels will be put out
+        # as well, if it will be changed.
+        configure_logging({"LOG_LEVEL": "CRITICAL"})
         self.log = logging.getLogger(__name__)
 
         # set up the config file
@@ -72,9 +75,7 @@ class initial(object):
         # if not stated otherwise in the arguments passed to this script
         self.remove_jobdir_if_not_resume()
 
-        """
-        starts a cralwer for each url in the read-in file
-        """
+        # starts a cralwer for each url in the read-in file
         if self.cfg.section('Crawler')['sitemap']:
             for url in self.json.get_url_array():
                 self.loadCrawler(sitemapCrawler, url)
@@ -89,7 +90,7 @@ class initial(object):
         loads the given crawler with the given url
         """
         if self.process is None:
-            self.process = CrawlerProcess(self.get_scrapy_options())
+            self.process = CrawlerProcess(self.cfg.get_scrapy_options())
         self.process.crawl(
             crawler,
             self.helper,
@@ -135,19 +136,6 @@ class initial(object):
 
             self.log.info("Removed JOBDIR since '--resume' was not passed to"
                           " initial.py")
-
-    def get_scrapy_options(self):
-        """
-        returns all the options listed in the config section 'Scrapy'
-        """
-        if self.__scrapy_options is None:
-            self.__scrapy_options = {}
-            options = self.cfg.section("Scrapy")
-
-            for key, value in options.items():
-                self.__scrapy_options[key.upper()] = value
-
-        return self.__scrapy_options
 
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         """

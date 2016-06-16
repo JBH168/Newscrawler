@@ -14,6 +14,7 @@ import logging
 import ConfigParser
 import json
 from ast import literal_eval
+from scrapy.utils.log import configure_logging
 
 
 class CrawlerConfig(object):
@@ -47,6 +48,8 @@ class CrawlerConfig(object):
     log = None
     log_output = []
     __current_section = None
+    __logging = None
+    __scrapy_options = None
 
     def __init__(self):
         """The constructor
@@ -75,6 +78,7 @@ class CrawlerConfig(object):
             {"level": "info", "msg": "Loading config-file (%s)" % filepath})
         self.load_config()
         self.handle_general()
+        self.handle_logging()
 
     def load_config(self):
         """Load the config to self.config. Recursive dict:
@@ -111,12 +115,38 @@ class CrawlerConfig(object):
                          "msg": "Exception on %s: %s" % (option, exc)})
                     self.__config[section][option] = None
 
+    def get_logging(self):
+        if self.__logging is None:
+            self.__logging = {}
+            logging_options = self.__config["Logging"]
+
+            for key, value in logging_options.iteritems():
+                self.__logging[key.upper()] = value
+
+        return deepcopy(self.__logging)
+
+    def get_scrapy_options(self):
+        """
+        returns all the options listed in the config section 'Scrapy'
+        """
+        if self.__scrapy_options is None:
+            self.__scrapy_options = {}
+            options = self.section("Scrapy")
+
+            for key, value in options.iteritems():
+                self.__scrapy_options[key.upper()] = value
+        return self.__scrapy_options
+
     def handle_general(self):
-        """Handle the General-section of the config."""
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
-        logging.basicConfig(format=self.__config["General"]["logformat"],
-                            level=self.__config["General"]["loglevel"])
+        return
+
+    def handle_logging(self):
+        """To allow devs to log as early as possible, logging will already be handled here"""
+
+        configure_logging(self.get_scrapy_options())
+
+        # Disable duplicates
+        self.__scrapy_options["LOG_ENABLED"] = False
 
         # Now, after log-level is correctly set, lets log them.
         for msg in self.log_output:
