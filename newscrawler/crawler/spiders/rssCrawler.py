@@ -28,10 +28,12 @@ class rssCrawler(scrapy.Spider):
                              callback=self.rss_parse)
 
     def rss_parse(self, response):
-        for url in response.xpath('//item/link/text()').extract():
-            yield scrapy.Request(url, callback=self.article_parse)
+        for item in response.xpath('//item'):
+            for url in item.xpath('link/text()').extract():
+                yield scrapy.Request(url, lambda resp: self.article_parse(
+                    resp, item.xpath('title/text()').extract()[0]))
 
-    def article_parse(self, response):
+    def article_parse(self, response, rss_title=None):
 
         # if self.config.section('Crawler')['ignoresubdomains'] and \
         #         not self.helper.heuristics.is_from_subdomain(
@@ -40,4 +42,5 @@ class rssCrawler(scrapy.Spider):
         #     pass
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
-            response, self.ignored_allowed_domains[0], self.original_url)
+            response, self.ignored_allowed_domains[0], self.original_url,
+            rss_title)

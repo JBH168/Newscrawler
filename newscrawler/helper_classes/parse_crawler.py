@@ -21,7 +21,8 @@ class parse_crawler(object):
             self,
             response,
             sourceDomain,
-            original_url
+            original_url,
+            rss_title=None
     ):
         if self.helper.heuristics.is_article(response, original_url):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
@@ -36,6 +37,10 @@ class parse_crawler(object):
             article['url'] = response.url
             article['title'] = response.selector.xpath('//title/text()') \
                 .extract_first().encode("utf-8")
+            # if rss_title is None:
+            #     article['rss_title'] = 'NULL'
+            # else:
+            #     article['rss_title'] = rss_title
             article['ancestor'] = 'NULL'
             article['descendant'] = 'NULL'
             article['version'] = '1'
