@@ -44,4 +44,4 @@ class recursiveCrawler(scrapy.Spider):
         #     pass
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
-            response, self.allowed_domains[0])
+            response, self.allowed_domains[0], self.original_url)
