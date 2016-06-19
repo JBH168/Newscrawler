@@ -2,7 +2,7 @@
     "base_urls" : [
         {
           "url": "http://zeit.de",
-          "crawler": "sitemap",
+          "crawler": "sitemapCrawler",
           "overwrite_heuristics": {
             "og_type": true,
             "linked_headlines": "<=0.5"
@@ -10,7 +10,7 @@
         },
         {
           "url": "http://sueddeutsche.de",
-          "crawler": "recursive",
+          "crawler": "recursiveCrawler",
           "overwrite_heuristics": {
             "og_type": true,
             "linked_headlines": false
