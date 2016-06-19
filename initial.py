@@ -17,6 +17,7 @@ import sys
 import shutil
 
 import logging
+import importlib
 
 from scrapy.crawler import CrawlerProcess
 
@@ -46,6 +47,7 @@ class initial(object):
     helper = None
     cfg_file_path = None
     __scrapy_options = None
+    __crawer_module = "newscrawler.crawler.spiders"
 
     def __init__(self):
         # set up logging before it's defined via the config file,
@@ -75,15 +77,21 @@ class initial(object):
         # if not stated otherwise in the arguments passed to this script
         self.remove_jobdir_if_not_resume()
 
+        sites = self.json.get_site_objects()
+        default_crawler = self.cfg.section("Crawler")["default"]
+
         # starts a cralwer for each url in the read-in file
-        if self.cfg.section('Crawler')['sitemap']:
-            for url in self.json.get_url_array():
-                self.loadCrawler(sitemapCrawler, url)
-        else:
-            for url in self.json.get_url_array():
-                self.loadCrawler(recursiveCrawler, url)
+        for site in sites:
+            if "crawler" in site:
+                crawler = site["crawler"]
+            else:
+                crawler = default_crawler
+            self.loadCrawler(self.getCrawler(crawler), site["url"])
 
         self.process.start()
+
+    def getCrawler(self, crawler):
+        return getattr(importlib.import_module(self.__crawer_module + "." + crawler), crawler)
 
     def loadCrawler(self, crawler, url):
         """
