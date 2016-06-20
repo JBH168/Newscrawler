@@ -45,3 +45,8 @@ class recursiveCrawler(scrapy.Spider):
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.allowed_domains[0], self.original_url)
+
+    @staticmethod
+    def supports_site(url):
+        """Recursive Crawler are supported by every site!"""
+        return True
