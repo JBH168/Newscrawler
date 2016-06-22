@@ -19,6 +19,7 @@ CREATE TABLE `ArchiveVersion` (
   `ancestor` int(10) unsigned DEFAULT NULL,
   `descendant` int(10) unsigned DEFAULT NULL,
   `version` int(10) unsigned NOT NULL,
+  `rssTitle` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -50,6 +51,7 @@ CREATE TABLE `CurrentVersion` (
   `ancestor` int(10) unsigned DEFAULT NULL,
   `descendant` int(10) unsigned DEFAULT NULL,
   `version` int(10) unsigned NOT NULL,
+  `rssTitle` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

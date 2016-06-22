@@ -37,10 +37,10 @@ class parse_crawler(object):
             article['url'] = response.url
             article['title'] = response.selector.xpath('//title/text()') \
                 .extract_first().encode("utf-8")
-            # if rss_title is None:
-            #     article['rss_title'] = 'NULL'
-            # else:
-            #     article['rss_title'] = rss_title
+            if rss_title is None:
+                article['rss_title'] = 'NULL'
+            else:
+                article['rss_title'] = rss_title
             article['ancestor'] = 'NULL'
             article['descendant'] = 'NULL'
             article['version'] = '1'

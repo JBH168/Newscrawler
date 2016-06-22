@@ -14,6 +14,8 @@ from ..config import CrawlerConfig
 ################
 #
 # Handles reponses to HTML responses other than 200 (accept).
+# As of 22.06.16 not active, but serves as an example of new
+#	functionality
 #
 ################
 
@@ -108,19 +110,19 @@ class DatabaseStorage(object):
 
         self.insertCurrent = ("INSERT INTO CurrentVersion(localPath,\
                               modifiedDate,downloadDate,sourceDomain,url,\
-                              title, ancestor, descendant, version) VALUES (\
-                              %(localPath)s, %(modifiedDate)s,\
-                              %(downloadDate)s, %(sourceDomain)s, %(url)s,\
-                              %(title)s, %(ancestor)s, %(descendant)s,\
-                              %(version)s)")
+                              title, ancestor, descendant, version, rssTitle) 
+							  VALUES (%(localPath)s, %(modifiedDate)s,\ 
+							  %(downloadDate)s, %(sourceDomain)s, %(url)s,\ 
+							  %(title)s, %(ancestor)s, %(descendant)s,\ 
+							  %(version)s, %(rss_title)s)")
 
-        self.insertArchive = ("INSERT INTO ArchiveVersion(id, localPath,\
-                              modifiedDate, downloadDate, sourceDomain, url,\
-                              title, ancestor, descendant, version) VALUES (\
-                              %(dbID)s, %(localPath)s, %(modifiedDate)s,\
-                              %(downloadDate)s, %(sourceDomain)s, %(url)s,\
-                              %(title)s, %(ancestor)s, %(descendant)s,\
-                              %(version)s)")
+        self.insertArchive = ("INSERT INTO ArchiveVersion(localPath,\
+                              modifiedDate,downloadDate,sourceDomain,url,\
+                              title, ancestor, descendant, version, rssTitle) 
+							  VALUES (%(localPath)s, %(modifiedDate)s,\ 
+							  %(downloadDate)s, %(sourceDomain)s, %(url)s,\ 
+							  %(title)s, %(ancestor)s, %(descendant)s,\ 
+							  %(version)s, %(rss_title)s)")
 
         self.deleteFromCurrent = ("DELETE FROM CurrentVersion WHERE url = %s")
 
@@ -154,7 +156,8 @@ class DatabaseStorage(object):
                 'title': oldVersion[6],
                 'ancestor': oldVersion[7],
                 'descendant': oldVersion[8],
-                'version': oldVersion[9], }
+                'version': oldVersion[9],
+                'rss_title': oldVersion[10],}
 
             # Update the version number of the new article
             item['version'] = (oldVersion[9] + 1)
@@ -186,7 +189,8 @@ class DatabaseStorage(object):
             'title': item['title'],
             'ancestor': item['ancestor'],
             'descendant': item['descendant'],
-            'version': item['version'], }
+            'version': item['version'],
+            'rss_title': item['rss_title'],}
 
         # Add the new version of the article to
         # the CurrentVersion table

@@ -30,3 +30,5 @@ class NewscrawlerItem(scrapy.Item):
     version = scrapy.Field()
     # Reponse object from crawler
     spiderResponse = scrapy.Field()
+	# Title of the article as store in the RSS feed
+	rss_title = scrapy.Field()
