@@ -15,7 +15,7 @@ from ..config import CrawlerConfig
 #
 # Handles reponses to HTML responses other than 200 (accept).
 # As of 22.06.16 not active, but serves as an example of new
-#	functionality
+#     functionality
 #
 ################
 
@@ -110,19 +110,19 @@ class DatabaseStorage(object):
 
         self.insertCurrent = ("INSERT INTO CurrentVersion(localPath,\
                               modifiedDate,downloadDate,sourceDomain,url,\
-                              title, ancestor, descendant, version, rssTitle) 
-							  VALUES (%(localPath)s, %(modifiedDate)s,\ 
-							  %(downloadDate)s, %(sourceDomain)s, %(url)s,\ 
-							  %(title)s, %(ancestor)s, %(descendant)s,\ 
-							  %(version)s, %(rss_title)s)")
+                              title, ancestor, descendant, version, rssTitle)\
+                              VALUES (%(localPath)s, %(modifiedDate)s,\
+                              %(downloadDate)s, %(sourceDomain)s, %(url)s,\
+                              %(title)s, %(ancestor)s, %(descendant)s,\
+                              %(version)s, %(rss_title)s)")
 
         self.insertArchive = ("INSERT INTO ArchiveVersion(localPath,\
                               modifiedDate,downloadDate,sourceDomain,url,\
-                              title, ancestor, descendant, version, rssTitle) 
-							  VALUES (%(localPath)s, %(modifiedDate)s,\ 
-							  %(downloadDate)s, %(sourceDomain)s, %(url)s,\ 
-							  %(title)s, %(ancestor)s, %(descendant)s,\ 
-							  %(version)s, %(rss_title)s)")
+                              title, ancestor, descendant, version, rssTitle)\
+                              VALUES (%(localPath)s, %(modifiedDate)s,\
+                              %(downloadDate)s, %(sourceDomain)s, %(url)s,\
+                              %(title)s, %(ancestor)s, %(descendant)s,\
+                              %(version)s, %(rss_title)s)")
 
         self.deleteFromCurrent = ("DELETE FROM CurrentVersion WHERE url = %s")
 
