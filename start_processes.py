@@ -1,0 +1,147 @@
+from subprocess import Popen
+import subprocess
+import signal
+import sys
+import os
+import logging
+from newscrawler.config import JsonConfig
+from newscrawler.config import CrawlerConfig
+from scrapy.utils.log import configure_logging
+import threading
+
+PROCESS = None
+
+
+class start_processes(object):
+
+    python_command = None
+    crawlers = []
+    cfg = None
+    log = None
+    cfg_file_path = None
+    shall_resume = False
+    threads = []
+
+    def __init__(self):
+        configure_logging({"LOG_LEVEL": "CRITICAL"})
+        self.log = logging.getLogger(__name__)
+
+        self.shall_resume = len([arg for arg in sys.argv if arg == '--resume']) != 0
+
+        self.cfg = CrawlerConfig.get_instance()
+        self.cfg_file_path = self.get_config_file_path()
+        self.cfg.setup(self.cfg_file_path)
+
+        urlinput_file_path = self.cfg.section('Files')['urlinput']
+        self.json = JsonConfig.get_instance()
+        self.json.setup(self.get_abs_file_path(
+            urlinput_file_path, quit_on_error=True))
+
+        return
+
+    def start_all_crawlers(self):
+        sites = self.json.get_site_objects()
+        for index, site in enumerate(sites):
+            thread = threading.Thread(target=self.start_crawler,
+                                      args=(index,),
+                                      kwargs={})
+            self.threads.append(thread)
+            thread.start()
+
+    def start_crawler(self, index):
+        python = self.get_python_command()
+        call_process = [python, "./initial.py", self.cfg_file_path, "%s" % index, "%s" % self.shall_resume]
+
+        self.log.debug("Calling Process: %s" % call_process)
+
+        crawler = Popen(call_process,
+                        stderr=None,
+                        stdout=None)
+        crawler.communicate()
+        self.crawlers.append(crawler)
+
+    def get_python_command(self):
+        """Get the correct command for executing python2.7"""
+        if self.python_command is not None:
+            return self.python_command
+
+        string = "python2.7"
+        try:
+            self.__get_python(string)
+        except OSError:
+            string = "python"
+            output = self.__get_python(string)
+            if not output.startswith("Python 2.7"):
+                print "ERROR: You need to have Python 2.7.* installed and in your PATH. It must be executable by invoking python or python2.7."
+        self.python_command = string
+        return string
+
+    def graceful_stop(self):
+        return True
+
+    def get_config_file_path(self):
+        """
+        returns the config file path
+         - if passed to this script, ensures it's a valid file path
+         - if not passed to this script or not valid, falls back to the
+           standard ./newscrawler.cfg
+        """
+        # test if the config file path was passed to this script
+        # argv[0] should be this script's name
+        # argv[1] should be the config file path
+        #   for path names with spaces, use "path"
+        if len(sys.argv) > 1:
+            input_config_file_path = os.path.abspath(sys.argv[1])
+
+            if os.path.exists(input_config_file_path) and os.path.splitext(
+                    input_config_file_path)[1] == ".cfg":
+                return input_config_file_path
+            else:
+                self.log.error("First argument passed to initial.py is not"
+                               " the config file. Falling back to"
+                               " ./newscrawler.cfg.")
+
+        # Default
+        return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
+
+    def __get_python(self, string):
+        return Popen([string, "--version"],
+                     stderr=subprocess.STDOUT,
+                     stdout=subprocess.PIPE).communicate()[0]
+
+    def get_abs_file_path(self, rel_file_path, quit_on_error=None):
+        """
+        returns the absolute file path of the given relative file path
+        to either this script or to the config file.
+
+        May throw a RuntimeError if quit_on_error is True
+        """
+        if self.cfg_file_path is not None and \
+                not self.cfg.section('General')['relativetoinitial']:
+            script_dir = os.path.dirname(self.cfg_file_path)
+        else:
+            # absolute dir this script is in
+            script_dir = os.path.dirname(__file__)
+
+        abs_file_path = os.path.abspath(
+            os.path.join(script_dir, rel_file_path))
+
+        if not os.path.exists(abs_file_path):
+            self.log.error(abs_file_path + " does not exist.")
+            if quit_on_error is True:
+                raise RuntimeError("Importet file not found. Quit.")
+
+        return abs_file_path
+
+def graceful_stop(a, b):
+    if PROCESS is not None:
+        PROCESS.graceful_stop()
+
+
+signal.signal(signal.SIGTERM, graceful_stop)
+signal.signal(signal.SIGABRT, graceful_stop)
+signal.signal(signal.SIGINT, graceful_stop)
+
+if __name__ == "__main__":
+    PROCESS = start_processes()
+    PROCESS.start_all_crawlers()
