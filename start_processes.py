@@ -28,6 +28,7 @@ class start_processes(object):
 
         self.shall_resume = len([arg for arg in sys.argv if arg == '--resume']) != 0
 
+        # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
         self.cfg_file_path = self.get_config_file_path()
         self.cfg.setup(self.cfg_file_path)
@@ -37,9 +38,10 @@ class start_processes(object):
         self.json.setup(self.get_abs_file_path(
             urlinput_file_path, quit_on_error=True))
 
-        return
-
     def start_all_crawlers(self):
+        """
+        Starts a thread for each site and a crawler for it
+        """
         sites = self.json.get_site_objects()
         for index, site in enumerate(sites):
             thread = threading.Thread(target=self.start_crawler,
@@ -49,6 +51,11 @@ class start_processes(object):
             thread.start()
 
     def start_crawler(self, index):
+        """
+        Starts a crawler from the input-array
+
+        :param index: The array-index of the site
+        """
         python = self.get_python_command()
         call_process = [python, "./initial.py", self.cfg_file_path, "%s" % index, "%s" % self.shall_resume]
 
@@ -61,7 +68,11 @@ class start_processes(object):
         self.crawlers.append(crawler)
 
     def get_python_command(self):
-        """Get the correct command for executing python2.7"""
+        """
+        Get the correct command for executing python2.7
+
+        :return string: python or python2.7
+        """
         if self.python_command is not None:
             return self.python_command
 
@@ -77,6 +88,9 @@ class start_processes(object):
         return string
 
     def graceful_stop(self):
+        """
+        This function will be called when a graceful-stop is initiated
+        """
         return True
 
     def get_config_file_path(self):

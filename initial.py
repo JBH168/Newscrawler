@@ -68,7 +68,7 @@ class initial(object):
         self.cfg_file_path = self.get_config_file_path()
         self.cfg.setup(self.cfg_file_path)
         self.log.info("Config initalized - Further initialisation.")
-        
+
         # load the URL-input-json-file
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
@@ -101,7 +101,10 @@ class initial(object):
         self.process.start()
 
     def update_job_dir(self, site):
-        print self.__scrapy_options
+        """
+        Update the JOBDIR in __scrapy_options for the crawler,
+        so each crawler gets its own jobdir.
+        """
         jobdir = self.__scrapy_options["JOBDIR"]
         if not jobdir.endswith("/"):
             jobdir = jobdir + "/"
