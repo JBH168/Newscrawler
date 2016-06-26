@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import urllib2
+from urlparse import urlparse
+import re
 
 
 class rssCrawler(scrapy.Spider):
@@ -44,3 +47,18 @@ class rssCrawler(scrapy.Spider):
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.ignored_allowed_domains[0], self.original_url,
             rss_title)
+
+    @staticmethod
+    def supports_site(url):
+        """
+        Sitemap-Crawler are supported by every site which have a
+        Sitemap set in the robots.txt
+        """
+
+        # Follow redirects
+        opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
+        redirect = opener.open(url).url
+        response = urllib2.urlopen(redirect).read()
+
+        # Check if "Sitemap" is set
+        return re.search(r'(<link[^>]*href[^>]*type ?= ?"application\/rss\+xml"|<link[^>]*type ?= ?"application\/rss\+xml"[^>]*href)', response) is not None

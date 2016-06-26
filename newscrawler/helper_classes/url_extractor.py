@@ -7,6 +7,7 @@ import os
 
 
 class url_extractor(object):
+
     """
     This class contains methods to extract parts of any given url
     """

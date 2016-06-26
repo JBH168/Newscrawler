@@ -104,15 +104,20 @@ class CrawlerConfig(object):
                         self.log_output.append(
                             {"level": "debug",
                              "msg": "Option not literal_eval-parsable"
-                             " (maybe string): %s" % option})
+                             " (maybe string): [%s] %s" % (section, option)})
 
                     if self.__config[section][option] == -1:
                         self.log_output.append(
-                            {"level": "debug", "msg": "Skipping: %s" % option})
+                            {"level": "debug",
+                             "msg": "Skipping: [%s] %s" % (section, option)}
+                        )
                 except ConfigParser.NoOptionError as exc:
                     self.log_output.append(
                         {"level": "error",
-                         "msg": "Exception on %s: %s" % (option, exc)})
+                         "msg": "Exception on [%s] %s: %s" % (section,
+                                                              option,
+                                                              exc)}
+                    )
                     self.__config[section][option] = None
 
     def get_logging(self):

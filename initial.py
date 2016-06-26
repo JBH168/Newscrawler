@@ -49,6 +49,7 @@ class initial(object):
     process = None
     helper = None
     cfg_file_path = None
+    cfg_crawler = None
     __scrapy_options = None
     __crawer_module = "newscrawler.crawler.spiders"
     site_number = None
