@@ -7,7 +7,6 @@ from newscrawler.crawler.items import NewscrawlerItem
 import time
 import re
 
-
 class parse_crawler(object):
     """
     helper class
@@ -47,7 +46,8 @@ class parse_crawler(object):
             article['spiderResponse'] = response
             return article
 
-    def recursive_requests(self, response, spider):
+    @staticmethod
+    def recursive_requests(response, spider):
         # Recursivly crawl all URLs on the current page
         # that do not point to irrelevant file types
         return [scrapy.Request(response.urljoin(href), callback=spider.parse)

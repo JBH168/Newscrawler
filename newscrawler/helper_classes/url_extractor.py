@@ -10,30 +10,33 @@ class url_extractor(object):
     """
     This class contains methods to extract parts of any given url
     """
-    def get_allowed_domains(self, url):
+    @staticmethod
+    def get_allowed_domains(url):
         """
         returns subdomains.domain.topleveldomain of url
         """
         return re.sub(r'^(www.)', '', re.search(r'[^/]+\.[^/]+', url).group(0))
 
-    def get_allowed_domains_without_subdomains(self, url):
+    @staticmethod
+    def get_allowed_domains_without_subdomains(url):
         """
         returns domain.topleveldomain of url
         """
         return re.search(r'[^/.]+\.[^/.]+$',
-                         self.get_allowed_domains(url)).group(0)
+                         url_extractor.get_allowed_domains(url)).group(0)
 
-    def get_sitemap_urls(self, url, allow_subdomains):
+    @staticmethod
+    def get_sitemap_urls(url, allow_subdomains):
         """
         returns http://subdomains.domain.topleveldomain/robots.txt of url
 
         allow_subdomains decides if the return contains the subdomains
         """
         if allow_subdomains:
-            return "http://" + self.get_allowed_domains(url) + "/robots.txt"
+            return "http://" + url_extractor.get_allowed_domains(url) + "/robots.txt"
         else:
             return "http://" + \
-                    self.get_allowed_domains_without_subdomains(url) + \
+                    url_extractor.get_allowed_domains_without_subdomains(url) + \
                     "/robots.txt"
 
     def get_rss_url(self, response):
@@ -46,18 +49,20 @@ class url_extractor(object):
         return response.xpath('//link[contains(@type, "application/rss+xml")]'
                               ).xpath('@href').extract()[0]
 
-    def get_start_urls(self, url):
+    @staticmethod
+    def get_start_urls(url):
         """
         returns http://subdomains.domain.topleveldomain/ of url
         """
-        allowed_domains = self.get_allowed_domains(url)
+        allowed_domains = url_extractor.get_allowed_domains(url)
         return "http://" + allowed_domains + "/"
 
-    def get_url_directory_string(self, url):
+    @staticmethod
+    def get_url_directory_string(url):
         """
         returns the directory string on the server
         """
-        domain = self.get_allowed_domains(url)
+        domain = url_extractor.get_allowed_domains(url)
 
         splitted_url = url.split('/')
 
@@ -75,7 +80,8 @@ class url_extractor(object):
 
         return '_'.join(splitted_url)
 
-    def get_url_file_name(self, url):
+    @staticmethod
+    def get_url_file_name(url):
         """
         returns the filename (without the file extension) on the server
         """

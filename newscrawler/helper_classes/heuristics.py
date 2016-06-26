@@ -17,7 +17,8 @@ class heuristics(heuristics_manager):
     #
     # HEURISTICS
 
-    def og_type(self, response):
+    @staticmethod
+    def og_type(response):
         """
         Check if the site contains a meta-tag which contains
         property="og:type" and content="article"
