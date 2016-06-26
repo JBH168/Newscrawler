@@ -53,6 +53,7 @@ class initial(object):
     __crawer_module = "newscrawler.crawler.spiders"
     site_number = None
     shall_resume = False
+    daemonize = 0
 
     def __init__(self):
         # set up logging before it's defined via the config file,
@@ -63,6 +64,7 @@ class initial(object):
 
         self.site_number = int(sys.argv[2])
         self.shall_resume = literal_eval(sys.argv[3])
+        self.daemonize = int(sys.argv[4])
 
         # set up the config file
         self.cfg = CrawlerConfig.get_instance()
@@ -121,8 +123,7 @@ class initial(object):
         """
         loads the given crawler with the given url
         """
-        if self.process is None:
-            self.process = CrawlerProcess(self.cfg.get_scrapy_options())
+        self.process = CrawlerProcess(self.cfg.get_scrapy_options())
         self.process.crawl(
             crawler,
             self.helper,
@@ -137,7 +138,8 @@ class initial(object):
         """
         jobdir = os.path.abspath(self.__scrapy_options["JOBDIR"])
 
-        if not self.shall_resume and os.path.exists(jobdir):
+        if (not self.shall_resume or self.daemonize > 0) \
+                and os.path.exists(jobdir):
             shutil.rmtree(jobdir)
 
             self.log.info("Removed JOBDIR since '--resume' was not passed to"

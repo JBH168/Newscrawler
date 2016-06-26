@@ -1,6 +1,11 @@
 {
     "base_urls" : [
         {
+          "url": "http://der-postillon.com",
+          "crawler": "rssCrawler",
+          "daemonize": 5
+        },
+        {
           "url": "http://zeit.de",
           "crawler": "sitemapCrawler",
           "overwrite_heuristics": {

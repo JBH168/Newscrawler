@@ -3,6 +3,7 @@ import subprocess
 import signal
 import sys
 import os
+import time
 import logging
 from newscrawler.config import JsonConfig
 from newscrawler.config import CrawlerConfig
@@ -18,9 +19,12 @@ class start_processes(object):
     crawlers = []
     cfg = None
     log = None
+    helper = None
     cfg_file_path = None
     shall_resume = False
     threads = []
+    threads_daemonized = []
+    crawler_list = None
 
     def __init__(self):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
@@ -39,19 +43,55 @@ class start_processes(object):
         self.json.setup(self.get_abs_file_path(
             urlinput_file_path, quit_on_error=True))
 
-    def start_all_crawlers(self):
+        self.crawler_list = crawler_list()
+
+    def manage_crawlers(self):
         """
         Starts a thread for each site and a crawler for it
         """
         sites = self.json.get_site_objects()
         for index, site in enumerate(sites):
-            thread = threading.Thread(target=self.start_crawler,
-                                      args=(index,),
+            if "daemonize" in site:
+                thread = threading.Thread(target=self.manage_crawler,
+                                          args=(index, site["daemonize"]),
+                                          kwargs={})
+                self.threads_daemonized.append(thread)
+                thread.start()
+            else:
+                self.crawler_list.appendItem(index)
+
+        for i in range(self.cfg.section(
+                'Crawler')['numberofparallelcrawlers']):
+            thread = threading.Thread(target=self.manage_crawler,
+                                      args=(),
                                       kwargs={})
             self.threads.append(thread)
             thread.start()
 
-    def start_crawler(self, index):
+        # join alive threads
+        #   1. crawler Threads
+        #   2. daemonized Threads (read somewhere this might prevent zombies...
+        #                          TODO: research)
+        for thread in self.threads:
+            thread.join()
+        for thread in self.threads_daemonized:
+            thread.join()
+
+    def manage_crawler(self, index=None, daemonize=0):
+        # if daemonized
+        while daemonize > 0:
+            beginTime = int(time.time())
+            self.start_crawler(index)
+            time.sleep(int(time.time()) - beginTime - daemonize)
+
+        # otherwise
+        while True:
+            index = self.crawler_list.getNextItem()
+            if index is None:
+                break
+            self.start_crawler(index)
+
+    def start_crawler(self, index, daemonize=0):
         """
         Starts a crawler from the input-array
 
@@ -59,7 +99,8 @@ class start_processes(object):
         """
         python = self.get_python_command()
         call_process = [python, "./initial.py", self.cfg_file_path,
-                        "%s" % index, "%s" % self.shall_resume]
+                        "%s" % index, "%s" % self.shall_resume,
+                        "%s" % daemonize]
 
         self.log.debug("Calling Process: %s" % call_process)
 
@@ -153,6 +194,32 @@ class start_processes(object):
         return abs_file_path
 
 
+class crawler_list(object):
+    lock = None
+    crawler_list = []
+
+    def __init__(self):
+        self.lock = threading.Lock()
+
+    def appendItem(self, item):
+        self.lock.acquire()
+        try:
+            self.crawler_list.append(item)
+        finally:
+            self.lock.release()
+
+    def getNextItem(self):
+        self.lock.acquire()
+        try:
+            if len(self.crawler_list) > 0:
+                item = self.crawler_list.pop(0)
+            else:
+                item = None
+        finally:
+            self.lock.release()
+            return item
+
+
 def graceful_stop(a, b):
     if PROCESS is not None:
         PROCESS.graceful_stop()
@@ -164,4 +231,4 @@ signal.signal(signal.SIGINT, graceful_stop)
 
 if __name__ == "__main__":
     PROCESS = start_processes()
-    PROCESS.start_all_crawlers()
+    PROCESS.manage_crawlers()
