@@ -3,7 +3,9 @@ import logging
 
 class heuristics_manager(object):
     """
-    This class is for managing the heuristics of a heuristics file (../heuristics.py) and adding the methods needed to check the heuristic (is_article).
+    This class is for managing the heuristics of
+    a heuristics file (../heuristics.py)
+    and adding the methods needed to check the heuristic (is_article).
 
     The heuristics file must inherit this class.
 
@@ -15,7 +17,6 @@ class heuristics_manager(object):
 
     __sites_object = {}
     __sites_heuristics = {}
-
 
     def __init__(self, cfg_heuristics, sites_object):
         self.cfg_heuristics = cfg_heuristics
@@ -52,7 +53,8 @@ class heuristics_manager(object):
 
     def __evaluate_result(self, result, condition):
         """
-        Evaluates a result of a heuristic with the condition given in the config
+        Evaluates a result of a heuristic
+        with the condition given in the config
 
         Arguments:
         :param result: The result of the heuristic
@@ -76,53 +78,62 @@ class heuristics_manager(object):
             if (condition.startswith("'") and condition.endswith("'")) or\
                (condition.startswith('"') and condition.endswith('"')):
                 if isinstance(result, basestring):
-                    self.log.debug("Condition %s recognized as string." % condition)
+                    self.log.debug("Condition %s recognized as string."
+                                   % condition)
                     return result == condition[1:-1]
-                return self.__evaluation_error(result, condition, "Result not string")
+                return self.__evaluation_error(
+                    result, condition, "Result not string")
 
             # Only number-comparision following
             if not isinstance(result, (float, int)):
-                return self.__evaluation_error(result, condition, "Result not number on comparision")
+                return self.__evaluation_error(
+                    result, condition, "Result not number on comparision")
 
             # Check if result should match a number
             if condition.startswith("="):
                 number = self.__try_parse_number(condition[1:])
                 if isinstance(number, bool):
-                    return self.__evaluation_error(result, condition, "Number not parsable (=)")
+                    return self.__evaluation_error(
+                        result, condition, "Number not parsable (=)")
                 return result == number
 
             # Check if result should be >= then a number
             if condition.startswith(">="):
                 number = self.__try_parse_number(condition[2:])
                 if isinstance(number, bool):
-                    return self.__evaluation_error(result, condition, "Number not parsable (>=)")
+                    return self.__evaluation_error(
+                        result, condition, "Number not parsable (>=)")
                 return result >= number
 
             # Check if result should be <= then a number
             if condition.startswith("<="):
                 number = self.__try_parse_number(condition[2:])
                 if isinstance(number, bool):
-                    return self.__evaluation_error(result, condition, "Number not parsable (<=)")
+                    return self.__evaluation_error(
+                        result, condition, "Number not parsable (<=)")
                 return result <= number
 
             # Check if result should be > then a number
             if condition.startswith(">"):
                 number = self.__try_parse_number(condition[1:])
                 if isinstance(number, bool):
-                    return self.__evaluation_error(result, condition, "Number not parsable (>)")
+                    return self.__evaluation_error(
+                        result, condition, "Number not parsable (>)")
                 return result > number
 
             # Check if result should be < then a number
             if condition.startswith("<"):
                 number = self.__try_parse_number(condition[1:])
                 if isinstance(number, bool):
-                    return self.__evaluation_error(result, condition, "Number not parsable (<)")
+                    return self.__evaluation_error(
+                        result, condition, "Number not parsable (<)")
                 return result < number
 
             # Check if result should be equal a number
             number = self.__try_parse_number(condition)
             if isinstance(number, bool):
-                return self.__evaluation_error(result, condition, "Number not parsable")
+                return self.__evaluation_error(
+                    result, condition, "Number not parsable")
             return result == number
 
         # Check if the condition is a number and matches the result
