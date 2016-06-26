@@ -26,7 +26,8 @@ class start_processes(object):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
         self.log = logging.getLogger(__name__)
 
-        self.shall_resume = len([arg for arg in sys.argv if arg == '--resume']) != 0
+        self.shall_resume = len([arg for arg in sys.argv
+                                 if arg == '--resume']) != 0
 
         # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
@@ -57,7 +58,8 @@ class start_processes(object):
         :param index: The array-index of the site
         """
         python = self.get_python_command()
-        call_process = [python, "./initial.py", self.cfg_file_path, "%s" % index, "%s" % self.shall_resume]
+        call_process = [python, "./initial.py", self.cfg_file_path,
+                        "%s" % index, "%s" % self.shall_resume]
 
         self.log.debug("Calling Process: %s" % call_process)
 
@@ -83,7 +85,9 @@ class start_processes(object):
             string = "python"
             output = self.__get_python(string)
             if not output.startswith("Python 2.7"):
-                print "ERROR: You need to have Python 2.7.* installed and in your PATH. It must be executable by invoking python or python2.7."
+                print "ERROR: You need to have Python 2.7.* installed " \
+                      "and in your PATH. It must be executable by invoking " \
+                      "python or python2.7."  # TODO end program?
         self.python_command = string
         return string
 
@@ -123,6 +127,7 @@ class start_processes(object):
                      stderr=subprocess.STDOUT,
                      stdout=subprocess.PIPE).communicate()[0]
 
+    # TODO: move into a helper class; copy in initial.py
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         """
         returns the absolute file path of the given relative file path
@@ -146,6 +151,7 @@ class start_processes(object):
                 raise RuntimeError("Importet file not found. Quit.")
 
         return abs_file_path
+
 
 def graceful_stop(a, b):
     if PROCESS is not None:
