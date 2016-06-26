@@ -7,7 +7,6 @@ from newscrawler.crawler.items import NewscrawlerItem
 import time
 import re
 
-
 class parse_crawler(object):
     """
     helper class
@@ -37,17 +36,18 @@ class parse_crawler(object):
             article['url'] = response.url
             article['title'] = response.selector.xpath('//title/text()') \
                 .extract_first().encode("utf-8")
-            # if rss_title is None:
-            #     article['rss_title'] = 'NULL'
-            # else:
-            #     article['rss_title'] = rss_title
+            if rss_title is None:
+                article['rss_title'] = 'NULL'
+            else:
+                article['rss_title'] = rss_title
             article['ancestor'] = 'NULL'
             article['descendant'] = 'NULL'
             article['version'] = '1'
             article['spiderResponse'] = response
             return article
 
-    def recursive_requests(self, response, spider):
+    @staticmethod
+    def recursive_requests(response, spider):
         # Recursivly crawl all URLs on the current page
         # that do not point to irrelevant file types
         return [scrapy.Request(response.urljoin(href), callback=spider.parse)

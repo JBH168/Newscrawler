@@ -7,7 +7,7 @@ import re
 import time
 import hashlib
 import os
-
+from url_extractor import url_extractor
 
 class savepath_parser(object):
     """
@@ -34,7 +34,8 @@ class savepath_parser(object):
 
         self.cfg_file_path = cfg_file_path
 
-    def time_replacer(self, match, timestamp):
+    @staticmethod
+    def time_replacer(match, timestamp):
         """
         returns the timestamp formated with strftime the way the regex-match
         within the first set of braces defines
@@ -53,43 +54,40 @@ class savepath_parser(object):
 
         # lambda is used for lazy evalutation
         savepath = re.sub(r'%time_download\(([^\)]+)\)',
-                          lambda match: self.time_replacer(match, timestamp),
+                          lambda match: savepath_parser.time_replacer(match, timestamp),
                           savepath)
         savepath = re.sub(r'%timestamp_download', str(timestamp), savepath)
         savepath = re.sub(r'%domain',
-                          lambda match: self.helper.url_extractor
+                          lambda match: url_extractor
                           .get_allowed_domains_without_subdomains(url),
                           savepath)
         savepath = re.sub(r'%md5_domain\(([^\)]+)\)',
-                          lambda match: hashlib.md5(self.helper
-                          .url_extractor
-                          .get_allowed_domains_without_subdomains(url))
+                          lambda match: hashlib.md5(url_extractor.get_allowed_domains_without_subdomains(url))
                           .hexdigest()[:match], savepath)
         savepath = re.sub(r'%full_domain',
-                          lambda match: self.helper.url_extractor
-                          .get_allowed_domains(url), savepath)
+                          lambda match: url_extractor.get_allowed_domains(url), savepath)
         savepath = re.sub(r'%url_directory_string\(([^\)]+)\)',
-                          lambda match: self.helper.url_extractor
+                          lambda match: url_extractor
                           .get_url_directory_string(url)[:match], savepath)
         savepath = re.sub(r'%url_file_name\(([^\)]+)\)',
-                          lambda match: self.helper.url_extractor
+                          lambda match: url_extractor
                           .get_url_file_name(url)[:match], savepath)
         savepath = re.sub(r'%md5_url_file_name\(([^\)]+)\)',
-                          lambda match: hashlib.md5(self.helper
-                          .url_extractor.get_url_file_name(url))
+                          lambda match: hashlib.md5(url_extractor.get_url_file_name(url))
                           .hexdigest()[:match], savepath)
 
         savepath = self.get_abs_path(savepath)
 
         savepath = re.sub(r'%max_url_file_name',
-                          lambda match: self.get_max_url_file_name(savepath,
+                          lambda match: savepath_parser.get_max_url_file_name(savepath,
                                                                    url),
                           savepath)
 
         # ensure the savepath doesn't contain any invalid characters
-        return self.remove_not_allowed_chars(savepath)
+        return savepath_parser.remove_not_allowed_chars(savepath)
 
-    def remove_not_allowed_chars(self, savepath):
+    @staticmethod
+    def remove_not_allowed_chars(savepath):
         """
         returns the given savepath without invalid savepath characters
         """
@@ -111,7 +109,8 @@ class savepath_parser(object):
                                                 (self.cfg_file_path),
                                                 (savepath)))
 
-    def get_max_url_file_name(self, savepath, url):
+    @staticmethod
+    def get_max_url_file_name(savepath, url):
         """
         returns the first max. allowed number of chars of the url_file_name
         """
@@ -125,5 +124,5 @@ class savepath_parser(object):
         max_size = 260 - 1 - size_without_max_url_file_name
         max_size_per_occurrence = max_size / number_occurrences
 
-        return self.helper.url_extractor \
+        return url_extractor \
             .get_url_file_name(url)[:max_size_per_occurrence]
