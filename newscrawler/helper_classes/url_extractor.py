@@ -34,11 +34,12 @@ class url_extractor(object):
         allow_subdomains decides if the return contains the subdomains
         """
         if allow_subdomains:
-            return "http://" + url_extractor.get_allowed_domains(url) + "/robots.txt"
+            return "http://" + url_extractor.get_allowed_domains(url) + \
+                "/robots.txt"
         else:
             return "http://" + \
-                    url_extractor.get_allowed_domains_without_subdomains(url) + \
-                    "/robots.txt"
+                    url_extractor.get_allowed_domains_without_subdomains(url) \
+                    + "/robots.txt"
 
     def get_rss_url(self, response):
         """
