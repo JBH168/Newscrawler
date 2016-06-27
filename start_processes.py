@@ -183,7 +183,6 @@ class start_processes(object):
                      stderr=subprocess.STDOUT,
                      stdout=subprocess.PIPE).communicate()[0]
 
-    # TODO: move into a helper class; copy in initial.py
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         """
         returns the absolute file path of the given relative file path

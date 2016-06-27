@@ -11,8 +11,8 @@ class heuristics(heuristics_manager):
     url_extractor = None
 
     # TO FIX: Needs to be updated to the new heuristic functionality
-    #def __init__(self, url_extractor):
-    #    self.url_extractor = url_extractor
+    # def __init__(self, url_extractor):
+    #     self.url_extractor = url_extractor
 
     #
     # HEURISTICS
@@ -50,7 +50,7 @@ class heuristics(heuristics_manager):
                 hAll_all += 1
                 if "href" in h:
                     # h_linked += 1
-                    hAll_linked +=1
+                    hAll_linked += 1
 
             # hcount['h%s' % i] = (h_all, h_linked)
         self.log.info("Linked headlines test: headlines = %s, linked = %s" %
@@ -65,8 +65,8 @@ class heuristics(heuristics_manager):
         return float(hAll_linked) / float(hAll_all)
 
     # TO FIX: Needs to be updated to the new heuristic functionality
-    #def is_from_subdomain(self, url, allowed_domains):
-    #    """
-    #    ensures the given url isn't from a subdomain
-    #    """
-    #    return self.url_extractor.get_allowed_domains(url) == allowed_domains
+    # def is_from_subdomain(self, url, allowed_domains):
+    #     """
+    #     ensures the given url isn't from a subdomain
+    #     """
+    #     return self.url_extractor.get_allowed_domains(url) == allowed_domains

@@ -111,8 +111,8 @@ class single_crawler(object):
         self.__scrapy_options["JOBDIR"] = jobdir + hashed.hexdigest()
 
     def getCrawler(self, crawler):
-        return getattr(importlib.import_module(self.__crawer_module + "." +
-                                               crawler), crawler)
+        return getattr(importlib.import_module(
+                       self.__crawer_module + "." + crawler), crawler)
 
     def loadCrawler(self, crawler, url, ignoreRegex):
         """
@@ -139,7 +139,7 @@ class single_crawler(object):
             shutil.rmtree(jobdir)
 
             self.log.info("Removed JOBDIR since '--resume' was not passed to"
-                          " initial.py")
+                          " initial.py or this crawler was daemonized.")
 
 if __name__ == "__main__":
     single_crawler(cfg_file_path=sys.argv[1],
