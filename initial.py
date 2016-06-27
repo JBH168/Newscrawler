@@ -44,7 +44,8 @@ class single_crawler(object):
     shall_resume = False
     daemonize = 0
 
-    def __init__(self, cfg_file_path, json_file_path, site_index, shall_resume, daemonize):
+    def __init__(self, cfg_file_path, json_file_path,
+                 site_index, shall_resume, daemonize):
         # set up logging before it's defined via the config file,
         # this will be overwritten and all other levels will be put out
         # as well, if it will be changed.
@@ -54,7 +55,8 @@ class single_crawler(object):
         self.cfg_file_path = cfg_file_path
         self.json_file_path = json_file_path
         self.site_number = int(site_index)
-        self.shall_resume = shall_resume if isinstance(shall_resume, bool) else literal_eval(shall_resume)
+        self.shall_resume = shall_resume \
+            if isinstance(shall_resume, bool) else literal_eval(shall_resume)
         self.daemonize = int(daemonize)
 
         # set up the config file
