@@ -90,7 +90,9 @@ class start_processes(object):
         while daemonize > 0 and not self.shutdown:
             beginTime = int(time.time())
             self.start_crawler(index, daemonize)
-            time.sleep(beginTime + daemonize - int(time.time()))
+            pajamaTime = beginTime + daemonize - int(time.time())
+            if pajamaTime > 0:
+                time.sleep(pajamaTime)
 
         # otherwise
         index = True

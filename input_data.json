@@ -3,7 +3,7 @@
         {
           "url": "http://der-postillon.com",
           "crawler": "rssCrawler",
-          "daemonize": 5
+          "daemonize": 60
         },
         {
           "url": "http://zeit.de",
