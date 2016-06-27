@@ -14,7 +14,7 @@ class rssCrawler(scrapy.Spider):
     config = None
     helper = None
 
-    def __init__(self, helper, url, config, *args, **kwargs):
+    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
         self.config = config
         self.helper = helper
 

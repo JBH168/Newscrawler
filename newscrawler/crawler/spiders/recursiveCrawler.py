@@ -15,9 +15,11 @@ class recursiveCrawler(scrapy.Spider):
     config = None
     helper = None
 
-    def __init__(self, helper, url, config, *args, **kwargs):
+    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
         self.config = config
         self.helper = helper
+
+        self.ignoreRegex = ignoreRegex
 
         self.original_url = url
 
@@ -34,7 +36,7 @@ class recursiveCrawler(scrapy.Spider):
     def parse(self, response):
 
         for request in self.helper.parse_crawler \
-                .recursive_requests(response, self):
+                .recursive_requests(response, self, self.ignoreRegex):
             yield request
 
         # if self.config.section('Crawler')['ignoresubdomains'] and \

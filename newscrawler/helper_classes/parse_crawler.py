@@ -7,6 +7,7 @@ from newscrawler.crawler.items import NewscrawlerItem
 import time
 import re
 
+
 class parse_crawler(object):
     """
     helper class
@@ -47,7 +48,7 @@ class parse_crawler(object):
             return article
 
     @staticmethod
-    def recursive_requests(response, spider):
+    def recursive_requests(response, spider, ignoreRegex=''):
         # Recursivly crawl all URLs on the current page
         # that do not point to irrelevant file types
         return [scrapy.Request(response.urljoin(href), callback=spider.parse)
@@ -58,4 +59,6 @@ class parse_crawler(object):
                             '(midi)|(mid)|(mp3)|(wav)|'
                             '(zip)|(rar)|(exe)|(apk)|'
                             '(css)$', response.urljoin(href), re.IGNORECASE
-                            ) is None]
+                            ) is None and
+                len(re.match(ignoreRegex,
+                             response.urljoin(href)).group(0)) == 0]

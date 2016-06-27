@@ -81,6 +81,11 @@ class initial(object):
 
         site = self.json.get_site_objects()[self.site_number]
 
+        if "ignoreRegex" in site:
+            ignoreRegex = '(' + site["ignoreRegex"] + ')|'
+        else:
+            ignoreRegex = ''
+
         self.helper = helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
                              self.cfg_file_path,
@@ -100,7 +105,8 @@ class initial(object):
         # if not stated otherwise in the arguments passed to this script
         self.remove_jobdir_if_not_resume()
 
-        self.loadCrawler(self.getCrawler(self.crawler), site["url"])
+        self.loadCrawler(self.getCrawler(self.crawler), site["url"],
+                         ignoreRegex)
 
         self.process.start()
 
@@ -120,7 +126,7 @@ class initial(object):
         return getattr(importlib.import_module(self.__crawer_module + "." +
                                                crawler), crawler)
 
-    def loadCrawler(self, crawler, url):
+    def loadCrawler(self, crawler, url, ignoreRegex):
         """
         loads the given crawler with the given url
         """
@@ -129,7 +135,8 @@ class initial(object):
             crawler,
             self.helper,
             url=url,
-            config=self.cfg)
+            config=self.cfg,
+            ignoreRegex=ignoreRegex)
 
     def remove_jobdir_if_not_resume(self):
         """

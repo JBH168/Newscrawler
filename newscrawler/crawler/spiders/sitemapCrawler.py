@@ -15,7 +15,7 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
     helper = None
     log = None
 
-    def __init__(self, helper, url, config, *args, **kwargs):
+    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
         self.config = config
         self.helper = helper
         self.original_url = url
