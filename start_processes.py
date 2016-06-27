@@ -25,6 +25,10 @@ class start_processes(object):
     threads = []
     threads_daemonized = []
     crawler_list = None
+    json_file_path = None
+    shutdown = False
+
+    __single_crawler = False
 
     def __init__(self):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
@@ -39,11 +43,15 @@ class start_processes(object):
         self.cfg.setup(self.cfg_file_path)
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
+        self.json_file_path = self.get_abs_file_path(
+            urlinput_file_path, quit_on_error=True)
+
         self.json = JsonConfig.get_instance()
-        self.json.setup(self.get_abs_file_path(
-            urlinput_file_path, quit_on_error=True))
+        self.json.setup(self.json_file_path)
 
         self.crawler_list = crawler_list()
+
+        self.__single_crawler = self.get_abs_file_path("./initial.py")
 
     def manage_crawlers(self):
         """
@@ -79,13 +87,14 @@ class start_processes(object):
 
     def manage_crawler(self, index=None, daemonize=0):
         # if daemonized
-        while daemonize > 0:
+        while daemonize > 0 and not self.shutdown:
             beginTime = int(time.time())
-            self.start_crawler(index)
-            time.sleep(int(time.time()) - beginTime - daemonize)
+            self.start_crawler(index, daemonize)
+            time.sleep(beginTime + daemonize - int(time.time()))
 
         # otherwise
-        while True:
+        index = True
+        while not self.shutdown and index is not None:
             index = self.crawler_list.getNextItem()
             if index is None:
                 break
@@ -98,8 +107,12 @@ class start_processes(object):
         :param index: The array-index of the site
         """
         python = self.get_python_command()
-        call_process = [python, "./initial.py", self.cfg_file_path,
-                        "%s" % index, "%s" % self.shall_resume,
+        call_process = [python,
+                        self.__single_crawler,
+                        self.cfg_file_path,
+                        self.json_file_path,
+                        "%s" % index,
+                        "%s" % self.shall_resume,
                         "%s" % daemonize]
 
         self.log.debug("Calling Process: %s" % call_process)
@@ -128,7 +141,8 @@ class start_processes(object):
             if not output.startswith("Python 2.7"):
                 print "ERROR: You need to have Python 2.7.* installed " \
                       "and in your PATH. It must be executable by invoking " \
-                      "python or python2.7."  # TODO end program?
+                      "python or python2.7."
+                sys.exit(1)
         self.python_command = string
         return string
 
@@ -136,6 +150,7 @@ class start_processes(object):
         """
         This function will be called when a graceful-stop is initiated
         """
+        self.shutdown = True
         return True
 
     def get_config_file_path(self):
