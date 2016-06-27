@@ -48,17 +48,14 @@ class parse_crawler(object):
             return article
 
     @staticmethod
-    def recursive_requests(response, spider, ignoreRegex=''):
+    def recursive_requests(response, spider, ignoreRegex='',
+                           ignoreFileExtensions='pdf'):
         # Recursivly crawl all URLs on the current page
         # that do not point to irrelevant file types
+        # or contain any of the given ignoreRegex regexes
         return [scrapy.Request(response.urljoin(href), callback=spider.parse)
                 for href in response.css("a::attr('href')").extract()
-                if re.match('.*\.(pdf)|(docx?)|(xlsx?)|(pptx?)|(epub)|'
-                            '(jpe?g)|(png)|(bmp)|(gif)|(tiff)|(webp)|'
-                            '(avi)|(mpe?g)|(mov)|(qt)|(webm)|(ogg)|'
-                            '(midi)|(mid)|(mp3)|(wav)|'
-                            '(zip)|(rar)|(exe)|(apk)|'
-                            '(css)$', response.urljoin(href), re.IGNORECASE
-                            ) is None and
+                if re.match('.*\.' + ignoreFileExtensions + '$',
+                            response.urljoin(href), re.IGNORECASE) is None and
                 len(re.match(ignoreRegex,
                              response.urljoin(href)).group(0)) == 0]
