@@ -34,8 +34,31 @@ class start_processes(object):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
         self.log = logging.getLogger(__name__)
 
+        if sys.argv[1] == 'help' or \
+                sys.argv[1] == '--help' or \
+                sys.argv[1] == '?':
+            print "CColon Newscrawler\n\n" \
+                "usage: python start_processes.py [cfg_file_path | help] " \
+                "[arg] ... \n\n" \
+                "cfg_file_path : absolute or relative file path to the " \
+                "config file\n" \
+                "help          : '--help' | 'help' | '?' to get this " \
+                "information\n" \
+                "arg ...       : arguments passed to this script\n" \
+                "                '--resume' to resume crawling\n" \
+                "                '--cleanup-db' to reset the DB\n"
+            sys.exit()
+
         self.shall_resume = len([arg for arg in sys.argv
                                  if arg == '--resume']) != 0
+
+        if len([arg for arg in sys.argv if arg == '--cleanup-db']) != 0:
+            self.cleanup_db()
+        # if len([arg for arg in sys.argv if arg == '--cleanup-files']) != 0:
+        #     self.cleanup_files()
+        # if len([arg for arg in sys.argv if arg == '--cleanup']) != 0:
+        #     self.cleanup_db()
+        #     self.cleanup_files()
 
         # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
@@ -208,6 +231,9 @@ class start_processes(object):
                 raise RuntimeError("Importet file not found. Quit.")
 
         return abs_file_path
+
+    def cleanup_db(self):
+        pass  # TODO: implement
 
 
 class crawler_list(object):
