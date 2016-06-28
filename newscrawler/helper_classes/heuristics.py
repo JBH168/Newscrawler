@@ -52,10 +52,8 @@ class heuristics(heuristics_manager):
                 h_all += 1
                 if "href" in h and (not check_self or
                                     re.search(site_regex, h) is not None):
-                    # h_linked += 1
-                    hAll_linked += 1
+                    h_linked += 1
 
-            # hcount['h%s' % i] = (h_all, h_linked)
         self.log.info("Linked headlines test: headlines = %s, linked = %s" %
                       (h_all, h_linked))
 
