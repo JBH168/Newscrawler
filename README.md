@@ -1,6 +1,6 @@
-# CColon-Webrawler
+# CColon-Newscrawler
 
-CColon Wecrawler is a software developed by the CColon-team in the context of the lecture "Softwareprojekt" by the University of Konstanz in the summer term 2016.
+CColon Newscrawler is a software developed by the CColon-team in the context of the lecture "Softwareprojekt" by the University of Konstanz in the summer term 2016.
 
 Its goal is to download news-article (and only news-article) multiple sites given by multiple URLs.
 
