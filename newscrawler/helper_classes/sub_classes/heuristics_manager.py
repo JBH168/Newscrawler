@@ -16,7 +16,6 @@ class heuristics_manager(object):
     __sites_object = {}
     __sites_heuristics = {}
 
-
     def __init__(self, cfg_heuristics, sites_object):
         self.cfg_heuristics = cfg_heuristics
         for site in sites_object:
@@ -37,10 +36,10 @@ class heuristics_manager(object):
         heuristics = self.__get_enabled_heuristics(url)
 
         is_article = True
-
+        self.log.info("Checking site: %s" % response.url)
         for heuristic, condition in heuristics.iteritems():
             heuristic_func = getattr(self, heuristic)
-            result = heuristic_func(response)
+            result = heuristic_func(response, site)
             check = self.__evaluate_result(result, condition)
             is_article = check and is_article
             self.log.info("Checking heuristic (%s)"

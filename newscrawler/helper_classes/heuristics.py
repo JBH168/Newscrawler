@@ -1,8 +1,9 @@
 """
 helper class for testing heuristics
 """
+import re
 from sub_classes.heuristics_manager import heuristics_manager
-
+from url_extractor import url_extractor
 
 class heuristics(heuristics_manager):
     """
@@ -18,7 +19,7 @@ class heuristics(heuristics_manager):
     # HEURISTICS
 
     @staticmethod
-    def og_type(response):
+    def og_type(response, site_object):
         """
         Check if the site contains a meta-tag which contains
         property="og:type" and content="article"
@@ -33,40 +34,53 @@ class heuristics(heuristics_manager):
 
         return True
 
-    def linked_headlines(self, response):
+    def linked_headlines(self, response, site_object, check_self=False):
         """
         Checks how many of the headlines on the site contain links.
+        :param response: The scrapy response
+        :param site_object: The site object from the JSON-File
+        :param check_self: Check headlines/headlines_containing_link_to_same_domain instead of headline/headline_containing_link
 
-        :return float: ration headlines/headlines_containing_link
+        :return float: ratio headlines/headlines_containing_link
         """
-        # hcount = {}
-        hAll_all = 0
-        hAll_linked = 0
+        h_all = 0
+        h_linked = 0
+        domain = url_extractor.get_allowed_domains_without_subdomains(site_object["url"])
+
+        # This regex checks, if a link containing site_domain as domain is contained in a string.
+        site_regex = "href=[\"'][^\/]*\/\/(?:[^\"']*\.|)%s[\"'\/]" % domain
         for i in range(1, 7):
-            # h_all = 0
-            # h_linked = 0
             for h in response.xpath('//h%s' % i).extract():
                 # h_all += 1
-                hAll_all += 1
-                if "href" in h:
+                h_all += 1
+                if "href" in h and (not check_self or re.search(site_regex, h) is not None):
                     # h_linked += 1
-                    hAll_linked +=1
+                    h_linked += 1
 
             # hcount['h%s' % i] = (h_all, h_linked)
         self.log.info("Linked headlines test: headlines = %s, linked = %s" %
-                      (hAll_all, hAll_linked))
+                      (h_all, h_linked))
 
         min_headlines = self.cfg_heuristics["min_headlines_for_linked_test"]
-        if min_headlines > hAll_all:
+        if min_headlines > h_all:
             self.log.info("Linked headlines test: Not enough headlines "
-                          "(%s < %s): Passing!" % (hAll_all, min_headlines))
+                          "(%s < %s): Passing!" % (h_all, min_headlines))
             return True
 
-        return float(hAll_linked) / float(hAll_all)
+        return float(h_linked) / float(h_all)
 
-    # TO FIX: Needs to be updated to the new heuristic functionality
-    #def is_from_subdomain(self, url, allowed_domains):
-    #    """
-    #    ensures the given url isn't from a subdomain
-    #    """
-    #    return self.url_extractor.get_allowed_domains(url) == allowed_domains
+    def self_linked_headlines(self, response, site_object):
+        """
+        Checks how many of the headlines on the site contain links.
+        :param response: The scrapy response
+        :param site_object: The site object from the JSON-File
+
+        :return float: ratio headlines/headlines_containing_link_to_same_domain
+        """
+        return self.linked_headlines(response, site_object, True)
+
+    def is_not_from_subdomain(self, response, site_object):
+        """
+        ensures the given url isn't from a subdomain
+        """
+        return url_extractor.get_allowed_domains(response.url) == site_object["url"]
