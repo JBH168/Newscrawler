@@ -37,28 +37,21 @@ class start_processes(object):
         if sys.argv[1] == 'help' or \
                 sys.argv[1] == '--help' or \
                 sys.argv[1] == '?':
-            print "CColon Newscrawler\n\n" \
-                "usage: python start_processes.py [cfg_file_path | help] " \
-                "[arg] ... \n\n" \
-                "cfg_file_path : absolute or relative file path to the " \
-                "config file\n" \
-                "help          : '--help' | 'help' | '?' to get this " \
-                "information\n" \
-                "arg ...       : arguments passed to this script\n" \
-                "                '--resume' to resume crawling\n" \
-                "                '--cleanup-db' to reset the DB\n"
+            self.print_help()
             sys.exit()
 
-        self.shall_resume = len([arg for arg in sys.argv
-                                 if arg == '--resume']) != 0
+        self.shall_resume = self.has_arg('--resume')
 
-        if len([arg for arg in sys.argv if arg == '--cleanup-db']) != 0:
+        if self.has_arg('--reset-db'):
             self.cleanup_db()
-        # if len([arg for arg in sys.argv if arg == '--cleanup-files']) != 0:
+            sys.exit(0)
+        # elif self.has_arg('--reset-files'):
         #     self.cleanup_files()
-        # if len([arg for arg in sys.argv if arg == '--cleanup']) != 0:
+        #     sys.exit(0)
+        # elif self.has_arg('--reset'):
         #     self.cleanup_db()
         #     self.cleanup_files()
+        #     sys.exit(0)
 
         # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
@@ -75,6 +68,9 @@ class start_processes(object):
         self.crawler_list = crawler_list()
 
         self.__single_crawler = self.get_abs_file_path("./initial.py")
+
+    def has_arg(self, string):
+        return len([arg for arg in sys.argv if arg == string]) != 0
 
     def manage_crawlers(self):
         """
@@ -207,6 +203,19 @@ class start_processes(object):
         return Popen([string, "--version"],
                      stderr=subprocess.STDOUT,
                      stdout=subprocess.PIPE).communicate()[0]
+
+    def print_help(self):
+        _help = "CColon Newscrawler\n\n" \
+                "Usage: python2 %s [cfg_file_path | help] " \
+                "[arg] \n\n" \
+                "cfg_file_path : absolute or relative file path to the " \
+                "config file\n\n" \
+                "help          : '--help' | 'help' | '?' to get this " \
+                "information\n\n" \
+                "arg           : arguments passed to this script\n\n" \
+                "                --resume         Resume crawling from last crawl\n" \
+                "                --reset-db       Reset the Database\n"
+        print _help % (__file__)
 
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         """
