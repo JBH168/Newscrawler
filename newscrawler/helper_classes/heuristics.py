@@ -9,15 +9,7 @@ class heuristics(heuristics_manager):
     """
     helper class
     """
-    url_extractor = None
-
-    # TO FIX: Needs to be updated to the new heuristic functionality
-    #def __init__(self, url_extractor):
-    #    self.url_extractor = url_extractor
-
-    #
-    # HEURISTICS
-
+    
     @staticmethod
     def og_type(response, site_object):
         """
