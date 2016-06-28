@@ -5,11 +5,12 @@ import re
 from sub_classes.heuristics_manager import heuristics_manager
 from url_extractor import url_extractor
 
+
 class heuristics(heuristics_manager):
     """
     helper class
     """
-    
+
     @staticmethod
     def og_type(response, site_object):
         """
@@ -31,23 +32,28 @@ class heuristics(heuristics_manager):
         Checks how many of the headlines on the site contain links.
         :param response: The scrapy response
         :param site_object: The site object from the JSON-File
-        :param check_self: Check headlines/headlines_containing_link_to_same_domain instead of headline/headline_containing_link
+        :param check_self: Check headlines/
+                                      headlines_containing_link_to_same_domain
+                           instead of headline/headline_containing_link
 
         :return float: ratio headlines/headlines_containing_link
         """
         h_all = 0
         h_linked = 0
-        domain = url_extractor.get_allowed_domains_without_subdomains(site_object["url"])
+        domain = url_extractor.get_allowed_domains_without_subdomains(
+            site_object["url"])
 
-        # This regex checks, if a link containing site_domain as domain is contained in a string.
+        # This regex checks, if a link containing site_domain as domain
+        # is contained in a string.
         site_regex = "href=[\"'][^\/]*\/\/(?:[^\"']*\.|)%s[\"'\/]" % domain
         for i in range(1, 7):
             for h in response.xpath('//h%s' % i).extract():
                 # h_all += 1
                 h_all += 1
-                if "href" in h and (not check_self or re.search(site_regex, h) is not None):
+                if "href" in h and (not check_self or
+                                    re.search(site_regex, h) is not None):
                     # h_linked += 1
-                    hAll_linked +=1
+                    hAll_linked += 1
 
             # hcount['h%s' % i] = (h_all, h_linked)
         self.log.info("Linked headlines test: headlines = %s, linked = %s" %
@@ -75,4 +81,5 @@ class heuristics(heuristics_manager):
         """
         ensures the given url isn't from a subdomain
         """
-        return url_extractor.get_allowed_domains(response.url) == site_object["url"]
+        return url_extractor.get_allowed_domains(response.url) \
+            == site_object["url"]
