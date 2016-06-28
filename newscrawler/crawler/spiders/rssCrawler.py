@@ -37,13 +37,6 @@ class rssCrawler(scrapy.Spider):
                     resp, item.xpath('title/text()').extract()[0]))
 
     def article_parse(self, response, rss_title=None):
-
-        # if self.config.section('Crawler')['ignoresubdomains'] and \
-        #         not self.helper.heuristics.is_from_subdomain(
-        #         response.url, self.allowed_domains[0]):
-        #     # TODO: Move to heuristics
-        #     pass
-
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.ignored_allowed_domains[0], self.original_url,
             rss_title)

@@ -32,13 +32,6 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
         super(sitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
-
-        # if self.config.section('Crawler')['ignoresubdomains'] and \
-        #         not self.helper.heuristics.is_from_subdomain(
-        #         response.url, self.allowed_domains[0]):
-        #     # TODO: Move to heuristics
-        #     pass
-
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.allowed_domains[0], self.original_url)
 
