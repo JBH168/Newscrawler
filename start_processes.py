@@ -214,7 +214,7 @@ Usage:
 
 
 
-Option and Arguments:
+Arguments:
 
     help          : '--help' | 'help' | '?' prints this help message and exits
 
