@@ -27,6 +27,15 @@ class url_extractor(object):
                          url_extractor.get_allowed_domains(url)).group(0)
 
     @staticmethod
+    def get_subdomains(url):
+        """
+        returns domain.topleveldomain of url
+        """
+        allowed_domains = url_extractor.get_allowed_domains(url)
+        return allowed_domains[:len(allowed_domains) - len(
+            url_extractor.get_allowed_domains_without_subdomains(url))]
+
+    @staticmethod
     def get_sitemap_urls(url, allow_subdomains):
         """
         returns http://subdomains.domain.topleveldomain/robots.txt of url

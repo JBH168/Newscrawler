@@ -39,20 +39,17 @@ class start_processes(object):
                                   sys.argv[1] == '--help' or
                                   sys.argv[1] == '?'):
             self.print_help()
-            sys.exit()
+            sys.exit(0)
 
         self.shall_resume = self.has_arg('--resume')
 
         if self.has_arg('--reset-db'):
             self.cleanup_db()
-            sys.exit(0)
         # elif self.has_arg('--reset-files'):
         #     self.cleanup_files()
-        #     sys.exit(0)
         # elif self.has_arg('--reset'):
         #     self.cleanup_db()
         #     self.cleanup_files()
-        #     sys.exit(0)
 
         # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
@@ -217,17 +214,29 @@ class start_processes(object):
                      stdout=subprocess.PIPE).communicate()[0]
 
     def print_help(self):
-        _help = "CColon Newscrawler\n\n" \
-                "Usage: python2 %s [cfg_file_path | help] " \
-                "[arg] \n\n" \
-                "cfg_file_path : absolute or relative file path to the " \
-                "config file\n\n" \
-                "help          : '--help' | 'help' | '?' to get this " \
-                "information\n\n" \
-                "arg           : arguments passed to this script\n\n" \
-                "                --resume         Resume crawling from last crawl\n" \
-                "                --reset-db       Reset the Database\n"
-        print _help % (__file__)
+        _help = \
+            """
+        CColon Newscrawler
+        ------------------
+
+
+Usage:
+
+    %s %s [help] [cfg_file_path] [arg] ...
+
+
+
+Arguments:
+
+    help          : '--help' | 'help' | '?' prints this help message and exits
+
+    cfg_file_path : absolute or relative file path to the config file
+
+    arg ...       : arguments passed to this script
+                --resume        Resume crawling from last crawl
+                --reset-db      Reset the Database
+            """
+        print _help % (self.get_python_command(), __file__)
 
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         """
