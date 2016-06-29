@@ -43,18 +43,18 @@ class start_processes(object):
 
         self.shall_resume = self.has_arg('--resume')
 
-        if self.has_arg('--reset-db'):
-            self.cleanup_db()
-        # elif self.has_arg('--reset-files'):
-        #     self.cleanup_files()
-        # elif self.has_arg('--reset'):
-        #     self.cleanup_db()
-        #     self.cleanup_files()
-
         # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
         self.cfg_file_path = self.get_config_file_path()
         self.cfg.setup(self.cfg_file_path)
+
+        if self.has_arg('--reset-db'):
+            self.cleanup_db()
+        elif self.has_arg('--reset-files'):
+            self.cleanup_files()
+        elif self.has_arg('--reset'):
+            self.cleanup_db()
+            self.cleanup_files()
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json_file_path = self.get_abs_file_path(
@@ -126,8 +126,9 @@ class start_processes(object):
             # next scheduled daemon, tuple (time, index)
             item = self.daemon_list.getNextItem()
             cur = time.time()
-            if cur < item[0]:
-                time.sleep(item[0] - cur)
+            pajamaTime = item[0] - cur
+            if pajamaTime > 0:
+                time.sleep(pajamaTime)
             self.start_crawler(item[1])
 
     def start_crawler(self, index, daemonize=0):
@@ -263,6 +264,9 @@ Arguments:
         return abs_file_path
 
     def cleanup_db(self):
+        pass  # TODO: implement
+
+    def cleanup_files(self):
         pass  # TODO: implement
 
 
