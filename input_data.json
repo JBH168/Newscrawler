@@ -7,19 +7,13 @@
         },
         {
           "url": "http://zeit.de",
-          "crawler": "sitemapCrawler",
-          "overwrite_heuristics": {
-            "og_type": true,
-            "linked_headlines": "<=0.5"
-          }
+          "crawler": "rssCrawler",
+          "daemonize": 60
         },
         {
           "url": "http://sueddeutsche.de",
-          "crawler": "recursiveCrawler",
-          "overwrite_heuristics": {
-            "og_type": true,
-            "linked_headlines": false
-          }
+          "crawler": "rssCrawler",
+          "daemonize": 60
         }
     ]
 }

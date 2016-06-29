@@ -25,6 +25,7 @@ class start_processes(object):
     threads = []
     threads_daemonized = []
     crawler_list = None
+    daemon_list = None
     json_file_path = None
     shutdown = False
 
@@ -34,9 +35,9 @@ class start_processes(object):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
         self.log = logging.getLogger(__name__)
 
-        if sys.argv[1] == 'help' or \
-                sys.argv[1] == '--help' or \
-                sys.argv[1] == '?':
+        if len(sys.argv) > 1 and (sys.argv[1] == 'help' or
+                                  sys.argv[1] == '--help' or
+                                  sys.argv[1] == '?'):
             self.print_help()
             sys.exit()
 
@@ -66,6 +67,7 @@ class start_processes(object):
         self.json.setup(self.json_file_path)
 
         self.crawler_list = crawler_list()
+        self.daemon_list = daemon_list()
 
         self.__single_crawler = self.get_abs_file_path("./initial.py")
 
@@ -79,21 +81,31 @@ class start_processes(object):
         sites = self.json.get_site_objects()
         for index, site in enumerate(sites):
             if "daemonize" in site:
-                thread = threading.Thread(target=self.manage_crawler,
-                                          args=(index, site["daemonize"]),
-                                          kwargs={})
-                self.threads_daemonized.append(thread)
-                thread.start()
+                self.daemon_list.addDaemon(index, site["daemonize"])
             else:
                 self.crawler_list.appendItem(index)
 
-        for i in range(self.cfg.section(
-                'Crawler')['numberofparallelcrawlers']):
+        num_threads = self.cfg.section('Crawler')['numberofparallelcrawlers']
+        if self.crawler_list.len() < num_threads:
+            num_threads = self.crawler_list.len()
+
+        for i in range(num_threads):
             thread = threading.Thread(target=self.manage_crawler,
                                       args=(),
                                       kwargs={})
             self.threads.append(thread)
             thread.start()
+
+        num_daemons = self.cfg.section('Crawler')['numberofparalleldaemons']
+        if self.daemon_list.len() < num_daemons:
+            num_daemons = self.daemon_list.len()
+
+        for i in range(num_daemons):
+            thread_daemonized = threading.Thread(target=self.manage_daemon,
+                                                 args=(),
+                                                 kwargs={})
+            self.threads_daemonized.append(thread_daemonized)
+            thread_daemonized.start()
 
         # join alive threads
         #   1. crawler Threads
@@ -104,22 +116,22 @@ class start_processes(object):
         for thread in self.threads_daemonized:
             thread.join()
 
-    def manage_crawler(self, index=None, daemonize=0):
-        # if daemonized
-        while daemonize > 0 and not self.shutdown:
-            beginTime = int(time.time())
-            self.start_crawler(index, daemonize)
-            pajamaTime = beginTime + daemonize - int(time.time())
-            if pajamaTime > 0:
-                time.sleep(pajamaTime)
-
-        # otherwise
+    def manage_crawler(self):
         index = True
         while not self.shutdown and index is not None:
             index = self.crawler_list.getNextItem()
             if index is None:
                 break
             self.start_crawler(index)
+
+    def manage_daemon(self):
+        while not self.shutdown:
+            # next scheduled daemon, tuple (time, index)
+            item = self.daemon_list.getNextItem()
+            cur = time.time()
+            if cur < item[0]:
+                time.sleep(item[0] - cur)
+            self.start_crawler(item[1])
 
     def start_crawler(self, index, daemonize=0):
         """
@@ -259,6 +271,9 @@ class crawler_list(object):
         finally:
             self.lock.release()
 
+    def len(self):
+        return len(self.crawler_list)
+
     def getNextItem(self):
         self.lock.acquire()
         try:
@@ -266,6 +281,52 @@ class crawler_list(object):
                 item = self.crawler_list.pop(0)
             else:
                 item = None
+        finally:
+            self.lock.release()
+            return item
+
+
+class daemon_list(object):
+    lock = None
+
+    daemons = {}
+    queue = []
+    queue_times = []
+
+    def __init__(self):
+        self.queue = []
+        self.lock = threading.Lock()
+
+    def sortQueue(self):
+        self.queue = sorted(self.queue, key=lambda t: t[0])
+        self.queue_times = sorted(self.queue_times)
+
+    def len(self):
+        return len(self.daemons)
+
+    def addDaemon(self, index, _time):
+        self.lock.acquire()
+        try:
+            self.daemons[index] = _time
+            self.addExecution(time.time(), index)
+        finally:
+            self.lock.release()
+
+    def addExecution(self, _time, index):
+        _time = int(_time)
+        while _time in self.queue_times:
+            _time += 1
+
+        self.queue_times.append(_time)
+        self.queue.append((_time, index))
+
+    def getNextItem(self):
+        self.lock.acquire()
+        self.sortQueue()
+        try:
+            item = self.queue.pop(0)
+            self.queue_times.pop(0)
+            self.addExecution(time.time() + self.daemons[item[1]], item[1])
         finally:
             self.lock.release()
             return item
@@ -279,6 +340,7 @@ def graceful_stop(a, b):
 signal.signal(signal.SIGTERM, graceful_stop)
 signal.signal(signal.SIGABRT, graceful_stop)
 signal.signal(signal.SIGINT, graceful_stop)
+
 
 if __name__ == "__main__":
     PROCESS = start_processes()
