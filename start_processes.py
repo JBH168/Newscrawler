@@ -235,7 +235,9 @@ Arguments:
 
     arg ...       : arguments passed to this script
                 --resume        Resume crawling from last crawl
-                --reset-db      Reset the Database
+                --reset-db      Reset the database
+                --reset-files   Reset the local savepath
+                --reset         Reset the databse and the local savepath
             """
         print _help % (self.get_python_command(), __file__)
 
