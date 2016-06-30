@@ -72,8 +72,9 @@ class RSSCrawlCompare(object):
             if oldVersion is not None:
                 # Compare the two download dates. index 3 of oldVersion
                 #   corresponds to the downloadDate attribute in the DB
-                if (item['downloadDate'] - oldVersion[3])\
-                    < datetime.timedelta(self.deltaTime):
+                if (datetime.datetime.strptime(item['downloadDate'],
+                    "%y-%m-%d %H:%M:%S") - oldVersion[3])\
+                    < datetime.timedelta(hours=self.deltaTime):
                     raise DropItem("Article in DB too recent. Not saving.")
 
         return item
