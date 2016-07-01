@@ -66,8 +66,8 @@ class start_processes(object):
         self.json = JsonConfig.get_instance()
         self.json.setup(self.json_file_path)
 
-        self.crawler_list = crawler_list()
-        self.daemon_list = daemon_list()
+        self.crawler_list = self.CrawlerList()
+        self.daemon_list = self.DaemonList()
 
         self.__single_crawler = self.get_abs_file_path("./initial.py")
 
@@ -107,16 +107,15 @@ class start_processes(object):
             self.threads_daemonized.append(thread_daemonized)
             thread_daemonized.start()
 
-        # join alive threads
-        #   1. crawler Threads
-        #   2. daemonized Threads (read somewhere this might prevent zombies...
-        #                          TODO: research)
+        # TODO: movabo - catch IOError
         while not self.shutdown:
-            time.sleep(10)
-        # for thread in self.threads:
-        #     thread.join()
-        # for thread in self.threads_daemonized:
-        #     thread.join()
+            try:
+                time.sleep(10)
+            except IOError:
+                # This exception will only occur on kill-process on windows
+                # The process should be killed, thus this exception is
+                # irrelevant
+                pass
 
     def manage_crawler(self):
         index = True
@@ -280,93 +279,93 @@ Arguments:
     def cleanup_files(self):
         pass  # TODO: implement
 
+    class CrawlerList(object):
+        lock = None
+        crawler_list = []
+        graceful_stop = False
 
-class crawler_list(object):
-    lock = None
-    crawler_list = []
-    graceful_stop = False
+        def __init__(self):
+            self.lock = threading.Lock()
 
-    def __init__(self):
-        self.lock = threading.Lock()
+        def appendItem(self, item):
+            self.lock.acquire()
+            try:
+                self.crawler_list.append(item)
+            finally:
+                self.lock.release()
 
-    def appendItem(self, item):
-        self.lock.acquire()
-        try:
-            self.crawler_list.append(item)
-        finally:
-            self.lock.release()
+        def len(self):
+            return len(self.crawler_list)
 
-    def len(self):
-        return len(self.crawler_list)
+        def getNextItem(self):
+            if self.graceful_stop:
+                return None
+            self.lock.acquire()
+            try:
+                if len(self.crawler_list) > 0:
+                    item = self.crawler_list.pop(0)
+                else:
+                    item = None
+            finally:
+                self.lock.release()
+                return item
 
-    def getNextItem(self):
-        if self.graceful_stop:
-            return None
-        self.lock.acquire()
-        try:
-            if len(self.crawler_list) > 0:
-                item = self.crawler_list.pop(0)
-            else:
-                item = None
-        finally:
-            self.lock.release()
-            return item
+        def stop(self):
+            self.graceful_stop = True
 
-    def stop(self):
-        self.graceful_stop = True
+    class DaemonList(object):
+        lock = None
+
+        daemons = {}
+        queue = []
+        queue_times = []
+        graceful_stop = False
+
+        def __init__(self):
+            self.queue = []
+            self.lock = threading.Lock()
+
+        def sortQueue(self):
+            self.queue = sorted(self.queue, key=lambda t: t[0])
+            self.queue_times = sorted(self.queue_times)
+
+        def len(self):
+            return len(self.daemons)
+
+        def addDaemon(self, index, _time):
+            self.lock.acquire()
+            try:
+                self.daemons[index] = _time
+                self.addExecution(time.time(), index)
+            finally:
+                self.lock.release()
+
+        def addExecution(self, _time, index):
+            _time = int(_time)
+            while _time in self.queue_times:
+                _time += 1
+
+            self.queue_times.append(_time)
+            self.queue.append((_time, index))
+
+        def getNextItem(self):
+            if self.graceful_stop:
+                return None
+            self.lock.acquire()
+            self.sortQueue()
+            try:
+                item = self.queue.pop(0)
+                self.queue_times.pop(0)
+                self.addExecution(time.time() + self.daemons[item[1]], item[1])
+            finally:
+                self.lock.release()
+                return item
+
+        def stop(self):
+            self.graceful_stop = True
 
 
-class daemon_list(object):
-    lock = None
-
-    daemons = {}
-    queue = []
-    queue_times = []
-    graceful_stop = False
-
-    def __init__(self):
-        self.queue = []
-        self.lock = threading.Lock()
-
-    def sortQueue(self):
-        self.queue = sorted(self.queue, key=lambda t: t[0])
-        self.queue_times = sorted(self.queue_times)
-
-    def len(self):
-        return len(self.daemons)
-
-    def addDaemon(self, index, _time):
-        self.lock.acquire()
-        try:
-            self.daemons[index] = _time
-            self.addExecution(time.time(), index)
-        finally:
-            self.lock.release()
-
-    def addExecution(self, _time, index):
-        _time = int(_time)
-        while _time in self.queue_times:
-            _time += 1
-
-        self.queue_times.append(_time)
-        self.queue.append((_time, index))
-
-    def getNextItem(self):
-        if self.graceful_stop:
-            return None
-        self.lock.acquire()
-        self.sortQueue()
-        try:
-            item = self.queue.pop(0)
-            self.queue_times.pop(0)
-            self.addExecution(time.time() + self.daemons[item[1]], item[1])
-        finally:
-            self.lock.release()
-            return item
-
-    def stop(self):
-        self.graceful_stop = True
-
+# TODO: movabo - try to move into the start_processes class
 def graceful_stop(a, b):
     if PROCESS is not None:
         PROCESS.graceful_stop()

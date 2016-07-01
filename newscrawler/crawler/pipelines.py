@@ -9,7 +9,7 @@ import mysql.connector
 import datetime
 import os.path
 import logging
-from ..config import CrawlerConfig
+from newscrawler.config import CrawlerConfig
 
 ################
 #

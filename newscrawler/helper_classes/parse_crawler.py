@@ -33,7 +33,7 @@ class parse_crawler(object):
                 .get_savepath(response.url)
             article['modifiedDate'] = timestamp
             article['downloadDate'] = timestamp
-            article['sourceDomain'] = sourceDomain[0].encode("utf-8")
+            article['sourceDomain'] = sourceDomain.encode("utf-8")
             article['url'] = response.url
             article['title'] = response.selector.xpath('//title/text()') \
                 .extract_first().encode("utf-8")
@@ -55,7 +55,7 @@ class parse_crawler(object):
         # or contain any of the given ignoreRegex regexes
         return [scrapy.Request(response.urljoin(href), callback=spider.parse)
                 for href in response.css("a::attr('href')").extract()
-                if re.match('.*\.' + ignoreFileExtensions + '$',
+                if re.match(r'.*\.' + ignoreFileExtensions + r'$',
                             response.urljoin(href), re.IGNORECASE) is None and
                 len(re.match(ignoreRegex,
                              response.urljoin(href)).group(0)) == 0]
