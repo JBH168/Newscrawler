@@ -28,6 +28,7 @@ class start_processes(object):
     daemon_list = None
     json_file_path = None
     shutdown = False
+    thread_event = None
 
     __single_crawler = False
 
@@ -42,6 +43,8 @@ class start_processes(object):
             sys.exit(0)
 
         self.shall_resume = self.has_arg('--resume')
+
+        self.thread_event = threading.Event()
 
         # Get & set CFG and JSON locally
         self.cfg = CrawlerConfig.get_instance()
@@ -108,10 +111,12 @@ class start_processes(object):
         #   1. crawler Threads
         #   2. daemonized Threads (read somewhere this might prevent zombies...
         #                          TODO: research)
-        for thread in self.threads:
-            thread.join()
-        for thread in self.threads_daemonized:
-            thread.join()
+        while not self.shutdown:
+            time.sleep(10)
+        # for thread in self.threads:
+        #     thread.join()
+        # for thread in self.threads_daemonized:
+        #     thread.join()
 
     def manage_crawler(self):
         index = True
@@ -128,8 +133,9 @@ class start_processes(object):
             cur = time.time()
             pajamaTime = item[0] - cur
             if pajamaTime > 0:
-                time.sleep(pajamaTime)
-            self.start_crawler(item[1])
+                self.thread_event.wait(pajamaTime)
+            if not self.shutdown:
+                self.start_crawler(item[1])
 
     def start_crawler(self, index, daemonize=0):
         """
@@ -182,6 +188,9 @@ class start_processes(object):
         This function will be called when a graceful-stop is initiated
         """
         self.shutdown = True
+        self.crawler_list.stop()
+        self.daemon_list.stop()
+        self.thread_event.set()
         return True
 
     def get_config_file_path(self):
@@ -275,6 +284,7 @@ Arguments:
 class crawler_list(object):
     lock = None
     crawler_list = []
+    graceful_stop = False
 
     def __init__(self):
         self.lock = threading.Lock()
@@ -290,6 +300,8 @@ class crawler_list(object):
         return len(self.crawler_list)
 
     def getNextItem(self):
+        if self.graceful_stop:
+            return None
         self.lock.acquire()
         try:
             if len(self.crawler_list) > 0:
@@ -300,6 +312,9 @@ class crawler_list(object):
             self.lock.release()
             return item
 
+    def stop(self):
+        self.graceful_stop = True
+
 
 class daemon_list(object):
     lock = None
@@ -307,6 +322,7 @@ class daemon_list(object):
     daemons = {}
     queue = []
     queue_times = []
+    graceful_stop = False
 
     def __init__(self):
         self.queue = []
@@ -336,6 +352,8 @@ class daemon_list(object):
         self.queue.append((_time, index))
 
     def getNextItem(self):
+        if self.graceful_stop:
+            return None
         self.lock.acquire()
         self.sortQueue()
         try:
@@ -346,6 +364,8 @@ class daemon_list(object):
             self.lock.release()
             return item
 
+    def stop(self):
+        self.graceful_stop = True
 
 def graceful_stop(a, b):
     if PROCESS is not None:
