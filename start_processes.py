@@ -10,8 +10,6 @@ from newscrawler.config import CrawlerConfig
 from scrapy.utils.log import configure_logging
 import threading
 
-PROCESS = None
-
 
 class start_processes(object):
 
