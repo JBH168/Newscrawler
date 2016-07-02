@@ -131,17 +131,16 @@ class SavepathParser(object):
                               url_extractor.get_url_file_name(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
-        savepath = self.get_abs_path(savepath)
-
+        abs_savepath = self.get_abs_path(savepath)
         savepath = re.sub(r'%max_url_file_name',
                           lambda match: url_extractor.get_url_file_name(url)[
                               :SavepathParser.get_max_url_file_name_length(
-                                  savepath, url)], savepath)
+                                  abs_savepath)], savepath)
         savepath = re.sub(r'%appendmd5_max_url_file_name',
                           lambda match: SavepathParser.append_md5_if_too_long(
                               url_extractor.get_url_file_name(url),
                               SavepathParser.get_max_url_file_name_length(
-                                  savepath, url)), savepath)
+                                  abs_savepath)), savepath)
 
         # ensure the savepath doesn't contain any invalid characters
         return SavepathParser.remove_not_allowed_chars(savepath)
@@ -167,7 +166,7 @@ class SavepathParser(object):
             return os.path.abspath(savepath)
         else:
             return os.path.abspath(
-                os.path.join(os.path.dirname(cfg_file_path), (savepath))
+                os.path.join(os.path.dirname(cfg_file_path))
                 )
 
     def get_abs_path(self, savepath):
@@ -194,7 +193,7 @@ class SavepathParser(object):
         return path + "/"
 
     @staticmethod
-    def get_max_url_file_name_length(savepath, url):
+    def get_max_url_file_name_length(savepath):
         """
         returns the first max. allowed number of chars of the url_file_name
         """
