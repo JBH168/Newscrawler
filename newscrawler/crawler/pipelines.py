@@ -235,19 +235,21 @@ class DatabaseStorage(object):
 
 class LocalStorage(object):
 
+
+
     # Save the html and filename to the local storage folder
     def process_item(self, item, spider):
 
         # Add a log entry confirming the save
-        logging.info("Saving to %s" % item['localPath'])
+        logging.info("Saving to %s" % item['absLocalPath'])
 
         # Ensure path exists
-        dir_ = os.path.dirname(item['localPath'])
+        dir_ = os.path.dirname(item['absLocalPath'])
         if not os.path.exists(dir_):
             os.makedirs(dir_)
 
         # Write raw html to local file system
-        with open(item['localPath'], 'wb') as file_:
+        with open(item['absLocalPath'], 'wb') as file_:
             file_.write(item['spiderResponse'].body)
             file_.close()
 
