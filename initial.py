@@ -73,10 +73,10 @@ class single_crawler(object):
 
         site = self.json.get_site_objects()[self.site_number]
 
-        if "ignoreRegex" in site:
-            ignoreRegex = '(' + site["ignoreRegex"] + ')|'
+        if "ignore_regex" in site:
+            ignore_regex = '(' + site["ignoreRegex"] + ')|'
         else:
-            ignoreRegex = ''
+            ignore_regex = ''
 
         self.helper = helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
@@ -98,7 +98,7 @@ class single_crawler(object):
         self.remove_jobdir_if_not_resume()
 
         self.loadCrawler(self.getCrawler(self.crawler), site["url"],
-                         ignoreRegex)
+                         ignore_regex)
 
         self.process.start()
 
@@ -120,7 +120,7 @@ class single_crawler(object):
         spider_loader = SpiderLoader(settings)
         return spider_loader.load(crawler)
 
-    def loadCrawler(self, crawler, url, ignoreRegex):
+    def loadCrawler(self, crawler, url, ignore_regex):
         """
         loads the given crawler with the given url
         """
@@ -130,7 +130,7 @@ class single_crawler(object):
             self.helper,
             url=url,
             config=self.cfg,
-            ignoreRegex=ignoreRegex)
+            ignore_regex=ignore_regex)
 
     def remove_jobdir_if_not_resume(self):
         """

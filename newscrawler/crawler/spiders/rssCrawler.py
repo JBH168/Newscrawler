@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-import scrapy
 import urllib2
-from urlparse import urlparse
-import re
+
+import scrapy
 
 
-class rssCrawler(scrapy.Spider):
-    name = "rssCrawler"
+class RssCrawler(scrapy.Spider):
+    name = "RssCrawler"
     ignored_allowed_domains = None
     start_urls = None
     original_url = None
@@ -14,7 +12,7 @@ class rssCrawler(scrapy.Spider):
     config = None
     helper = None
 
-    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
+    def __init__(self, helper, url, config, ignore_regex, *args, **kwargs):
         self.config = config
         self.helper = helper
 
@@ -24,7 +22,7 @@ class rssCrawler(scrapy.Spider):
                                         .get_allowed_domains(url)]
         self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
 
-        super(rssCrawler, self).__init__(*args, **kwargs)
+        super(RssCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         yield scrapy.Request(self.helper.url_extractor.get_rss_url(response),

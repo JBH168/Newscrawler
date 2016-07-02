@@ -2,17 +2,17 @@
     "base_urls" : [
         {
           "url": "http://der-postillon.com",
-          "crawler": "rssCrawler",
+          "crawler": "RssCrawler",
           "daemonize": 60
         },
         {
           "url": "http://zeit.de",
-          "crawler": "rssCrawler",
+          "crawler": "RssCrawler",
           "daemonize": 60
         },
         {
           "url": "http://sueddeutsche.de",
-          "crawler": "rssCrawler",
+          "crawler": "RssCrawler",
           "daemonize": 60
         }
     ]

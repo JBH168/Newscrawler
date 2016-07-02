@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 import scrapy
 
-from scrapy.spiders import Rule
-from scrapy.linkextractors import LinkExtractor
-from scrapy.selector import HtmlXPathSelector
 
-
-class recursiveCrawler(scrapy.Spider):
-    name = "recursiveCrawler"
+class RecursiveCrawler(scrapy.Spider):
+    name = "RecursiveCrawler"
     allowed_domains = None
     start_urls = None
     original_url = None
@@ -15,15 +10,15 @@ class recursiveCrawler(scrapy.Spider):
     config = None
     helper = None
 
-    ignoreRegex = None
-    ignoreFileExtesions = None
+    ignore_regex = None
+    ignore_file_extensions = None
 
-    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
+    def __init__(self, helper, url, config, ignore_regex, *args, **kwargs):
         self.config = config
         self.helper = helper
 
-        self.ignoreRegex = ignoreRegex
-        self.ignoreFileExtesions = self.config.section(
+        self.ignore_regex = ignore_regex
+        self.ignore_file_extensions = self.config.section(
             'Crawler')['ignorefileextensions']
 
         self.original_url = url
@@ -32,17 +27,13 @@ class recursiveCrawler(scrapy.Spider):
                                 .get_allowed_domains(url)]
         self.start_urls = [self.helper.url_extractor.get_start_urls(url)]
 
-        super(recursiveCrawler, self).__init__(*args, **kwargs)
-
-        rules = [Rule(LinkExtractor(allow=('')),
-                 callback='parse',
-                 follow=True)]
+        super(RecursiveCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
 
         for request in self.helper.parse_crawler \
-                .recursive_requests(response, self, self.ignoreRegex,
-                                    self.ignoreFileExtesions):
+                .recursive_requests(response, self, self.ignore_regex,
+                                    self.ignore_file_extensions):
             yield request
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(

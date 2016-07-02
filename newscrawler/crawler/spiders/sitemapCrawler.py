@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import logging
 import urllib2
 from urlparse import urlparse
 
+import logging
 
-class sitemapCrawler(scrapy.spiders.SitemapSpider):
-    name = "sitemapCrawler"
+import scrapy
+
+
+class SitemapCrawler(scrapy.spiders.SitemapSpider):
+    name = "SitemapCrawler"
     allowed_domains = None
     sitemap_urls = None
     original_url = None
@@ -15,7 +16,7 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
     helper = None
     log = None
 
-    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
+    def __init__(self, helper, url, config, ignore_regex, *args, **kwargs):
         self.config = config
         self.helper = helper
         self.original_url = url
@@ -23,13 +24,12 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
-        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(url,
-                             config.section('Crawler')
-                             ['sitemapallowsubdomains'])]
+        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(
+            url, config.section('Crawler')['sitemapallowsubdomains'])]
 
         self.log.debug(self.sitemap_urls)
 
-        super(sitemapCrawler, self).__init__(*args, **kwargs)
+        super(SitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(

@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-import scrapy
-import logging
 import urllib2
 from urlparse import urlparse
 
+import scrapy
 
-class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
-    name = "recursiveSitemapCrawler"
+
+class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
+    name = "RecursiveSitemapCrawler"
     allowed_domains = None
     sitemap_urls = None
     original_url = None
@@ -14,32 +13,31 @@ class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
     config = None
     helper = None
 
-    ignoreRegex = None
-    ignoreFileExtesions = None
+    ignore_regex = None
+    ignore_file_extensions = None
 
-    def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
+    def __init__(self, helper, url, config, ignore_regex, *args, **kwargs):
         self.config = config
         self.helper = helper
 
-        self.ignoreRegex = ignoreRegex
-        self.ignoreFileExtesions = self.config.section(
+        self.ignore_regex = ignore_regex
+        self.ignore_file_extensions = self.config.section(
             'Crawler')['ignorefileextensions']
 
         self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
-        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(url,
-                             config.section('Crawler')
-                             ['sitemapallowsubdomains'])]
+        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(
+            url, config.section('Crawler')['sitemapallowsubdomains'])]
 
-        super(recursiveSitemapCrawler, self).__init__(*args, **kwargs)
+        super(RecursiveSitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
 
         for request in self.helper.parse_crawler \
-                .recursive_requests(response, self, self.ignoreRegex,
-                                    self.ignoreFileExtesions):
+                .recursive_requests(response, self, self.ignore_regex,
+                                    self.ignore_file_extensions):
             yield request
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
