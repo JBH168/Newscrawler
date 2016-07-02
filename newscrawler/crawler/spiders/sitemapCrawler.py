@@ -35,6 +35,7 @@ class sitemapCrawler(scrapy.spiders.SitemapSpider):
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.allowed_domains[0], self.original_url)
 
+    # TODO: move; copy in recursiveSitemapCrawler
     @staticmethod
     def supports_site(url):
         """

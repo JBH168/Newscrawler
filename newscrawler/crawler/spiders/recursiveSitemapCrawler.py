@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import logging
+import urllib2
+from urlparse import urlparse
 
 
 class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
@@ -41,3 +44,23 @@ class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.allowed_domains[0], self.original_url)
+
+    # TODO: move; copy in sitemapCrawler.py
+    @staticmethod
+    def supports_site(url):
+        """
+        Sitemap-Crawler are supported by every site which have a
+        Sitemap set in the robots.txt
+        """
+
+        # Follow redirects
+        opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
+        redirect = opener.open(url).url
+
+        # Get robots.txt
+        parsed = urlparse(redirect)
+        robots = '{url.scheme}://{url.netloc}/robots.txt'.format(url=parsed)
+        response = urllib2.urlopen(robots)
+
+        # Check if "Sitemap" is set
+        return "Sitemap:" in response.read()
