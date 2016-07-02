@@ -53,5 +53,8 @@ class rssCrawler(scrapy.Spider):
         redirect = opener.open(url).url
         response = urllib2.urlopen(redirect).read()
 
-        # Check if "Sitemap" is set
-        return re.search(r'(<link[^>]*href[^>]*type ?= ?"application\/rss\+xml"|<link[^>]*type ?= ?"application\/rss\+xml"[^>]*href)', response) is not None
+        # Check if a standard rss feed exists
+        return bool(
+            response.xpath('//link[contains(@type, "application/rss+xml")]')
+            .xpath('@href').extract()
+            )
