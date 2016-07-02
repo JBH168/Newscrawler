@@ -9,7 +9,6 @@ import sys
 import shutil
 
 import logging
-import importlib
 import hashlib
 
 from scrapy.crawler import CrawlerProcess
@@ -18,6 +17,9 @@ from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
 
 from newscrawler.helper import helper
+
+from scrapy.settings import Settings
+from scrapy.spiderloader import SpiderLoader
 
 from scrapy.utils.log import configure_logging
 from ast import literal_eval
@@ -113,8 +115,10 @@ class single_crawler(object):
         self.__scrapy_options["JOBDIR"] = jobdir + hashed.hexdigest()
 
     def getCrawler(self, crawler):
-        return getattr(importlib.import_module(
-                       self.__crawer_module + "." + crawler), crawler)
+        settings = Settings()
+        settings.set('SPIDER_MODULES', [self.__crawer_module])
+        spider_loader = SpiderLoader(settings)
+        return spider_loader.load(crawler)
 
     def loadCrawler(self, crawler, url, ignoreRegex):
         """
