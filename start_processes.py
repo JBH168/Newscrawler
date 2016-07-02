@@ -44,6 +44,8 @@ class start_processes(object):
 
         self.shall_resume = self.has_arg('--resume')
 
+        self.set_stop_handler()
+
         self.thread_event = threading.Event()
 
         # Get & set CFG and JSON locally
@@ -70,6 +72,13 @@ class start_processes(object):
         self.daemon_list = self.DaemonList()
 
         self.__single_crawler = self.get_abs_file_path("./initial.py")
+
+        self.manage_crawlers()
+
+    def set_stop_handler(self):
+        signal.signal(signal.SIGTERM, self.graceful_stop)
+        signal.signal(signal.SIGABRT, self.graceful_stop)
+        signal.signal(signal.SIGINT, self.graceful_stop)
 
     def has_arg(self, string):
         return len([arg for arg in sys.argv if arg == string]) != 0
@@ -107,7 +116,6 @@ class start_processes(object):
             self.threads_daemonized.append(thread_daemonized)
             thread_daemonized.start()
 
-        # TODO: movabo - catch IOError
         while not self.shutdown:
             try:
                 time.sleep(10)
@@ -182,10 +190,16 @@ class start_processes(object):
         self.python_command = string
         return string
 
-    def graceful_stop(self):
+    def graceful_stop(self, signal_number=None, stack_frame=None):
         """
         This function will be called when a graceful-stop is initiated
         """
+        if signal_number is None:
+            self.log.info("Graceful stop called manually. Shutting down.")
+        else:
+            self.log.info("Graceful stop called by signal "
+                          "#" + str(signal_number) + ". Shutting down."
+                          "Stack Frame: " + str(stack_frame))
         self.shutdown = True
         self.crawler_list.stop()
         self.daemon_list.stop()
@@ -365,17 +379,5 @@ Arguments:
             self.graceful_stop = True
 
 
-# TODO: movabo - try to move into the start_processes class
-def graceful_stop(a, b):
-    if PROCESS is not None:
-        PROCESS.graceful_stop()
-
-
-signal.signal(signal.SIGTERM, graceful_stop)
-signal.signal(signal.SIGABRT, graceful_stop)
-signal.signal(signal.SIGINT, graceful_stop)
-
-
 if __name__ == "__main__":
-    PROCESS = start_processes()
-    PROCESS.manage_crawlers()
+    start_processes()
