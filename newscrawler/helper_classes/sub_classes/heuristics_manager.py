@@ -1,7 +1,7 @@
 import logging
 
 
-class heuristics_manager(object):
+class HeuristicsManager(object):
     """
     This class is for managing the heuristics of
     a heuristics file (../heuristics.py)
@@ -38,17 +38,17 @@ class heuristics_manager(object):
         heuristics = self.__get_enabled_heuristics(url)
 
         is_article = True
-        self.log.info("Checking site: %s" % response.url)
+        self.log.info("Checking site: %s", response.url)
         for heuristic, condition in heuristics.iteritems():
             heuristic_func = getattr(self, heuristic)
             result = heuristic_func(response, site)
             check = self.__evaluate_result(result, condition)
             is_article = check and is_article
             self.log.info("Checking heuristic (%s)"
-                          " result (%s) on condition (%s): %s" %
-                          (heuristic, result, condition, check))
+                          " result (%s) on condition (%s): %s",
+                          heuristic, result, condition, check)
 
-        self.log.info("Article accepted: %s" % is_article)
+        self.log.info("Article accepted: %s", is_article)
         return is_article
 
     def __evaluate_result(self, result, condition):
@@ -78,8 +78,8 @@ class heuristics_manager(object):
             if (condition.startswith("'") and condition.endswith("'")) or\
                (condition.startswith('"') and condition.endswith('"')):
                 if isinstance(result, basestring):
-                    self.log.debug("Condition %s recognized as string."
-                                   % condition)
+                    self.log.debug("Condition %s recognized as string.",
+                                   condition)
                     return result == condition[1:-1]
                 return self.__evaluation_error(
                     result, condition, "Result not string")
@@ -145,9 +145,9 @@ class heuristics_manager(object):
 
     def __evaluation_error(self, result, condition, throw):
         """Helper-method for easy error-logging"""
-        self.log.error("Result does not match condition, dropping item."
-                       " Result %s; Condition: %s; Throw: %s" %
-                       (result, condition, throw))
+        self.log.error("Result does not match condition, dropping item. "
+                       "Result %s; Condition: %s; Throw: %s",
+                       result, condition, throw)
         return False
 
     def __try_parse_number(self, string):
@@ -182,7 +182,7 @@ class heuristics_manager(object):
         self.__sites_heuristics[site["url"]] = heuristics
 
         self.log.debug(
-            "Enabled heuristics for %s: %s" % (site["url"], heuristics)
+            "Enabled heuristics for %s: %s", site["url"], heuristics
         )
 
         return heuristics

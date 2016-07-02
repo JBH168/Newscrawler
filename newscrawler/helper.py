@@ -3,13 +3,13 @@ This file's only purpose is to bundle all helper classes in ./helper_classes
 so they can be passed to other classes easily
 """
 
-from helper_classes.heuristics import heuristics
-from helper_classes.url_extractor import url_extractor
-from helper_classes.savepath_parser import savepath_parser
-from helper_classes.parse_crawler import parse_crawler
+from helper_classes.heuristics import Heuristics
+from helper_classes.url_extractor import UrlExtractor
+from helper_classes.savepath_parser import SavepathParser
+from helper_classes.parse_crawler import ParseCrawler
 
 
-class helper(object):
+class Helper(object):
     """
     This class contains helper classes from ./helper_classes
     This class and its helper-classes is passed to all crawlers
@@ -26,8 +26,8 @@ class helper(object):
             cfg_file_path,
             sites_object
     ):
-        self.heuristics = heuristics(cfg_heuristics, sites_object)
-        self.url_extractor = url_extractor()
-        self.savepath_parser = savepath_parser(cfg_savepath,
-                                               cfg_file_path, self)
-        self.parse_crawler = parse_crawler(self)
+        self.heuristics = Heuristics(cfg_heuristics, sites_object)
+        self.url_extractor = UrlExtractor()
+        self.savepath_parser = SavepathParser(cfg_savepath,
+                                              cfg_file_path, self)
+        self.parse_crawler = ParseCrawler(self)

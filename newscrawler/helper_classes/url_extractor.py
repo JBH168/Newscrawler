@@ -1,12 +1,11 @@
 """
 helper class for url extraction
 """
-
 import re
 import os
 
 
-class url_extractor(object):
+class UrlExtractor(object):
 
     """
     This class contains methods to extract parts of any given url
@@ -24,16 +23,16 @@ class url_extractor(object):
         returns domain.topleveldomain of url
         """
         return re.search(r'[^/.]+\.[^/.]+$',
-                         url_extractor.get_allowed_domains(url)).group(0)
+                         UrlExtractor.get_allowed_domains(url)).group(0)
 
     @staticmethod
     def get_subdomains(url):
         """
         returns domain.topleveldomain of url
         """
-        allowed_domains = url_extractor.get_allowed_domains(url)
+        allowed_domains = UrlExtractor.get_allowed_domains(url)
         return allowed_domains[:len(allowed_domains) - len(
-            url_extractor.get_allowed_domains_without_subdomains(url))]
+            UrlExtractor.get_allowed_domains_without_subdomains(url))]
 
     @staticmethod
     def get_sitemap_urls(url, allow_subdomains):
@@ -43,11 +42,11 @@ class url_extractor(object):
         allow_subdomains decides if the return contains the subdomains
         """
         if allow_subdomains:
-            return "http://" + url_extractor.get_allowed_domains(url) + \
+            return "http://" + UrlExtractor.get_allowed_domains(url) + \
                 "/robots.txt"
         else:
             return "http://" + \
-                    url_extractor.get_allowed_domains_without_subdomains(url) \
+                    UrlExtractor.get_allowed_domains_without_subdomains(url) \
                     + "/robots.txt"
 
     def get_rss_url(self, response):
@@ -57,15 +56,16 @@ class url_extractor(object):
         """
         # if this throws an IndexError, then the webpage with the given url
         # does not contain a link of type "application/rss+xml"
-        return response.xpath('//link[contains(@type, "application/rss+xml")]'
-                              ).xpath('@href').extract()[0]
+        return response.xpath(
+            '//link[contains(@type, "application/rss+xml")]').xpath(
+                '@href').extract()[0]
 
     @staticmethod
     def get_start_urls(url):
         """
         returns http://subdomains.domain.topleveldomain/ of url
         """
-        allowed_domains = url_extractor.get_allowed_domains(url)
+        allowed_domains = UrlExtractor.get_allowed_domains(url)
         return "http://" + allowed_domains + "/"
 
     @staticmethod
@@ -73,7 +73,7 @@ class url_extractor(object):
         """
         returns the directory string on the server
         """
-        domain = url_extractor.get_allowed_domains(url)
+        domain = UrlExtractor.get_allowed_domains(url)
 
         splitted_url = url.split('/')
 
@@ -99,7 +99,7 @@ class url_extractor(object):
         url_root_ext = os.path.splitext(url)
 
         # len(".markdown") = 9
-        if (len(url_root_ext[1]) < 10):
+        if len(url_root_ext[1]) < 10:
             return os.path.split(url_root_ext[0])[1]
         else:
             return os.path.split(url)[1]

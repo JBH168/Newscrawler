@@ -1,16 +1,15 @@
 """
 helper class for parsing the in the config defined savepath
 """
-
-
 import re
 import time
 import hashlib
 import os
+
 from url_extractor import url_extractor
 
 
-class savepath_parser(object):
+class SavepathParser(object):
     """
     This class contains methods to parse the given savepath
     """
@@ -67,7 +66,7 @@ class savepath_parser(object):
 
         # lambda is used for lazy evalutation
         savepath = re.sub(r'%time_download\(([^\)]+)\)',
-                          lambda match: savepath_parser.time_replacer(
+                          lambda match: SavepathParser.time_replacer(
                               match, timestamp), savepath)
         savepath = re.sub(r'%timestamp_download', str(timestamp), savepath)
 
@@ -76,7 +75,7 @@ class savepath_parser(object):
                           .get_allowed_domains_without_subdomains(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_domain\(([^\)]+)\)',
-                          lambda match: savepath_parser.append_md5_if_too_long(
+                          lambda match: SavepathParser.append_md5_if_too_long(
                               url_extractor
                               .get_allowed_domains_without_subdomains(url),
                               int(match.group(1))), savepath)
@@ -90,7 +89,7 @@ class savepath_parser(object):
                           lambda match: url_extractor.get_allowed_domains(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_full_domain\(([^\)]+)\)',
-                          lambda match: savepath_parser.append_md5_if_too_long(
+                          lambda match: SavepathParser.append_md5_if_too_long(
                               url_extractor.get_allowed_domains(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_full_domain\(([^\)]+)\)',
@@ -102,7 +101,7 @@ class savepath_parser(object):
                           lambda match: url_extractor.get_subdomains(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_subdomains\(([^\)]+)\)',
-                          lambda match: savepath_parser.append_md5_if_too_long(
+                          lambda match: SavepathParser.append_md5_if_too_long(
                               url_extractor.get_subdomains(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_subdomains\(([^\)]+)\)',
@@ -115,7 +114,7 @@ class savepath_parser(object):
                           .get_url_directory_string(url)[:int(match.group(1))],
                           savepath)
         savepath = re.sub(r'%appendmd5_url_directory_string\(([^\)]+)\)',
-                          lambda match: savepath_parser.append_md5_if_too_long(
+                          lambda match: SavepathParser.append_md5_if_too_long(
                               url_extractor.get_url_directory_string(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_url_directory_string\(([^\)]+)\)',
@@ -136,16 +135,16 @@ class savepath_parser(object):
 
         savepath = re.sub(r'%max_url_file_name',
                           lambda match: url_extractor.get_url_file_name(url)[
-                              :savepath_parser.get_max_url_file_name_length(
+                              :SavepathParser.get_max_url_file_name_length(
                                   savepath, url)], savepath)
         savepath = re.sub(r'%appendmd5_max_url_file_name',
-                          lambda match: savepath_parser.append_md5_if_too_long(
+                          lambda match: SavepathParser.append_md5_if_too_long(
                               url_extractor.get_url_file_name(url),
-                              savepath_parser.get_max_url_file_name_length(
+                              SavepathParser.get_max_url_file_name_length(
                                   savepath, url)), savepath)
 
         # ensure the savepath doesn't contain any invalid characters
-        return savepath_parser.remove_not_allowed_chars(savepath)
+        return SavepathParser.remove_not_allowed_chars(savepath)
 
     @staticmethod
     def remove_not_allowed_chars(savepath):
@@ -167,9 +166,9 @@ class savepath_parser(object):
         if os.path.isabs(savepath):
             return os.path.abspath(savepath)
         else:
-            return os.path.abspath(os.path.join(os.path.dirname
-                                                (cfg_file_path),
-                                                (savepath)))
+            return os.path.abspath(
+                os.path.join(os.path.dirname(cfg_file_path), (savepath))
+                )
 
     def get_abs_path(self, savepath):
         """
@@ -204,7 +203,8 @@ class savepath_parser(object):
         savepath_copy = savepath
         size_without_max_url_file_name = len(
             savepath_copy.replace('%max_url_file_name', '')
-                         .replace('%appendmd5_max_url_file_name', ''))
+            .replace('%appendmd5_max_url_file_name', '')
+            )
 
         # Windows: max file path length is 260 characters including
         # NULL (string end)

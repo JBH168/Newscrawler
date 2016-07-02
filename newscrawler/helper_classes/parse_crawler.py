@@ -1,14 +1,14 @@
 """
 This is a helper class for the crawler's parse methods
 """
-import scrapy
-from newscrawler.crawler.items import NewscrawlerItem
-
 import time
 import re
 
+import scrapy
+from newscrawler.crawler.items import NewscrawlerItem
 
-class parse_crawler(object):
+
+class ParseCrawler(object):
     """
     helper class
     """
@@ -20,7 +20,7 @@ class parse_crawler(object):
     def pass_to_pipeline_if_article(
             self,
             response,
-            sourceDomain,
+            source_domain,
             original_url,
             rss_title=None
     ):
@@ -33,7 +33,7 @@ class parse_crawler(object):
                 .get_savepath(response.url)
             article['modifiedDate'] = timestamp
             article['downloadDate'] = timestamp
-            article['sourceDomain'] = sourceDomain.encode("utf-8")
+            article['sourceDomain'] = source_domain.encode("utf-8")
             article['url'] = response.url
             article['title'] = response.selector.xpath('//title/text()') \
                 .extract_first().encode("utf-8")
@@ -48,14 +48,14 @@ class parse_crawler(object):
             return article
 
     @staticmethod
-    def recursive_requests(response, spider, ignoreRegex='',
-                           ignoreFileExtensions='pdf'):
+    def recursive_requests(response, spider, ignore_regex='',
+                           ignore_file_extensions='pdf'):
         # Recursivly crawl all URLs on the current page
         # that do not point to irrelevant file types
-        # or contain any of the given ignoreRegex regexes
+        # or contain any of the given ignore_regex regexes
         return [scrapy.Request(response.urljoin(href), callback=spider.parse)
                 for href in response.css("a::attr('href')").extract()
-                if re.match(r'.*\.' + ignoreFileExtensions + r'$',
+                if re.match(r'.*\.' + ignore_file_extensions + r'$',
                             response.urljoin(href), re.IGNORECASE) is None and
-                len(re.match(ignoreRegex,
+                len(re.match(ignore_regex,
                              response.urljoin(href)).group(0)) == 0]
