@@ -5,10 +5,12 @@ import sys
 import os
 import time
 import logging
+from newscrawler.helper_classes.savepath_parser import savepath_parser
 from newscrawler.config import JsonConfig
 from newscrawler.config import CrawlerConfig
 from scrapy.utils.log import configure_logging
 import threading
+import shutil
 
 
 class start_processes(object):
@@ -17,7 +19,6 @@ class start_processes(object):
     crawlers = []
     cfg = None
     log = None
-    helper = None
     cfg_file_path = None
     shall_resume = False
     threads = []
@@ -52,12 +53,15 @@ class start_processes(object):
         self.cfg.setup(self.cfg_file_path)
 
         if self.has_arg('--reset-db'):
-            self.cleanup_db()
+            self.reset_db()
+            sys.exit(0)
         elif self.has_arg('--reset-files'):
-            self.cleanup_files()
+            self.reset_files()
+            sys.exit(0)
         elif self.has_arg('--reset'):
-            self.cleanup_db()
-            self.cleanup_files()
+            self.reset_db()
+            self.reset_files()
+            sys.exit(0)
 
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json_file_path = self.get_abs_file_path(
@@ -192,12 +196,15 @@ class start_processes(object):
         """
         This function will be called when a graceful-stop is initiated
         """
+        stop_msg = "Hard" if self.shutdown else "Graceful"
         if signal_number is None:
-            self.log.info("Graceful stop called manually. Shutting down.")
+            self.log.info("{0} stop called manually. "
+                          "Shutting down.".format(stop_msg))
         else:
-            self.log.info("Graceful stop called by signal "
-                          "#" + str(signal_number) + ". Shutting down."
-                          "Stack Frame: " + str(stack_frame))
+            self.log.info("{0} stop called by signal #{1}. Shutting down."
+                          "Stack Frame: {2}".format(stop_msg,
+                                                    signal_number,
+                                                    stack_frame))
         self.shutdown = True
         self.crawler_list.stop()
         self.daemon_list.stop()
@@ -285,11 +292,55 @@ Arguments:
 
         return abs_file_path
 
-    def cleanup_db(self):
-        pass  # TODO: implement
+    def reset_db(self):
+        confirm = self.has_arg("--noconfirm")
+        confirm_by_arg = confirm
 
-    def cleanup_files(self):
-        pass  # TODO: implement
+        text = """Cleanup db: This will truncate all tables and reset the whole database.
+Do you really want to do this? Write 'yes' to confirm: {yes}"""\
+            .format(yes='yes' if confirm else '')
+        if confirm:
+            print(text)
+        else:
+            confirm = 'yes' in raw_input(text).lower()
+        if not confirm:
+            print("Did not type yes. Thus aborting.")
+            return
+        print("Resetting database...")
+
+        # TODO: implement database reset
+
+        if not confirm_by_arg:
+            print("Little hint: If you want to skip this confirm-dialogue, "
+                  "type --noconfirm after the command.")
+        pass
+
+    def reset_files(self):
+        confirm = self.has_arg("--noconfirm")
+        confirm_by_arg = confirm
+        path = savepath_parser.get_abs_path_static(
+            self.cfg.section('Crawler')["savepath"],
+            self.cfg_file_path
+        )
+        path = savepath_parser.get_base_path(path)
+        text = """Cleanup files: This will recursively delete all files in {path}.
+Do you really want to do this? Write 'yes' to confirm: {yes}"""\
+            .format(path=path, yes='yes' if confirm else '')
+        if confirm:
+            print(text)
+        else:
+            confirm = 'yes' in raw_input(text).lower()
+        if not confirm:
+            print("Did not type yes. Thus aborting.")
+            return
+        print("Removing: {0}".format(path))
+        try:
+            shutil.rmtree(path)
+        except OSError, err:
+            print err
+        if not confirm_by_arg:
+            print("Little hint: If you want to skip this confirm-dialogue, "
+                  "type --noconfirm after the command.")
 
     class CrawlerList(object):
         lock = None

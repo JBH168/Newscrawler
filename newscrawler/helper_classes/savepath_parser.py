@@ -158,7 +158,8 @@ class savepath_parser(object):
                                                 split_savepath[1])
         return split_savepath[0] + savepath_without_invalid_chars
 
-    def get_abs_path(self, savepath):
+    @staticmethod
+    def get_abs_path_static(savepath, cfg_file_path):
         """
         returns an absolute version of savepath
         relative paths are relative to the config file
@@ -167,8 +168,31 @@ class savepath_parser(object):
             return os.path.abspath(savepath)
         else:
             return os.path.abspath(os.path.join(os.path.dirname
-                                                (self.cfg_file_path),
+                                                (cfg_file_path),
                                                 (savepath)))
+
+    def get_abs_path(self, savepath):
+        """
+        returns an absolute version of savepath
+        relative paths are relative to the config file
+        """
+        return self.get_abs_path_static(savepath, self.cfg_file_path)
+
+    @staticmethod
+    def get_base_path(path):
+        """
+        Returns the path until the first %
+        So
+        /this/is/a/pa%th would become /this/is/a/
+
+        :param path: String, the path to get the base from
+        """
+        if "%" not in path:
+            return path
+        path = os.path.split(path)[0]
+        while "%" in path:
+            path = os.path.split(path)[0]
+        return path + "/"
 
     @staticmethod
     def get_max_url_file_name_length(savepath, url):
