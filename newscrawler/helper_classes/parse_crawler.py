@@ -42,7 +42,7 @@ class ParseCrawler(object):
             if rss_title is None:
                 article['rss_title'] = 'NULL'
             else:
-                article['rss_title'] = rss_title
+                article['rss_title'] = rss_title.encode("utf-8")
             article['ancestor'] = 'NULL'
             article['descendant'] = 'NULL'
             article['version'] = '1'
