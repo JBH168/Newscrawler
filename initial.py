@@ -8,24 +8,25 @@ import os
 import sys
 import shutil
 
-import logging
 import hashlib
+from ast import literal_eval
+
+import logging
 
 from scrapy.crawler import CrawlerProcess
+
+from scrapy.settings import Settings
+from scrapy.spiderloader import SpiderLoader
+
+from scrapy.utils.log import configure_logging
 
 from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
 
 from newscrawler.helper import Helper
 
-from scrapy.settings import Settings
-from scrapy.spiderloader import SpiderLoader
 
-from scrapy.utils.log import configure_logging
-from ast import literal_eval
-
-
-class single_crawler(object):
+class SingleCrawler(object):
     """
     This class is called when this script is executed
 
@@ -67,7 +68,6 @@ class single_crawler(object):
         self.log.info("Config initalized - Further initialisation.")
 
         # load the URL-input-json-file
-        urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
         self.json.setup(self.json_file_path)
 
@@ -97,8 +97,8 @@ class single_crawler(object):
         # if not stated otherwise in the arguments passed to this script
         self.remove_jobdir_if_not_resume()
 
-        self.loadCrawler(self.getCrawler(self.crawler), site["url"],
-                         ignore_regex)
+        self.load_crawler(self.get_crawler(self.crawler), site["url"],
+                          ignore_regex)
 
         self.process.start()
 
@@ -114,13 +114,13 @@ class single_crawler(object):
 
         self.__scrapy_options["JOBDIR"] = jobdir + hashed.hexdigest()
 
-    def getCrawler(self, crawler):
+    def get_crawler(self, crawler):
         settings = Settings()
         settings.set('SPIDER_MODULES', [self.__crawer_module])
         spider_loader = SpiderLoader(settings)
         return spider_loader.load(crawler)
 
-    def loadCrawler(self, crawler, url, ignore_regex):
+    def load_crawler(self, crawler, url, ignore_regex):
         """
         loads the given crawler with the given url
         """
@@ -148,8 +148,8 @@ class single_crawler(object):
                           " initial.py or this crawler was daemonized.")
 
 if __name__ == "__main__":
-    single_crawler(cfg_file_path=sys.argv[1],
-                   json_file_path=sys.argv[2],
-                   site_index=sys.argv[3],
-                   shall_resume=sys.argv[4],
-                   daemonize=sys.argv[5])
+    SingleCrawler(cfg_file_path=sys.argv[1],
+                  json_file_path=sys.argv[2],
+                  site_index=sys.argv[3],
+                  shall_resume=sys.argv[4],
+                  daemonize=sys.argv[5])
