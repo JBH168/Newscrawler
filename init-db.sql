@@ -1,14 +1,12 @@
 -- Re-initalize DB-schema for the ccolon web-crawler
--- Updated: 03.07.2016 14:00
+-- Updated: 03.07.2016 15:20
 
 --
--- Table structure for table `ArchiveVersion`
+-- Table structure for table `ArchiveVersions`
 --
 
-DROP TABLE IF EXISTS `ArchiveVersion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ArchiveVersion` (
+DROP TABLE IF EXISTS `ArchiveVersions`;
+CREATE TABLE `ArchiveVersions` (
   `id` int(10) unsigned NOT NULL,
   `local_path` varchar(255) NOT NULL,
   `modified_date` datetime NOT NULL,
@@ -24,13 +22,11 @@ CREATE TABLE `ArchiveVersion` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `CurrentVersion`
+-- Table structure for table `CurrentVersions`
 --
 
-DROP TABLE IF EXISTS `CurrentVersion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `CurrentVersion` (
+DROP TABLE IF EXISTS `CurrentVersions`;
+CREATE TABLE `CurrentVersions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `local_path` varchar(255) NOT NULL,
   `modified_date` datetime NOT NULL,

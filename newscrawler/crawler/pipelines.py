@@ -55,7 +55,7 @@ class RSSCrawlCompare(object):
         self.cursor = self.conn.cursor()
 
         # Defined DB query to retrieve the last version of the article
-        self.compareVersions = ("SELECT * FROM CurrentVersion WHERE url=%s")
+        self.compareVersions = ("SELECT * FROM CurrentVersions WHERE url=%s")
 
     def process_item(self, item, spider):
         if spider.name == 'rssCrawler':
@@ -107,9 +107,9 @@ class DatabaseStorage(object):
         self.cursor = self.conn.cursor()
 
         # initialize necessary DB queries for this pipe
-        self.compareVersions = ("SELECT * FROM CurrentVersion WHERE url=%s")
+        self.compareVersions = ("SELECT * FROM CurrentVersions WHERE url=%s")
 
-        self.insertCurrent = ("INSERT INTO CurrentVersion(local_path,\
+        self.insertCurrent = ("INSERT INTO CurrentVersions(local_path,\
                               modified_date,download_date,source_domain,url,\
                               html_title, ancestor, descendant, version,\
                               rss_title) VALUES (%(local_path)s,\
@@ -118,7 +118,7 @@ class DatabaseStorage(object):
                               %(ancestor)s, %(descendant)s, %(version)s,\
                               %(rss_title)s)")
 
-        self.insertArchive = ("INSERT INTO ArchiveVersion(id, local_path,\
+        self.insertArchive = ("INSERT INTO ArchiveVersions(id, local_path,\
                               modified_date,download_date,source_domain,url,\
                               html_title, ancestor, descendant, version,\
                               rss_title) VALUES (%(dbID)s, %(local_path)s,\
@@ -127,7 +127,7 @@ class DatabaseStorage(object):
                               %(ancestor)s, %(descendant)s, %(version)s,\
                               %(rss_title)s)")
 
-        self.deleteFromCurrent = ("DELETE FROM CurrentVersion WHERE url = %s")
+        self.deleteFromCurrent = ("DELETE FROM CurrentVersions WHERE url = %s")
 
     # Store item data in DB.
     # First determine if a version of the article already exists,
@@ -215,7 +215,7 @@ class DatabaseStorage(object):
         if oldVersion is not None:
             # Update the old version's descendant attribute
             try:
-                self.cursor.execute("UPDATE ArchiveVersion SET descendant=%s WHERE\
+                self.cursor.execute("UPDATE ArchiveVersions SET descendant=%s WHERE\
                                     id=%s", (item['dbID'], oldVersion[0],))
             except mysql.connector.Error as err:
                 print("Something went wrong in version update: {}"
@@ -236,13 +236,11 @@ class DatabaseStorage(object):
 
 class LocalStorage(object):
 
-
-
     # Save the html and filename to the local storage folder
     def process_item(self, item, spider):
 
         # Add a log entry confirming the save
-        logging.info("Saving to %s" % item['absLocalPath'])
+        logging.info("Saving to {}".format(item['absLocalPath']))
 
         # Ensure path exists
         dir_ = os.path.dirname(item['absLocalPath'])
