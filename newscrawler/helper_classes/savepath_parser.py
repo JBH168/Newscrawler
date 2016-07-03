@@ -63,7 +63,6 @@ class SavepathParser(object):
         timestamp = int(time.time())
 
         savepath = self.cfg_savepath
-        print savepath
 
         # lambda is used for lazy evalutation
         savepath = re.sub(r'%time_download\(([^\)]+)\)',
