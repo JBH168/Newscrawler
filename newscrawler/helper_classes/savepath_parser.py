@@ -182,7 +182,7 @@ class savepath_parser(object):
         """
         Returns the path until the first %
         So
-        /this/is/a/pa%th would become /this/is/a/
+        /this/is/a/pa%th would become /this/is/a
 
         :param path: String, the path to get the base from
         """
@@ -191,7 +191,7 @@ class savepath_parser(object):
         path = os.path.split(path)[0]
         while "%" in path:
             path = os.path.split(path)[0]
-        return path + "/"
+        return path
 
     @staticmethod
     def get_max_url_file_name_length(savepath):

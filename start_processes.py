@@ -263,10 +263,13 @@ Arguments:
     cfg_file_path : absolute or relative file path to the config file
 
     arg ...       : arguments passed to this script
+
                 --resume        Resume crawling from last crawl
+
                 --reset-db      Reset the database
                 --reset-files   Reset the local savepath
                 --reset         Reset the databse and the local savepath
+                --noconfirm     Skip confirm dialogs
             """
         print _help % (self.get_python_command(), __file__)
 
@@ -304,57 +307,62 @@ Arguments:
         self.cursor = self.conn.cursor()
 
         confirm = self.has_arg("--noconfirm")
-        confirm_by_arg = confirm
 
-        text = """Cleanup db: This will truncate all tables and reset the whole database.
-Do you really want to do this? Write 'yes' to confirm: {yes}"""\
-            .format(yes='yes' if confirm else '')
-        if confirm:
-            print(text)
-        else:
-            confirm = 'yes' in raw_input(text).lower()
+        print """
+Cleanup db:
+    This will truncate all tables and reset the whole database.
+"""
+
         if not confirm:
-            print("Did not type yes. Thus aborting.")
+            confirm = 'yes' in raw_input(
+                """
+    Do you really want to do this? Write 'yes' to confirm: {yes}""".format(
+                    yes='yes' if confirm else '')
+                )
+
+        if not confirm:
+            self.log.warn("Did not type yes. Thus aborting.")
             return
-        print("Resetting database...")
+
+        self.log.info("Resetting database...")
 
         try:
             self.cursor.execute("TRUNCATE TABLE CurrentVersions")
             self.cursor.execute("TRUNCATE TABLE ArchiveVersions")
-        except mysql.connector.Error as err:
-            print("Database reset error: {}".format(err))
-
-        if not confirm_by_arg:
-            print("Little hint: If you want to skip this confirm-dialogue, "
-                  "type --noconfirm after the command.")
-        pass
+        except mysql.connector.Error as error:
+            self.log.error("Database reset error: %s", error)
 
     def reset_files(self):
         confirm = self.has_arg("--noconfirm")
-        confirm_by_arg = confirm
+
         path = savepath_parser.get_abs_path_static(
             self.cfg.section('Crawler')["savepath"],
             self.cfg_file_path
         )
         path = savepath_parser.get_base_path(path)
-        text = """Cleanup files: This will recursively delete all files in {path}.
-Do you really want to do this? Write 'yes' to confirm: {yes}"""\
-            .format(path=path, yes='yes' if confirm else '')
-        if confirm:
-            print(text)
-        else:
-            confirm = 'yes' in raw_input(text).lower()
+
+        print """
+Cleanup files:
+    This will delete {path} and all its contents.
+"""
+
         if not confirm:
-            print("Did not type yes. Thus aborting.")
+            confirm = 'yes' in raw_input(
+                """
+    Do you really want to do this? Write 'yes' to confirm: {yes}""".format(
+                    path=path, yes='yes' if confirm else '')
+                )
+
+        if not confirm:
+            self.log.warn("Did not type yes. Thus aborting.")
             return
-        print("Removing: {0}".format(path))
+
+        self.log.info("Removing: %s", path)
+
         try:
             shutil.rmtree(path)
-        except OSError, err:
-            print err
-        if not confirm_by_arg:
-            print("Little hint: If you want to skip this confirm-dialogue, "
-                  "type --noconfirm after the command.")
+        except OSError as error:
+            self.log.error(error)
 
     class CrawlerList(object):
         lock = None
