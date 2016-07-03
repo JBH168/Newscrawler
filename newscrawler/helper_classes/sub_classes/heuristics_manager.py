@@ -153,13 +153,12 @@ class HeuristicsManager(object):
     def __try_parse_number(self, string):
         """Try to parse a string to a number, else return False."""
         try:
-            number = int(string)
+            return int(string)
         except ValueError:
             try:
-                number = float(string)
+                return float(string)
             except ValueError:
                 return False
-        return number
 
     def __get_enabled_heuristics(self, url):
         """

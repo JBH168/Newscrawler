@@ -47,11 +47,12 @@ class Heuristics(HeuristicsManager):
         # is contained in a string.
         site_regex = r"href=[\"'][^\/]*\/\/(?:[^\"']*\.|)%s[\"'\/]" % domain
         for i in range(1, 7):
-            for h in response.xpath('//h%s' % i).extract():
+            for headline in response.xpath('//h%s' % i).extract():
                 # h_all += 1
                 h_all += 1
-                if "href" in h and (not check_self or
-                                    re.search(site_regex, h) is not None):
+                if "href" in headline and (
+                        not check_self or re.search(site_regex, headline)
+                        is not None):
                     h_linked += 1
 
         self.log.info("Linked headlines test: headlines = %s, linked = %s",

@@ -248,7 +248,7 @@ class LocalStorage(object):
     def process_item(self, item, spider):
 
         # Add a log entry confirming the save
-        logging.info("Saving to {}".format(item['absLocalPath']))
+        logging.info("Saving to %s", item['absLocalPath'])
 
         # Ensure path exists
         dir_ = os.path.dirname(item['absLocalPath'])
