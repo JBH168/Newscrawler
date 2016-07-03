@@ -12,18 +12,18 @@ class NewscrawlerItem(scrapy.Item):
     # ID of the article in the DB
     dbID = scrapy.Field()
     # Path of the file on the local filesystem
-    localPath = scrapy.Field()
+    local_path = scrapy.Field()
     # absolute path of the file on the local filesystem
     absLocalPath = scrapy.Field()
     # When the article was last modified
-    modifiedDate = scrapy.Field()
+    modified_date = scrapy.Field()
     # When the article was downloaded
-    downloadDate = scrapy.Field()
+    download_date = scrapy.Field()
     # Root domain from which the article came
-    sourceDomain = scrapy.Field()
+    source_domain = scrapy.Field()
     url = scrapy.Field()
     # Title of the article
-    title = scrapy.Field()
+    html_title = scrapy.Field()
     # Older version of the article in the DB, if exists
     ancestor = scrapy.Field()
     # Newer version of the article in the DB, if exists

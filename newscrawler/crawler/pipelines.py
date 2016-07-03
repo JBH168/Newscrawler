@@ -72,7 +72,7 @@ class RSSCrawlCompare(object):
             if oldVersion is not None:
                 # Compare the two download dates. index 3 of oldVersion
                 #   corresponds to the downloadDate attribute in the DB
-                if (datetime.datetime.strptime(item['downloadDate'],
+                if (datetime.datetime.strptime(item['download_date'],
                     "%y-%m-%d %H:%M:%S") - oldVersion[3])\
                     < datetime.timedelta(hours=self.deltaTime):
                     raise DropItem("Article in DB too recent. Not saving.")
@@ -106,24 +106,26 @@ class DatabaseStorage(object):
                                             buffered=True)
         self.cursor = self.conn.cursor()
 
-        # Init all necessary DB queries for this pipeline
+        # initialize necessary DB queries for this pipe
         self.compareVersions = ("SELECT * FROM CurrentVersion WHERE url=%s")
 
-        self.insertCurrent = ("INSERT INTO CurrentVersion(localPath,\
-                              modifiedDate,downloadDate,sourceDomain,url,\
-                              title, ancestor, descendant, version, rssTitle)\
-                              VALUES (%(localPath)s, %(modifiedDate)s,\
-                              %(downloadDate)s, %(sourceDomain)s, %(url)s,\
-                              %(title)s, %(ancestor)s, %(descendant)s,\
-                              %(version)s, %(rss_title)s)")
+        self.insertCurrent = ("INSERT INTO CurrentVersion(local_path,\
+                              modified_date,download_date,source_domain,url,\
+                              html_title, ancestor, descendant, version,\
+                              rss_title) VALUES (%(local_path)s,\
+                              %(modified_date)s, %(download_date)s,\
+                              %(source_domain)s, %(url)s, %(html_title)s,\
+                              %(ancestor)s, %(descendant)s, %(version)s,\
+                              %(rss_title)s)")
 
-        self.insertArchive = ("INSERT INTO ArchiveVersion(localPath,\
-                              modifiedDate,downloadDate,sourceDomain,url,\
-                              title, ancestor, descendant, version, rssTitle)\
-                              VALUES (%(localPath)s, %(modifiedDate)s,\
-                              %(downloadDate)s, %(sourceDomain)s, %(url)s,\
-                              %(title)s, %(ancestor)s, %(descendant)s,\
-                              %(version)s, %(rss_title)s)")
+        self.insertArchive = ("INSERT INTO ArchiveVersion(id, local_path,\
+                              modified_date,download_date,source_domain,url,\
+                              html_title, ancestor, descendant, version,\
+                              rss_title) VALUES (%(dbID)s, %(local_path)s,\
+                              %(modified_date)s, %(download_date)s,\
+                              %(source_domain)s, %(url)s, %(html_title)s,\
+                              %(ancestor)s, %(descendant)s, %(version)s,\
+                              %(rss_title)s)")
 
         self.deleteFromCurrent = ("DELETE FROM CurrentVersion WHERE url = %s")
 
@@ -149,12 +151,12 @@ class DatabaseStorage(object):
         if oldVersion is not None:
             oldVersionList = {
                 'dbID': oldVersion[0],
-                'localPath': oldVersion[1],
-                'modifiedDate': oldVersion[2],
-                'downloadDate': oldVersion[3],
-                'sourceDomain': oldVersion[4],
+                'local_path': oldVersion[1],
+                'modified_date': oldVersion[2],
+                'download_date': oldVersion[3],
+                'source_domain': oldVersion[4],
                 'url': oldVersion[5],
-                'title': oldVersion[6],
+                'html_title': oldVersion[6],
                 'ancestor': oldVersion[7],
                 'descendant': oldVersion[8],
                 'version': oldVersion[9],
@@ -182,16 +184,16 @@ class DatabaseStorage(object):
                 print("Something went wrong in archive: {}".format(err))
 
         currentVersionList = {
-            'localPath': item['localPath'],
-            'modifiedDate': item['modifiedDate'],
-            'downloadDate': item['downloadDate'],
-            'sourceDomain': item['sourceDomain'],
+            'local_path': item['local_path'],
+            'modified_date': item['modified_date'],
+            'download_date': item['download_date'],
+            'source_domain': item['source_domain'],
             'url': item['url'],
-            'title': item['title'],
+            'html_title': item['html_title'],
             'ancestor': item['ancestor'],
             'descendant': item['descendant'],
             'version': item['version'],
-            'rss_title': item['rss_title'],}
+            'rss_title': item['rss_title'], }
 
         # Add the new version of the article to
         # the CurrentVersion table
@@ -204,14 +206,13 @@ class DatabaseStorage(object):
 
         logging.info("Article inserted into the database.")
 
-        if oldVersion is not None:
-            # Retrieve the auto_id from the new article for the old version's
-            #   descendant attribute
-            try:
-                item['dbID'] = self.cursor.lastrowid
-            except mysql.connector.Error as err:
-                print("Something went wrong in id query: {}".format(err))
+        # populate item field with db ID number
+        try:
+            item['dbID'] = self.cursor.lastrowid
+        except mysql.connector.Error as err:
+            print("Something went wrong in id query: {}".format(err))
 
+        if oldVersion is not None:
             # Update the old version's descendant attribute
             try:
                 self.cursor.execute("UPDATE ArchiveVersion SET descendant=%s WHERE\

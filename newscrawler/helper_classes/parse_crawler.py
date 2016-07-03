@@ -29,15 +29,15 @@ class parse_crawler(object):
                                       time.gmtime(time.time()))
 
             article = NewscrawlerItem()
-            article['localPath'] = self.helper.savepath_parser \
+            article['local_path'] = self.helper.savepath_parser \
                 .get_savepath(response.url)
             article['absLocalPath'] = self.helper.savepath_parser.get_abs_path(
-                article['localPath'])
-            article['modifiedDate'] = timestamp
-            article['downloadDate'] = timestamp
-            article['sourceDomain'] = sourceDomain.encode("utf-8")
+                article['local_path'])
+            article['modified_date'] = timestamp
+            article['download_date'] = timestamp
+            article['source_domain'] = sourceDomain.encode("utf-8")
             article['url'] = response.url
-            article['title'] = response.selector.xpath('//title/text()') \
+            article['html_title'] = response.selector.xpath('//title/text()') \
                 .extract_first().encode("utf-8")
             if rss_title is None:
                 article['rss_title'] = 'NULL'

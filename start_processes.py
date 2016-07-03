@@ -9,6 +9,7 @@ from newscrawler.helper_classes.savepath_parser import savepath_parser
 from newscrawler.config import JsonConfig
 from newscrawler.config import CrawlerConfig
 from scrapy.utils.log import configure_logging
+import mysql.connector
 import threading
 import shutil
 
@@ -51,6 +52,7 @@ class start_processes(object):
         self.cfg = CrawlerConfig.get_instance()
         self.cfg_file_path = self.get_config_file_path()
         self.cfg.setup(self.cfg_file_path)
+        self.db = self.cfg.section("Database")
 
         if self.has_arg('--reset-db'):
             self.reset_db()
@@ -293,6 +295,14 @@ Arguments:
         return abs_file_path
 
     def reset_db(self):
+        # initialize DB connection
+        self.conn = mysql.connector.connect(host=self.db["host"],
+                                            port=self.db["port"],
+                                            db=self.db["db"],
+                                            user=self.db["username"],
+                                            passwd=self.db["password"])
+        self.cursor = self.conn.cursor()
+
         confirm = self.has_arg("--noconfirm")
         confirm_by_arg = confirm
 
@@ -308,7 +318,11 @@ Do you really want to do this? Write 'yes' to confirm: {yes}"""\
             return
         print("Resetting database...")
 
-        # TODO: implement database reset
+        try:
+            self.cursor.execute("TRUNCATE TABLE CurrentVersion")
+            self.cursor.execute("TRUNCATE TABLE ArchiveVersion")
+        except mysql.connector.Error as err:
+            print("Database reset error: {}".format(err))
 
         if not confirm_by_arg:
             print("Little hint: If you want to skip this confirm-dialogue, "
