@@ -1,6 +1,9 @@
 import urllib2
 from urlparse import urlparse
 
+import re
+import logging
+
 import scrapy
 
 
@@ -10,6 +13,8 @@ class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
     sitemap_urls = None
     original_url = None
 
+    log = None
+
     config = None
     helper = None
 
@@ -17,6 +22,8 @@ class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
     ignore_file_extensions = None
 
     def __init__(self, helper, url, config, ignore_regex, *args, **kwargs):
+        self.log = logging.getLogger(__name__)
+
         self.config = config
         self.helper = helper
 
@@ -34,6 +41,11 @@ class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
         super(RecursiveSitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
+        if not re.match('text/html', response.headers.get('Content-Type')):
+            self.log.warn("Dropped: %s's content is not of type "
+                          "text/html but %s", response.url,
+                          response.headers.get('Content-Type'))
+            return
 
         for request in self.helper.parse_crawler \
                 .recursive_requests(response, self, self.ignore_regex,

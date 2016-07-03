@@ -1,6 +1,7 @@
 import urllib2
 from urlparse import urlparse
 
+import re
 import logging
 
 import scrapy
@@ -12,15 +13,17 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     sitemap_urls = None
     original_url = None
 
-    config = None
-    helper = None
     log = None
 
+    config = None
+    helper = None
+
     def __init__(self, helper, url, config, ignore_regex, *args, **kwargs):
+        self.log = logging.getLogger(__name__)
+
         self.config = config
         self.helper = helper
         self.original_url = url
-        self.log = logging.getLogger(__name__)
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domains(url)]
@@ -32,6 +35,12 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         super(SitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
+        if not re.match('text/html', response.headers.get('Content-Type')):
+            self.log.warn("Dropped: %s's content is not of type "
+                          "text/html but %s", response.url,
+                          response.headers.get('Content-Type'))
+            return
+
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.allowed_domains[0], self.original_url)
 
