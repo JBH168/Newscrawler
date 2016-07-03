@@ -344,13 +344,14 @@ Cleanup db:
         print """
 Cleanup files:
     This will delete {path} and all its contents.
-"""
+""" \
+        .format(path=path)
 
         if not confirm:
             confirm = 'yes' in raw_input(
                 """
     Do you really want to do this? Write 'yes' to confirm: {yes}""".format(
-                    path=path, yes='yes' if confirm else '')
+                    yes='yes' if confirm else '')
                 )
 
         if not confirm:
