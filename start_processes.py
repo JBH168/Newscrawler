@@ -75,7 +75,7 @@ class start_processes(object):
         self.crawler_list = self.CrawlerList()
         self.daemon_list = self.DaemonList()
 
-        self.__single_crawler = self.get_abs_file_path("./initial.py")
+        self.__single_crawler = self.get_abs_file_path("./single_crawler.py")
 
         self.manage_crawlers()
 
@@ -231,8 +231,8 @@ class start_processes(object):
                     input_config_file_path)[1] == ".cfg":
                 return input_config_file_path
             else:
-                self.log.error("First argument passed to initial.py is not"
-                               " the config file. Falling back to"
+                self.log.error("First argument passed to start_processes.py "
+                               "is not the config file. Falling back to"
                                " ./newscrawler.cfg.")
 
         # Default
