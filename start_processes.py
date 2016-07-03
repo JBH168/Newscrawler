@@ -342,13 +342,12 @@ Cleanup db:
                 )
             )
 
-        text = """Cleanup files: This will recursively delete all files in {path}.
-Do you really want to do this? Write 'yes' to confirm: {yes}"""\
-            .format(path=path, yes='yes' if confirm else '')
-        if confirm:
-            print(text)
-        else:
-            confirm = 'yes' in raw_input(text).lower()
+        print """
+Cleanup files:
+    This will delete {path} and all its contents.
+""" \
+        .format(path=path)
+
         if not confirm:
             confirm = 'yes' in raw_input(
                 """
