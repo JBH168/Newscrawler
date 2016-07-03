@@ -1,20 +1,25 @@
-from subprocess import Popen
-import subprocess
-import signal
-import sys
 import os
+import sys
 import time
+import shutil
+
+import subprocess
+from subprocess import Popen
+import threading
+import signal
+
 import logging
+
+import mysql.connector
+
+from scrapy.utils.log import configure_logging
+
 from newscrawler.helper_classes.savepath_parser import SavepathParser
 from newscrawler.config import JsonConfig
 from newscrawler.config import CrawlerConfig
-from scrapy.utils.log import configure_logging
-import mysql.connector
-import threading
-import shutil
 
 
-class start_processes(object):
+class StartProcesses(object):
 
     python_command = None
     crawlers = []
@@ -29,6 +34,7 @@ class start_processes(object):
     json_file_path = None
     shutdown = False
     thread_event = None
+    database = None
 
     __single_crawler = False
 
@@ -52,7 +58,7 @@ class start_processes(object):
         self.cfg = CrawlerConfig.get_instance()
         self.cfg_file_path = self.get_config_file_path()
         self.cfg.setup(self.cfg_file_path)
-        self.db = self.cfg.section("Database")
+        self.database = self.cfg.section("Database")
 
         if self.has_arg('--reset-db'):
             self.reset_db()
@@ -84,7 +90,8 @@ class start_processes(object):
         signal.signal(signal.SIGABRT, self.graceful_stop)
         signal.signal(signal.SIGINT, self.graceful_stop)
 
-    def has_arg(self, string):
+    @staticmethod
+    def has_arg(string):
         return len([arg for arg in sys.argv if arg == string]) != 0
 
     def manage_crawlers(self):
@@ -94,15 +101,15 @@ class start_processes(object):
         sites = self.json.get_site_objects()
         for index, site in enumerate(sites):
             if "daemonize" in site:
-                self.daemon_list.addDaemon(index, site["daemonize"])
+                self.daemon_list.add_daemon(index, site["daemonize"])
             else:
-                self.crawler_list.appendItem(index)
+                self.crawler_list.append_item(index)
 
         num_threads = self.cfg.section('Crawler')['numberofparallelcrawlers']
         if self.crawler_list.len() < num_threads:
             num_threads = self.crawler_list.len()
 
-        for i in range(num_threads):
+        for _ in range(num_threads):
             thread = threading.Thread(target=self.manage_crawler,
                                       args=(),
                                       kwargs={})
@@ -113,7 +120,7 @@ class start_processes(object):
         if self.daemon_list.len() < num_daemons:
             num_daemons = self.daemon_list.len()
 
-        for i in range(num_daemons):
+        for _ in range(num_daemons):
             thread_daemonized = threading.Thread(target=self.manage_daemon,
                                                  args=(),
                                                  kwargs={})
@@ -132,7 +139,7 @@ class start_processes(object):
     def manage_crawler(self):
         index = True
         while not self.shutdown and index is not None:
-            index = self.crawler_list.getNextItem()
+            index = self.crawler_list.get_next_item()
             if index is None:
                 break
             self.start_crawler(index)
@@ -140,11 +147,11 @@ class start_processes(object):
     def manage_daemon(self):
         while not self.shutdown:
             # next scheduled daemon, tuple (time, index)
-            item = self.daemon_list.getNextItem()
+            item = self.daemon_list.get_next_item()
             cur = time.time()
-            pajamaTime = item[0] - cur
-            if pajamaTime > 0:
-                self.thread_event.wait(pajamaTime)
+            pajama_time = item[0] - cur
+            if pajama_time > 0:
+                self.thread_event.wait(pajama_time)
             if not self.shutdown:
                 self.start_crawler(item[1])
 
@@ -163,7 +170,7 @@ class start_processes(object):
                         "%s" % self.shall_resume,
                         "%s" % daemonize]
 
-        self.log.debug("Calling Process: %s" % call_process)
+        self.log.debug("Calling Process: %s", call_process)
 
         crawler = Popen(call_process,
                         stderr=None,
@@ -200,13 +207,12 @@ class start_processes(object):
         """
         stop_msg = "Hard" if self.shutdown else "Graceful"
         if signal_number is None:
-            self.log.info("{0} stop called manually. "
-                          "Shutting down.".format(stop_msg))
+            self.log.info("%s stop called manually. "
+                          "Shutting down.", stop_msg)
         else:
-            self.log.info("{0} stop called by signal #{1}. Shutting down."
-                          "Stack Frame: {2}".format(stop_msg,
-                                                    signal_number,
-                                                    stack_frame))
+            self.log.info("%s stop called by signal #%s. Shutting down."
+                          "Stack Frame: %s",
+                          stop_msg, signal_number, stack_frame)
         self.shutdown = True
         self.crawler_list.stop()
         self.daemon_list.stop()
@@ -299,11 +305,11 @@ Arguments:
 
     def reset_db(self):
         # initialize DB connection
-        self.conn = mysql.connector.connect(host=self.db["host"],
-                                            port=self.db["port"],
-                                            db=self.db["db"],
-                                            user=self.db["username"],
-                                            passwd=self.db["password"])
+        self.conn = mysql.connector.connect(host=self.database["host"],
+                                            port=self.database["port"],
+                                            db=self.database["db"],
+                                            user=self.database["username"],
+                                            passwd=self.database["password"])
         self.cursor = self.conn.cursor()
 
         confirm = self.has_arg("--noconfirm")
@@ -316,9 +322,8 @@ Cleanup db:
         if not confirm:
             confirm = 'yes' in raw_input(
                 """
-    Do you really want to do this? Write 'yes' to confirm: {yes}""".format(
-                    yes='yes' if confirm else '')
-                )
+    Do you really want to do this? Write 'yes' to confirm: {yes}"""
+                .format(yes='yes' if confirm else ''))
 
         if not confirm:
             self.log.warn("Did not type yes. Thus aborting.")
@@ -351,9 +356,8 @@ Cleanup files:
         if not confirm:
             confirm = 'yes' in raw_input(
                 """
-    Do you really want to do this? Write 'yes' to confirm: {yes}""".format(
-                    yes='yes' if confirm else '')
-                )
+    Do you really want to do this? Write 'yes' to confirm: {yes}"""
+                .format(yes='yes' if confirm else ''))
 
         if not confirm:
             self.log.warn("Did not type yes. Thus aborting.")
@@ -374,7 +378,7 @@ Cleanup files:
         def __init__(self):
             self.lock = threading.Lock()
 
-        def appendItem(self, item):
+        def append_item(self, item):
             self.lock.acquire()
             try:
                 self.crawler_list.append(item)
@@ -384,7 +388,7 @@ Cleanup files:
         def len(self):
             return len(self.crawler_list)
 
-        def getNextItem(self):
+        def get_next_item(self):
             if self.graceful_stop:
                 return None
             self.lock.acquire()
@@ -395,7 +399,8 @@ Cleanup files:
                     item = None
             finally:
                 self.lock.release()
-                return item
+
+            return item
 
         def stop(self):
             self.graceful_stop = True
@@ -412,22 +417,22 @@ Cleanup files:
             self.queue = []
             self.lock = threading.Lock()
 
-        def sortQueue(self):
+        def sort_queue(self):
             self.queue = sorted(self.queue, key=lambda t: t[0])
             self.queue_times = sorted(self.queue_times)
 
         def len(self):
             return len(self.daemons)
 
-        def addDaemon(self, index, _time):
+        def add_daemon(self, index, _time):
             self.lock.acquire()
             try:
                 self.daemons[index] = _time
-                self.addExecution(time.time(), index)
+                self.add_execution(time.time(), index)
             finally:
                 self.lock.release()
 
-        def addExecution(self, _time, index):
+        def add_execution(self, _time, index):
             _time = int(_time)
             while _time in self.queue_times:
                 _time += 1
@@ -435,22 +440,24 @@ Cleanup files:
             self.queue_times.append(_time)
             self.queue.append((_time, index))
 
-        def getNextItem(self):
+        def get_next_item(self):
             if self.graceful_stop:
                 return None
             self.lock.acquire()
-            self.sortQueue()
+            self.sort_queue()
             try:
                 item = self.queue.pop(0)
                 self.queue_times.pop(0)
-                self.addExecution(time.time() + self.daemons[item[1]], item[1])
+                self.add_execution(time.time() + self.daemons[item[1]],
+                                   item[1])
             finally:
                 self.lock.release()
-                return item
+
+            return item
 
         def stop(self):
             self.graceful_stop = True
 
 
 if __name__ == "__main__":
-    start_processes()
+    StartProcesses()
