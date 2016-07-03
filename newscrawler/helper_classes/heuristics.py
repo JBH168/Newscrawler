@@ -3,7 +3,7 @@ helper class for testing heuristics
 """
 import re
 from sub_classes.heuristics_manager import HeuristicsManager
-from url_extractor import url_extractor
+from url_extractor import UrlExtractor
 
 
 class Heuristics(HeuristicsManager):
@@ -40,7 +40,7 @@ class Heuristics(HeuristicsManager):
         """
         h_all = 0
         h_linked = 0
-        domain = url_extractor.get_allowed_domains_without_subdomains(
+        domain = UrlExtractor.get_allowed_domains_without_subdomains(
             site_object["url"])
 
         # This regex checks, if a link containing site_domain as domain
@@ -79,5 +79,5 @@ class Heuristics(HeuristicsManager):
         """
         ensures the given url isn't from a subdomain
         """
-        return url_extractor.get_allowed_domains(response.url) \
+        return UrlExtractor.get_allowed_domains(response.url) \
             == site_object["url"]

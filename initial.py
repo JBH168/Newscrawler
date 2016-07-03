@@ -16,7 +16,7 @@ from scrapy.crawler import CrawlerProcess
 from newscrawler.config import CrawlerConfig
 from newscrawler.config import JsonConfig
 
-from newscrawler.helper import helper
+from newscrawler.helper import Helper
 
 from scrapy.settings import Settings
 from scrapy.spiderloader import SpiderLoader
@@ -78,7 +78,7 @@ class single_crawler(object):
         else:
             ignore_regex = ''
 
-        self.helper = helper(self.cfg.section('Heuristics'),
+        self.helper = Helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
                              self.cfg_file_path,
                              self.json.get_site_objects())

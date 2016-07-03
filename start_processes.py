@@ -5,7 +5,7 @@ import sys
 import os
 import time
 import logging
-from newscrawler.helper_classes.savepath_parser import savepath_parser
+from newscrawler.helper_classes.savepath_parser import SavepathParser
 from newscrawler.config import JsonConfig
 from newscrawler.config import CrawlerConfig
 from scrapy.utils.log import configure_logging
@@ -318,11 +318,11 @@ Do you really want to do this? Write 'yes' to confirm: {yes}"""\
     def reset_files(self):
         confirm = self.has_arg("--noconfirm")
         confirm_by_arg = confirm
-        path = savepath_parser.get_abs_path_static(
+        path = SavepathParser.get_abs_path_static(
             self.cfg.section('Crawler')["savepath"],
             self.cfg_file_path
         )
-        path = savepath_parser.get_base_path(path)
+        path = SavepathParser.get_base_path(path)
         text = """Cleanup files: This will recursively delete all files in {path}.
 Do you really want to do this? Write 'yes' to confirm: {yes}"""\
             .format(path=path, yes='yes' if confirm else '')

@@ -6,7 +6,7 @@ import time
 import hashlib
 import os
 
-from url_extractor import url_extractor
+from url_extractor import UrlExtractor
 
 
 class SavepathParser(object):
@@ -63,6 +63,7 @@ class SavepathParser(object):
         timestamp = int(time.time())
 
         savepath = self.cfg_savepath
+        print savepath
 
         # lambda is used for lazy evalutation
         savepath = re.sub(r'%time_download\(([^\)]+)\)',
@@ -71,74 +72,75 @@ class SavepathParser(object):
         savepath = re.sub(r'%timestamp_download', str(timestamp), savepath)
 
         savepath = re.sub(r'%domain\(([^\)]+)\)',
-                          lambda match: url_extractor
+                          lambda match: UrlExtractor
                           .get_allowed_domains_without_subdomains(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_domain\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              url_extractor
+                              UrlExtractor
                               .get_allowed_domains_without_subdomains(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_domain\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              url_extractor
+                              UrlExtractor
                               .get_allowed_domains_without_subdomains(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%full_domain\(([^\)]+)\)',
-                          lambda match: url_extractor.get_allowed_domains(url)[
+                          lambda match: UrlExtractor.get_allowed_domains(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_full_domain\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              url_extractor.get_allowed_domains(url),
+                              UrlExtractor.get_allowed_domains(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_full_domain\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              url_extractor.get_allowed_domains(url))
+                              UrlExtractor.get_allowed_domains(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%subdomains\(([^\)]+)\)',
-                          lambda match: url_extractor.get_subdomains(url)[
+                          lambda match: UrlExtractor.get_subdomains(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_subdomains\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              url_extractor.get_subdomains(url),
+                              UrlExtractor.get_subdomains(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_subdomains\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              url_extractor.get_subdomains(url))
+                              UrlExtractor.get_subdomains(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%url_directory_string\(([^\)]+)\)',
-                          lambda match: url_extractor
+                          lambda match: UrlExtractor
                           .get_url_directory_string(url)[:int(match.group(1))],
                           savepath)
         savepath = re.sub(r'%appendmd5_url_directory_string\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              url_extractor.get_url_directory_string(url),
+                              UrlExtractor.get_url_directory_string(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_url_directory_string\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              url_extractor.get_url_directory_string(url))
+                              UrlExtractor.get_url_directory_string(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%url_file_name\(([^\)]+)\)',
-                          lambda match: url_extractor
+                          lambda match: UrlExtractor
                           .get_url_file_name(url)[:int(match.group(1))],
                           savepath)
         savepath = re.sub(r'%md5_url_file_name\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              url_extractor.get_url_file_name(url))
+                              UrlExtractor.get_url_file_name(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         abs_savepath = self.get_abs_path(savepath)
+
         savepath = re.sub(r'%max_url_file_name',
-                          lambda match: url_extractor.get_url_file_name(url)[
+                          lambda match: UrlExtractor.get_url_file_name(url)[
                               :SavepathParser.get_max_url_file_name_length(
                                   abs_savepath)], savepath)
         savepath = re.sub(r'%appendmd5_max_url_file_name',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              url_extractor.get_url_file_name(url),
+                              UrlExtractor.get_url_file_name(url),
                               SavepathParser.get_max_url_file_name_length(
                                   abs_savepath)), savepath)
 
@@ -166,7 +168,7 @@ class SavepathParser(object):
             return os.path.abspath(savepath)
         else:
             return os.path.abspath(
-                os.path.join(os.path.dirname(cfg_file_path))
+                os.path.join(os.path.dirname(cfg_file_path), (savepath))
                 )
 
     def get_abs_path(self, savepath):
