@@ -42,6 +42,8 @@ class HTMLCodeHandling(object):
 class RSSCrawlCompare(object):
 
     def __init__(self):
+        self.log = logging.getLogger(__name__)
+
         self.cfg = CrawlerConfig.get_instance()
         self.delta_time = self.cfg.section("Crawler")["deltatime"]
         self.database = self.cfg.section("Database")
@@ -64,8 +66,8 @@ class RSSCrawlCompare(object):
             # Search the CurrentVersion table for a version of the article
             try:
                 self.cursor.execute(self.compare_versions, (item['url'],))
-            except mysql.connector.Error as err:
-                print "Something went wrong in rss query: {}".format(err)
+            except mysql.connector.Error as error:
+                self.log.error("Something went wrong in rss query: %s", error)
 
             # Save the result of the query. Must be done before the add,
             #   otherwise the result will be overwritten in the buffer
@@ -97,6 +99,8 @@ class DatabaseStorage(object):
 
     # init database connection
     def __init__(self):
+        self.log = logging.getLogger(__name__)
+
         self.cfg = CrawlerConfig.get_instance()
         self.database = self.cfg.section("Database")
         # Establish DB connection
@@ -142,8 +146,8 @@ class DatabaseStorage(object):
         # Search the CurrentVersion table for a version of the article
         try:
             self.cursor.execute(self.compare_versions, (item['url'],))
-        except mysql.connector.Error as err:
-            print "Something went wrong in query: {}".format(err)
+        except mysql.connector.Error as error:
+            self.log.error("Something went wrong in query: %s", error)
 
         # Save the result of the query. Must be done before the add,
         #   otherwise the result will be overwritten in the buffer
@@ -179,15 +183,15 @@ class DatabaseStorage(object):
                     self.delete_from_current, (old_version[5], )
                     )
                 self.conn.commit()
-            except mysql.connector.Error as err:
-                print "Something went wrong in delete: {}".format(err)
+            except mysql.connector.Error as error:
+                self.log.error("Something went wrong in delete: %s", error)
 
             # Add the old version to the ArchiveVersion table
             try:
                 self.cursor.execute(self.insert_archive, old_version_list)
                 self.conn.commit()
-            except mysql.connector.Error as err:
-                print "Something went wrong in archive: {}".format(err)
+            except mysql.connector.Error as error:
+                self.log.error("Something went wrong in archive: %s", error)
 
         current_version_list = {
             'local_path': item['local_path'],
@@ -207,16 +211,16 @@ class DatabaseStorage(object):
             self.cursor.execute(self.insert_current, current_version_list)
             self.conn.commit()
 
-        except mysql.connector.Error as err:
-            print "Something went wrong in commit: {}".format(err)
+        except mysql.connector.Error as error:
+            self.log.error("Something went wrong in commit: %s", error)
 
-        logging.info("Article inserted into the database.")
+        self.log.info("Article inserted into the database.")
 
         # populate item field with db ID number
         try:
             item['dbID'] = self.cursor.lastrowid
-        except mysql.connector.Error as err:
-            print "Something went wrong in id query: {}".format(err)
+        except mysql.connector.Error as error:
+            self.log.error("Something went wrong in id query: %s", error)
 
         if old_version is not None:
             # Update the old version's descendant attribute
@@ -225,9 +229,9 @@ class DatabaseStorage(object):
                     "UPDATE ArchiveVersions SET descendant=%s WHERE\
                     id=%s", (item['dbID'], old_version[0],)
                     )
-            except mysql.connector.Error as err:
-                print("Something went wrong in version update: {}"
-                      .format(err))
+            except mysql.connector.Error as error:
+                self.log.error("Something went wrong in version update: %s",
+                               error)
 
         return item
 
@@ -244,11 +248,13 @@ class DatabaseStorage(object):
 
 class LocalStorage(object):
 
+    def __init__(self):
+        self.log = logging.getLogger(__name__)
+
     # Save the html and filename to the local storage folder
     def process_item(self, item, spider):
-
         # Add a log entry confirming the save
-        logging.info("Saving to %s", item['absLocalPath'])
+        self.log.info("Saving to %s", item['absLocalPath'])
 
         # Ensure path exists
         dir_ = os.path.dirname(item['absLocalPath'])
