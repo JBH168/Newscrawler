@@ -250,6 +250,5 @@ class LocalStorage(object):
         # Write raw html to local file system
         with open(item['absLocalPath'], 'wb') as file_:
             file_.write(item['spiderResponse'].body)
-            file_.close()
 
         return item
