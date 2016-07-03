@@ -319,8 +319,8 @@ Do you really want to do this? Write 'yes' to confirm: {yes}"""\
         print("Resetting database...")
 
         try:
-            self.cursor.execute("TRUNCATE TABLE CurrentVersion")
-            self.cursor.execute("TRUNCATE TABLE ArchiveVersion")
+            self.cursor.execute("TRUNCATE TABLE CurrentVersions")
+            self.cursor.execute("TRUNCATE TABLE ArchiveVersions")
         except mysql.connector.Error as err:
             print("Database reset error: {}".format(err))
 
