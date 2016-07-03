@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import re
+import logging
+
 import scrapy
 
 from scrapy.spiders import Rule
@@ -12,6 +15,8 @@ class recursiveCrawler(scrapy.Spider):
     start_urls = None
     original_url = None
 
+    log = None
+
     config = None
     helper = None
 
@@ -19,6 +24,8 @@ class recursiveCrawler(scrapy.Spider):
     ignoreFileExtesions = None
 
     def __init__(self, helper, url, config, ignoreRegex, *args, **kwargs):
+        self.log = logging.getLogger(__name__)
+
         self.config = config
         self.helper = helper
 
@@ -39,6 +46,11 @@ class recursiveCrawler(scrapy.Spider):
                  follow=True)]
 
     def parse(self, response):
+        if not re.match('text/html', response.headers.get('Content-Type')):
+            self.log.warn("Dropped: %s's content is not of type "
+                          "text/html but %s", response.url,
+                          response.headers.get('Content-Type'))
+            return
 
         for request in self.helper.parse_crawler \
                 .recursive_requests(response, self, self.ignoreRegex,
