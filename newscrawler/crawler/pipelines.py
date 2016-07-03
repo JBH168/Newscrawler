@@ -154,17 +154,17 @@ class DatabaseStorage(object):
         #   CurrentVersion table
         if old_version is not None:
             old_version_list = {
-                'dbID': oldVersion[0],
-                'local_path': oldVersion[1],
-                'modified_date': oldVersion[2],
-                'download_date': oldVersion[3],
-                'source_domain': oldVersion[4],
-                'url': oldVersion[5],
-                'html_title': oldVersion[6],
-                'ancestor': oldVersion[7],
-                'descendant': oldVersion[8],
-                'version': oldVersion[9],
-                'rss_title': oldVersion[10],}
+                'dbID': old_version[0],
+                'local_path': old_version[1],
+                'modified_date': old_version[2],
+                'download_date': old_version[3],
+                'source_domain': old_version[4],
+                'url': old_version[5],
+                'html_title': old_version[6],
+                'ancestor': old_version[7],
+                'descendant': old_version[8],
+                'version': old_version[9],
+                'rss_title': old_version[10], }
 
             # Update the version number of the new article
             item['version'] = (old_version[9] + 1)
