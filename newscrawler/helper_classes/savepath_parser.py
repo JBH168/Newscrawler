@@ -1,10 +1,10 @@
 """
 helper class for parsing the in the config defined savepath
 """
-import re
-import time
-import hashlib
 import os
+import time
+import re
+import hashlib
 
 from url_extractor import UrlExtractor
 
@@ -188,9 +188,12 @@ class SavepathParser(object):
         """
         if "%" not in path:
             return path
+
         path = os.path.split(path)[0]
+
         while "%" in path:
             path = os.path.split(path)[0]
+
         return path
 
     @staticmethod
@@ -200,6 +203,7 @@ class SavepathParser(object):
         """
         number_occurrences = savepath.count('%max_url_file_name')
         number_occurrences += savepath.count('%appendmd5_max_url_file_name')
+
         savepath_copy = savepath
         size_without_max_url_file_name = len(
             savepath_copy.replace('%max_url_file_name', '')
