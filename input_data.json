@@ -1,19 +1,12 @@
 {
     "base_urls" : [
-        {
-          "url": "http://der-postillon.com",
-          "crawler": "RssCrawler",
-          "daemonize": 60
-        },
-        {
-          "url": "http://zeit.de",
-          "crawler": "RssCrawler",
-          "daemonize": 60
-        },
-        {
-          "url": "http://sueddeutsche.de",
-          "crawler": "RssCrawler",
-          "daemonize": 60
-        }
+        { "url": "http://www.sueddeutsche.de/" },
+        { "url": "http://www.bild.de/" },
+        { "url": "http://www.spiegel.de/" },
+        { "url": "https://www.washingtonpost.com/" },
+        { "url": "https://www.rt.com/" },
+        { "url": "http://www.aljazeera.net/" },
+        { "url": "https://www.theguardian.com/" },
+        { "url": "http://vm.ru/" }
     ]
 }
