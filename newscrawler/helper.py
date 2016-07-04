@@ -26,7 +26,7 @@ class Helper(object):
             cfg_file_path,
             sites_object
     ):
-        self.heuristics = Heuristics(cfg_heuristics, sites_object)
+        self.heuristics = Heuristics(cfg_heuristics, sites_object, self)
         self.url_extractor = UrlExtractor()
         self.savepath_parser = SavepathParser(cfg_savepath,
                                               cfg_file_path, self)

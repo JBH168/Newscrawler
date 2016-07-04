@@ -12,6 +12,7 @@ import mysql.connector
 from scrapy.exceptions import DropItem
 from newscrawler.config import CrawlerConfig
 
+
 ################
 #
 # Handles reponses to HTML responses other than 200 (accept).
@@ -30,6 +31,12 @@ class HTMLCodeHandling(object):
             raise DropItem("%s: Non-200 response" % item['url'])
         else:
             return item
+
+
+class Tesing(object):
+
+    def process_item(self, item, spider):
+        pass
 
 ################
 #

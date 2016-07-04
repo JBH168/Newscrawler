@@ -1,4 +1,5 @@
 import logging
+import os
 
 
 class HeuristicsManager(object):
@@ -14,15 +15,18 @@ class HeuristicsManager(object):
     """
     cfg_heuristics = None
     log = None
+    helper = None
 
     __sites_object = {}
     __sites_heuristics = {}
+    __test_file = None
 
-    def __init__(self, cfg_heuristics, sites_object):
+    def __init__(self, cfg_heuristics, sites_object, helper):
         self.cfg_heuristics = cfg_heuristics
         for site in sites_object:
             self.__sites_object[site["url"]] = site
         self.log = logging.getLogger(__name__)
+        self.helper = helper
 
     def is_article(self, response, url):
         """
@@ -35,21 +39,71 @@ class HeuristicsManager(object):
         :return bool, true if the heuristics match the site as an article
         """
         site = self.__sites_object[url]
+
+        test_file = None
+        if self.cfg_heuristics["testing"]:
+            test_file = self.__get_test_file(url)
+            test_result = []
+
         heuristics = self.__get_enabled_heuristics(url)
 
         is_article = True
         self.log.info("Checking site: %s", response.url)
+
         for heuristic, condition in heuristics.iteritems():
             heuristic_func = getattr(self, heuristic)
             result = heuristic_func(response, site)
+            if self.cfg_heuristics["testing"]:
+                if isinstance(result, basestring):
+                    test_result.append('"' + result.replace('"', '\\"') + '"')
+                elif isinstance(result, bool):
+                    r = "1" if result else "0"
+                    test_result.append(r)
+                else:
+                    test_result.append(str(result))
             check = self.__evaluate_result(result, condition)
             is_article = check and is_article
             self.log.info("Checking heuristic (%s)"
                           " result (%s) on condition (%s): %s",
                           heuristic, result, condition, check)
 
+        if self.cfg_heuristics["testing"]:
+            test_result.append('"' + response.url + '"')
+            with open(test_file, "a") as f:
+                f.write(",".join(test_result) + "\r\n")
         self.log.info("Article accepted: %s", is_article)
+        if self.cfg_heuristics["testing"]:
+            self.log.info("Article not passed to pipeline due to testing.")
+            return False
         return is_article
+
+    def __get_test_file(self, url):
+        if self.__test_file is not None:
+            return self.__test_file
+
+        replaced_site = self.helper.url_extractor.get_allowed_domains(url)
+        self.__test_file = \
+            self.cfg_heuristics["testing_file"].replace("%site", replaced_site)
+
+        self.log.debug("Creating test-file %s",
+                       self.__test_file)
+        if os.path.isfile(self.__test_file):
+            os.remove(self.__test_file)
+
+        heuristics = self.__get_enabled_heuristics(url)
+
+        heuristics_string = ''
+        for heuristic, condition in heuristics.iteritems():
+            heuristics_string += '"' + heuristic + '",'
+
+        if not os.path.exists(os.path.dirname(self.__test_file)):
+            try:
+                os.makedirs(os.path.dirname(self.__test_file))
+            except OSError as exc:
+                self.log.error(exc)
+        with open(self.__test_file, "w") as f:
+            f.write(heuristics_string + '"article"\r\n')
+        return self.__test_file
 
     def __evaluate_result(self, result, condition):
         """
@@ -172,7 +226,8 @@ class HeuristicsManager(object):
 
         site = self.__sites_object[url]
         heuristics = dict(self.cfg_heuristics["enabled_heuristics"])
-        if "overwrite_heuristics" in site:
+
+        if not self.cfg_heuristics["testing"] and "overwrite_heuristics" in site:
             for heuristic, value in site["overwrite_heuristics"].iteritems():
                 if value is False and heuristic in heuristics:
                     del heuristics[heuristic]
