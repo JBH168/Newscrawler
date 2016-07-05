@@ -5,9 +5,6 @@ import re
 from sub_classes.heuristics_manager import heuristics_manager
 from url_extractor import url_extractor
 
-# TODO: crawler_contains_article_alikes
-# TODO: meta_contains_article
-
 
 class heuristics(heuristics_manager):
     """
@@ -27,6 +24,14 @@ class heuristics(heuristics_manager):
         """
         return self.crawler_class.name in self.only_article_alike_crawlers
 
+    def meta_contains_article_keyword(self, response, site_object):
+        contains_meta = response.xpath('//meta') \
+                                .re('(= ?["\'][^"\']*article[^"\']*["\'])')
+
+        if not contains_meta:
+            return False
+        return True
+
     @staticmethod
     def og_type(response, site_object):
         """
@@ -36,8 +41,8 @@ class heuristics(heuristics_manager):
         :return bool: true if the tag is contained.
         """
         og_type_article = response.xpath('//meta') \
-            .re('(property="og:type".*content="article")|'
-                '(content="article".*property="og:type")')
+            .re('(property=["\']og:type["\'].*content=["\']article["\'])|'
+                '(content=["\']article["\'].*property=["\']og:type["\'])')
         if not og_type_article:
             return False
 
