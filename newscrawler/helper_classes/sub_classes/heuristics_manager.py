@@ -14,13 +14,15 @@ class heuristics_manager(object):
     """
     cfg_heuristics = None
     log = None
+    crawler_class = None
 
     __sites_object = {}
     __sites_heuristics = {}
     __heuristics_condition = None
     __condition_allowed = ["(", ")", "and", "or", "not"]
 
-    def __init__(self, cfg_heuristics, sites_object):
+    def __init__(self, cfg_heuristics, sites_object, crawler_class):
+        self.crawler_class = crawler_class
         self.cfg_heuristics = cfg_heuristics
         for site in sites_object:
             self.__sites_object[site["url"]] = site

@@ -1,9 +1,12 @@
 {
     "base_urls" : [
         {
-          "url": "http://sueddeutsche.de",
-          "crawler": "sitemapCrawler",
-          "pass_heuristics_condition": "og_type"
+          "url": "http://www.zeit.de/",
+          "crawler": "recursiveCrawler",
+          "pass_heuristics_condition": "crawler_contains_only_article_alikes",
+          "overwrite_heuristics": {
+            "crawler_contains_only_article_alikes": true
+          }
         }
     ]
 }

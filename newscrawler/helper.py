@@ -24,9 +24,10 @@ class helper(object):
             cfg_heuristics,
             cfg_savepath,
             cfg_file_path,
-            sites_object
+            sites_object,
+            crawler_class
     ):
-        self.heuristics = heuristics(cfg_heuristics, sites_object)
+        self.heuristics = heuristics(cfg_heuristics, sites_object, crawler_class)
         self.url_extractor = url_extractor()
         self.savepath_parser = savepath_parser(cfg_savepath,
                                                cfg_file_path, self)

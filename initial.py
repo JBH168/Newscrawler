@@ -80,18 +80,23 @@ class single_crawler(object):
         else:
             ignoreRegex = ''
 
-        self.helper = helper(self.cfg.section('Heuristics'),
-                             self.cfg.section('Crawler')['savepath'],
-                             self.cfg_file_path,
-                             self.json.get_site_objects())
 
-        self.__scrapy_options = self.cfg.get_scrapy_options()
-
-        # lets start dat crawler
+        # Get the default crawler. The crawler can be overwritten by fallbacks.
         if "crawler" in site:
             self.crawler = site["crawler"]
         else:
             self.crawler = self.cfg.section("Crawler")["default"]
+        # Get the real crawler-class (already "fallen back")
+        crawler_class = self.getCrawler(self.crawler, site["url"])
+
+
+        self.helper = helper(self.cfg.section('Heuristics'),
+                             self.cfg.section('Crawler')['savepath'],
+                             self.cfg_file_path,
+                             self.json.get_site_objects(),
+                             crawler_class)
+
+        self.__scrapy_options = self.cfg.get_scrapy_options()
 
         self.update_job_dir(site)
 
@@ -99,7 +104,7 @@ class single_crawler(object):
         # if not stated otherwise in the arguments passed to this script
         self.remove_jobdir_if_not_resume()
 
-        self.loadCrawler(self.getCrawler(self.crawler, site["url"]),
+        self.loadCrawler(crawler_class,
                          site["url"],
                          ignoreRegex)
 

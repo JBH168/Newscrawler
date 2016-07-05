@@ -8,10 +8,24 @@ from url_extractor import url_extractor
 # TODO: crawler_contains_article_alikes
 # TODO: meta_contains_article
 
+
 class heuristics(heuristics_manager):
     """
     helper class
     """
+    only_article_alike_crawlers = ["rssCrawler", "sitemapCrawler"]
+
+    def crawler_contains_only_article_alikes(self, response, site_object):
+        """
+        Some crawlers (rssCrawlers, sitemapCrawlers) only return sites, which
+        are actually articles or article-collections.
+        This heuristic, checks which crawler is used and if one of thos crawlers
+        is used, it returns true
+
+        :return bool: true if it is a crawler which only returns articles or
+            article-collections
+        """
+        return self.crawler_class.name in self.only_article_alike_crawlers
 
     @staticmethod
     def og_type(response, site_object):
