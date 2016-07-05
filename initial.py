@@ -66,6 +66,8 @@ class single_crawler(object):
         self.cfg.setup(self.cfg_file_path)
         self.log.info("Config initalized - Further initialisation.")
 
+        self.cfg_crawler = self.cfg.section("Crawler")
+
         # load the URL-input-json-file
         urlinput_file_path = self.cfg.section('Files')['urlinput']
         self.json = JsonConfig.get_instance()
@@ -97,7 +99,8 @@ class single_crawler(object):
         # if not stated otherwise in the arguments passed to this script
         self.remove_jobdir_if_not_resume()
 
-        self.loadCrawler(self.getCrawler(self.crawler), site["url"],
+        self.loadCrawler(self.getCrawler(self.crawler, site["url"]),
+                         site["url"],
                          ignoreRegex)
 
         self.process.start()
@@ -114,7 +117,43 @@ class single_crawler(object):
 
         self.__scrapy_options["JOBDIR"] = jobdir + hashed.hexdigest()
 
-    def getCrawler(self, crawler):
+    def getCrawler(self, crawler, url):
+        """
+        Checks if a crawler supports a website (the website offers e.g. RSS
+        or sitemap) and falls back to the fallbacks defined in the config if the
+        site is not supported.
+
+        :param crawler: Crawler-string (from the crawler-module)
+        :return crawler-class or None
+        """
+        checked_crawlers = []
+        while crawler is not None and crawler not in checked_crawlers:
+            checked_crawlers.append(crawler)
+            current = self.getCrawlerClass(crawler)
+            if hasattr(current, "supports_site"):
+                supports_site = getattr(current, "supports_site")
+                if callable(supports_site):
+                    if supports_site(url):
+                        self.log.debug("Using crawler %s for %s.", crawler, url)
+                        return current
+                    elif (
+                        crawler in self.cfg_crawler["fallbacks"] and
+                        self.cfg_crawler["fallbacks"][crawler] is not None
+                    ):
+                        self.log.warn("Crawler %s not supported by %s. "
+                                      "Trying to fall back.", crawler, url)
+                        crawler = self.cfg_crawler["fallbacks"][crawler]
+                    else:
+                        self.log.error("No crawlers (incl. fallbacks) "
+                                       "found for url %s.", url)
+                        return None
+            else:
+                self.log.warning("The crawler %s has no "
+                                 "supports_site-method defined", crawler)
+                return current
+        return None
+
+    def getCrawlerClass(self, crawler):
         settings = Settings()
         settings.set('SPIDER_MODULES', [self.__crawer_module])
         spider_loader = SpiderLoader(settings)

@@ -5,6 +5,8 @@ import re
 from sub_classes.heuristics_manager import heuristics_manager
 from url_extractor import url_extractor
 
+# TODO: crawler_contains_article_alikes
+# TODO: meta_contains_article
 
 class heuristics(heuristics_manager):
     """
@@ -45,7 +47,7 @@ class heuristics(heuristics_manager):
 
         # This regex checks, if a link containing site_domain as domain
         # is contained in a string.
-        site_regex = "href=[\"'][^\/]*\/\/(?:[^\"']*\.|)%s[\"'\/]" % domain
+        site_regex = r"href=[\"'][^\/]*\/\/(?:[^\"']*\.|)%s[\"'\/]" % domain
         for i in range(1, 7):
             for h in response.xpath('//h%s' % i).extract():
                 # h_all += 1
@@ -54,13 +56,13 @@ class heuristics(heuristics_manager):
                                     re.search(site_regex, h) is not None):
                     h_linked += 1
 
-        self.log.info("Linked headlines test: headlines = %s, linked = %s" %
-                      (h_all, h_linked))
+        self.log.info("Linked headlines test: headlines = %s, linked = %s",
+                      h_all, h_linked)
 
         min_headlines = self.cfg_heuristics["min_headlines_for_linked_test"]
         if min_headlines > h_all:
             self.log.info("Linked headlines test: Not enough headlines "
-                          "(%s < %s): Passing!" % (h_all, min_headlines))
+                          "(%s < %s): Passing!", h_all, min_headlines)
             return True
 
         return float(h_linked) / float(h_all)
