@@ -17,6 +17,8 @@ class heuristics_manager(object):
 
     __sites_object = {}
     __sites_heuristics = {}
+    __heuristics_condition = None
+    __condition_allowed = ["(", ")", "and", "or", "not"]
 
     def __init__(self, cfg_heuristics, sites_object):
         self.cfg_heuristics = cfg_heuristics
@@ -37,19 +39,62 @@ class heuristics_manager(object):
         site = self.__sites_object[url]
         heuristics = self.__get_enabled_heuristics(url)
 
-        is_article = True
         self.log.info("Checking site: %s" % response.url)
+
+        statement = self.__get_condition(url)
+        self.log.info("Condition (original): %s", statement)
+
         for heuristic, condition in heuristics.iteritems():
             heuristic_func = getattr(self, heuristic)
             result = heuristic_func(response, site)
             check = self.__evaluate_result(result, condition)
-            is_article = check and is_article
+            statement = statement.replace(heuristic, str(check))
             self.log.info("Checking heuristic (%s)"
                           " result (%s) on condition (%s): %s" %
                           (heuristic, result, condition, check))
 
+        self.log.info("Condition (evaluated): %s" % statement)
+        is_article = eval(statement)
         self.log.info("Article accepted: %s" % is_article)
         return is_article
+
+    def __get_condition(self, url):
+        if self.__heuristics_condition is not None:
+            return self.__heuristics_condition
+        if "pass_heuristics_condition" in self.__sites_object[url]:
+            condition = \
+                self.__sites_object[url]["pass_heuristics_condition"]
+        else:
+            condition = \
+                self.cfg_heuristics["pass_heuristics_condition"]
+
+        # Because the condition will be eval-ed (Yeah, eval is evil, BUT only
+        # when not filtered properly), we are filtering it here.
+        # Anyway, if that filter-method is not perfect: This is not any
+        # random user-input thats evaled. This is (hopefully still when you
+        # read this) not a webtool, where you need to filter everything 100%
+        # properly.
+        disalloweds = condition
+        heuristics = self.__get_enabled_heuristics(url)
+
+        for allowed in self.__condition_allowed:
+            disalloweds = disalloweds.replace(allowed, "")
+
+        for heuristic, cnd in heuristics.iteritems():
+            disalloweds = disalloweds.replace(heuristic, "")
+
+        disalloweds = disalloweds.split(" ")
+        for disallowed in disalloweds:
+            if disallowed != "":
+                self.log.error("Misconfiguration: In the condition,"
+                               " an unknown heuristic was found and"
+                               " will be ignored: %s", disallowed)
+                condition = condition.replace(disallowed, "True")
+
+        self.__heuristics_condition = condition
+        # Now condition should just consits of not, and, or, (, ), and all
+        # enabled heuristics.
+        return condition
 
     def __evaluate_result(self, result, condition):
         """

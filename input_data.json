@@ -13,7 +13,8 @@
         {
           "url": "http://sueddeutsche.de",
           "crawler": "rssCrawler",
-          "daemonize": 60
+          "daemonize": 60,
+          "pass_heuristics_condition": "og_type"
         }
     ]
 }
