@@ -5,7 +5,7 @@ import urllib2
 from urlparse import urlparse
 import re
 
-from ...helper_classes.url_extractor import url_extractor
+from newscrawler.helper_classes.url_extractor import url_extractor
 
 
 class recursiveSitemapCrawler(scrapy.spiders.SitemapSpider):

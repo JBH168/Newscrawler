@@ -36,6 +36,8 @@ class start_processes(object):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
         self.log = logging.getLogger(__name__)
 
+        os.environ['CColon'] = os.path.dirname(__file__)
+
         if len(sys.argv) > 1 and (sys.argv[1] == 'help' or
                                   sys.argv[1] == '--help' or
                                   sys.argv[1] == '?'):
