@@ -3,7 +3,7 @@ import logging
 
 import scrapy
 
-from ...helper_classes.url_extractor import UrlExtractor
+from newscrawler.helper_classes.url_extractor import UrlExtractor
 
 
 class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
