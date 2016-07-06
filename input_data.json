@@ -1,19 +1,12 @@
 {
     "base_urls" : [
         {
-          "url": "http://der-postillon.com",
-          "crawler": "RssCrawler",
-          "daemonize": 60
-        },
-        {
-          "url": "http://zeit.de",
-          "crawler": "RssCrawler",
-          "daemonize": 60
-        },
-        {
-          "url": "http://sueddeutsche.de",
-          "crawler": "RssCrawler",
-          "daemonize": 60
+          "url": "http://www.faz.net/",
+          "crawler": "RecursiveCrawler",
+          "pass_heuristics_condition": "meta_contains_article_keyword",
+          "overwrite_heuristics": {
+            "meta_contains_article_keyword": true
+          }
         }
     ]
 }

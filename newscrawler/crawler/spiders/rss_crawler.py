@@ -65,7 +65,4 @@ class RssCrawler(scrapy.Spider):
         response = urllib2.urlopen(redirect).read()
 
         # Check if a standard rss feed exists
-        return bool(
-            response.xpath('//link[contains(@type, "application/rss+xml")]')
-            .xpath('@href').extract()
-            )
+        return re.search(r'(<link[^>]*href[^>]*type ?= ?"application\/rss\+xml"|<link[^>]*type ?= ?"application\/rss\+xml"[^>]*href)', response) is not None

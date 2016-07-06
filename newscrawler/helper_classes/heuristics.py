@@ -10,6 +10,27 @@ class Heuristics(HeuristicsManager):
     """
     helper class
     """
+    only_article_alike_crawlers = ["rssCrawler", "sitemapCrawler"]
+
+    def crawler_contains_only_article_alikes(self, response, site_object):
+        """
+        Some crawlers (rssCrawlers, sitemapCrawlers) only return sites, which
+        are actually articles or article-collections.
+        This heuristic, checks which crawler is used and if one of thos crawlers
+        is used, it returns true
+
+        :return bool: true if it is a crawler which only returns articles or
+            article-collections
+        """
+        return self.crawler_class.name in self.only_article_alike_crawlers
+
+    def meta_contains_article_keyword(self, response, site_object):
+        contains_meta = response.xpath('//meta') \
+                                .re('(= ?["\'][^"\']*article[^"\']*["\'])')
+
+        if not contains_meta:
+            return False
+        return True
 
     @staticmethod
     def og_type(response, site_object):
@@ -20,8 +41,8 @@ class Heuristics(HeuristicsManager):
         :return bool: true if the tag is contained.
         """
         og_type_article = response.xpath('//meta') \
-            .re('(property="og:type".*content="article")|'
-                '(content="article".*property="og:type")')
+            .re('(property=["\']og:type["\'].*content=["\']article["\'])|'
+                '(content=["\']article["\'].*property=["\']og:type["\'])')
         if not og_type_article:
             return False
 
