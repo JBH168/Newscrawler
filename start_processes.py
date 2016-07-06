@@ -211,6 +211,7 @@ class StartProcesses(object):
     def get_python_command(self):
         """
         Get the correct command for executing python 2.7.
+        Exits the program with error-code if no string is found.
 
         :return str: 'python' or 'python2.7'
         """
@@ -489,6 +490,10 @@ Cleanup files:
             self.lock = threading.Lock()
 
         def sort_queue(self):
+            """
+            Sorts the queue, so the tuple with the lowest index (first value) is
+            the first element in the array.
+            """
             self.queue = sorted(self.queue, key=lambda t: t[0])
             self.queue_times = sorted(self.queue_times)
 
@@ -501,6 +506,13 @@ Cleanup files:
             return len(self.daemons)
 
         def add_daemon(self, index, _time):
+            """
+            Adds a daemon to the queue.
+
+            :param index: The index, usually the index of the site-object
+            :param _time: The repetition-time (every _time seconds the crawler)
+                starts again.
+            """
             self.lock.acquire()
             try:
                 self.daemons[index] = _time
@@ -509,6 +521,16 @@ Cleanup files:
                 self.lock.release()
 
         def add_execution(self, _time, index):
+            """
+            Adds an execution to the queue.
+            When for this particular _time an execution is already scheduled,
+            the time will be checked for one second later until a free slot
+            is found.
+
+            :param _time: The (unix)-timestamp when the crawler should be
+                executed.
+            :param index: The index, usually the index of the site-object
+            """
             _time = int(_time)
             while _time in self.queue_times:
                 _time += 1
@@ -517,6 +539,10 @@ Cleanup files:
             self.queue.append((_time, index))
 
         def get_next_item(self):
+            """
+            Gets the next daemon-item and adds the daemon to the queue again.
+            (With the new scheduled time)
+            """
             if self.graceful_stop:
                 return None
             self.lock.acquire()
