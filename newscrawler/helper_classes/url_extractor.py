@@ -4,12 +4,15 @@ helper class for url extraction
 import re
 import os
 
+import urllib2
+from urlparse import urlparse
 
 class UrlExtractor(object):
 
     """
     This class contains methods to extract parts of any given url
     """
+
     @staticmethod
     def get_allowed_domains(url):
         """
@@ -28,11 +31,16 @@ class UrlExtractor(object):
     @staticmethod
     def get_subdomains(url):
         """
-        returns domain.topleveldomain of url
+        returns subdomains of url
         """
         allowed_domains = UrlExtractor.get_allowed_domains(url)
         return allowed_domains[:len(allowed_domains) - len(
             UrlExtractor.get_allowed_domains_without_subdomains(url))]
+
+    @staticmethod
+    def follow_redirects(url):
+        opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
+        return opener.open(url).url
 
     @staticmethod
     def get_sitemap_urls(url, allow_subdomains):
@@ -42,12 +50,39 @@ class UrlExtractor(object):
         allow_subdomains decides if the return contains the subdomains
         """
         if allow_subdomains:
-            return "http://" + UrlExtractor.get_allowed_domains(url) + \
-                "/robots.txt"
+            redirect = UrlExtractor.follow_redirects(
+                "http://" + UrlExtractor.get_allowed_domains(url)
+                )
         else:
-            return "http://" + \
-                    UrlExtractor.get_allowed_domains_without_subdomains(url) \
-                    + "/robots.txt"
+            redirect = UrlExtractor.follow_redirects(
+                "http://" +
+                UrlExtractor.get_allowed_domains_without_subdomains(url)
+                )
+        redirect = UrlExtractor.follow_redirects(url)
+
+        # Get robots.txt
+        parsed = urlparse(redirect)
+        robots = '{url.scheme}://{url.netloc}/robots.txt'.format(url=parsed)
+
+        try:
+            urllib2.urlopen(robots)
+            return robots
+        except:
+            if allow_subdomains:
+                return UrlExtractor.get_sitemap_urls(url, False)
+            else:
+                raise Exception('Fatal: no robots.txt found.')
+
+    @staticmethod
+    def sitemap_check(url):
+        """
+        Sitemap-Crawler are supported by every site which have a
+        Sitemap set in the robots.txt
+        """
+        response = urllib2.urlopen(UrlExtractor.get_sitemap_urls(url, True))
+
+        # Check if "Sitemap" is set
+        return "Sitemap:" in response.read()
 
     def get_rss_url(self, response):
         """

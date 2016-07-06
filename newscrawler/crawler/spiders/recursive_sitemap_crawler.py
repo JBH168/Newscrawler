@@ -1,10 +1,9 @@
-import urllib2
-from urlparse import urlparse
-
 import re
 import logging
 
 import scrapy
+
+from ...helper_classes.url_extractor import UrlExtractor
 
 
 class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
@@ -55,7 +54,6 @@ class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
             response, self.allowed_domains[0], self.original_url)
 
-    # TODO: move; copy in sitemapCrawler.py
     @staticmethod
     def supports_site(url):
         """
@@ -63,14 +61,4 @@ class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
         Sitemap set in the robots.txt
         """
 
-        # Follow redirects
-        opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
-        redirect = opener.open(url).url
-
-        # Get robots.txt
-        parsed = urlparse(redirect)
-        robots = '{url.scheme}://{url.netloc}/robots.txt'.format(url=parsed)
-        response = urllib2.urlopen(robots)
-
-        # Check if "Sitemap" is set
-        return "Sitemap:" in response.read()
+        return UrlExtractor.sitemap_check(url)
