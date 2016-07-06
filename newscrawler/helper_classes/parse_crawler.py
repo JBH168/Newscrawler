@@ -4,6 +4,8 @@ This is a helper class for the crawler's parse methods
 import time
 import re
 
+import logging
+
 import scrapy
 from newscrawler.crawler.items import NewscrawlerItem
 
@@ -13,9 +15,11 @@ class ParseCrawler(object):
     Helper class for the crawler's parse methods.
     """
     helper = None
+    log = None
 
     def __init__(self, helper):
         self.helper = helper
+        self.log = logging.getLogger(__name__)
 
     def pass_to_pipeline_if_article(
             self,
@@ -84,3 +88,18 @@ class ParseCrawler(object):
                             response.urljoin(href), re.IGNORECASE) is None and
                 len(re.match(ignore_regex,
                              response.urljoin(href)).group(0)) == 0]
+
+    def content_type(self, response):
+        """
+        Ensures the response is of type
+
+        :param obj response: The scrapy response
+        :return bool: Determines wether the response is of the correct type
+        """
+        if not re.match('text/html', response.headers.get('Content-Type')):
+            self.log.warn("Dropped: %s's content is not of type "
+                          "text/html but %s", response.url,
+                          response.headers.get('Content-Type'))
+            return False
+        else:
+            return True

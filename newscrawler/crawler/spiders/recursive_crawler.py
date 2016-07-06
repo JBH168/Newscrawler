@@ -37,10 +37,13 @@ class RecursiveCrawler(scrapy.Spider):
         super(RecursiveCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
-        if not re.match('text/html', response.headers.get('Content-Type')):
-            self.log.warn("Dropped: %s's content is not of type "
-                          "text/html but %s", response.url,
-                          response.headers.get('Content-Type'))
+        """
+        Checks any given response on being an article and if positiv,
+        passes the response to the pipeline.
+
+        :param obj response: The scrapy response
+        """
+        if not self.helper.parse_crawler.content_type(response):
             return
 
         for request in self.helper.parse_crawler \
@@ -53,5 +56,12 @@ class RecursiveCrawler(scrapy.Spider):
 
     @staticmethod
     def supports_site(url):
-        """Recursive Crawler are supported by every site!"""
+        """
+        Recursive Crawler are supported by every site!
+
+        Determines if this crawler works on the given url.
+
+        :param str url: The url to test
+        :return bool: Determines wether this crawler work on the given url
+        """
         return True

@@ -32,20 +32,34 @@ class RssCrawler(scrapy.Spider):
         super(RssCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
+        """
+        Extracts the Rss Feed and initiates crawling it.
+
+        :param obj response: The scrapy response
+        """
         yield scrapy.Request(self.helper.url_extractor.get_rss_url(response),
                              callback=self.rss_parse)
 
     def rss_parse(self, response):
+        """
+        Extracts all article links and initiates crawling them.
+
+        :param obj response: The scrapy response
+        """
         for item in response.xpath('//item'):
             for url in item.xpath('link/text()').extract():
                 yield scrapy.Request(url, lambda resp: self.article_parse(
                     resp, item.xpath('title/text()').extract()[0]))
 
     def article_parse(self, response, rss_title=None):
-        if not re.match('text/html', response.headers.get('Content-Type')):
-            self.log.warn("Dropped: %s's content is not of type "
-                          "text/html but %s", response.url,
-                          response.headers.get('Content-Type'))
+        """
+        Checks any given response on being an article and if positiv,
+        passes the response to the pipeline.
+
+        :param obj response: The scrapy response
+        :param str rss_title: Title extracted from the rss feed
+        """
+        if not self.helper.parse_crawler.content_type(response):
             return
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
@@ -55,8 +69,12 @@ class RssCrawler(scrapy.Spider):
     @staticmethod
     def supports_site(url):
         """
-        Sitemap-Crawler are supported by every site which have a
-        Sitemap set in the robots.txt
+        Rss Crawler are supported if by every site containing an rss feed.
+
+        Determines if this crawler works on the given url.
+
+        :param str url: The url to test
+        :return bool: Determines wether this crawler work on the given url
         """
 
         # Follow redirects

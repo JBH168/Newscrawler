@@ -34,10 +34,13 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         super(SitemapCrawler, self).__init__(*args, **kwargs)
 
     def parse(self, response):
-        if not re.match('text/html', response.headers.get('Content-Type')):
-            self.log.warn("Dropped: %s's content is not of type "
-                          "text/html but %s", response.url,
-                          response.headers.get('Content-Type'))
+        """
+        Checks any given response on being an article and if positiv,
+        passes the response to the pipeline.
+
+        :param obj response: The scrapy response
+        """
+        if not self.helper.parse_crawler.content_type(response):
             return
 
         yield self.helper.parse_crawler.pass_to_pipeline_if_article(
@@ -47,7 +50,12 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
     def supports_site(url):
         """
         Sitemap-Crawler are supported by every site which have a
-        Sitemap set in the robots.txt
+        Sitemap set in the robots.txt.
+
+        Determines if this crawler works on the given url.
+
+        :param str url: The url to test
+        :return bool: Determines wether this crawler work on the given url
         """
 
         return UrlExtractor.sitemap_check(url)
