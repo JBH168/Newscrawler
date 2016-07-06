@@ -61,6 +61,11 @@ class HeuristicsManager(object):
         return is_article
 
     def __get_condition(self, url):
+        """
+        Gets the condition for a url and validates it.
+
+        :param str url: The url to get the condition for
+        """
         if self.__heuristics_condition is not None:
             return self.__heuristics_condition
         if "pass_heuristics_condition" in self.__sites_object[url]:
@@ -103,8 +108,8 @@ class HeuristicsManager(object):
         Evaluates a result of a heuristic
         with the condition given in the config.
 
-        :param result: The result of the heuristic
-        :param condition: The condition string to evaluate on the result
+        :param mixed result: The result of the heuristic
+        :param mixed condition: The condition string to evaluate on the result
         :return bool: Whether the heuristic result matches the condition
         """
 
@@ -212,6 +217,8 @@ class HeuristicsManager(object):
         overwrite together.
         The config will only be read once and the merged site-config will be
         cached.
+
+        :param str url: The url to get the heuristics for.
         """
         if url in self.__sites_heuristics:
             return self.__sites_heuristics[url]
