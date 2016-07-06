@@ -101,8 +101,7 @@ class UrlExtractor(object):
         """
         returns http://subdomains.domain.topleveldomain/ of url
         """
-        allowed_domains = UrlExtractor.get_allowed_domains(url)
-        return "http://" + allowed_domains + "/"
+        return "http://" + UrlExtractor.get_allowed_domains(url) + "/"
 
     @staticmethod
     def get_url_directory_string(url):

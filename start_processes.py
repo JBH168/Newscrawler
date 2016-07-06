@@ -450,8 +450,9 @@ Cleanup files:
             try:
                 item = self.queue.pop(0)
                 self.queue_times.pop(0)
-                self.add_execution(time.time() + self.daemons[item[1]],
-                                   item[1])
+                self.add_execution(
+                    time.time() + self.daemons[item[1]], item[1]
+                )
             finally:
                 self.lock.release()
 

@@ -49,7 +49,7 @@ class SavepathParser(object):
         if len(component) > size:
             if size > 32:
                 component_size = size - 32 - 1
-                return component[:component_size] + '_' + \
+                return "%s_%s", component[:component_size], \
                     hashlib.md5(component).hexdigest()
             else:
                 return hashlib.md5(component).hexdigest()[:size]

@@ -76,7 +76,7 @@ class SingleCrawler(object):
         site = self.json.get_site_objects()[self.site_number]
 
         if "ignore_regex" in site:
-            ignore_regex = '(' + site["ignoreRegex"] + ')|'
+            ignore_regex = "(%s)|", site["ignoreRegex"]
         else:
             ignore_regex = ''
 

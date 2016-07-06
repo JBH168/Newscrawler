@@ -116,9 +116,8 @@ class CrawlerConfig(object):
                 except ConfigParser.NoOptionError as exc:
                     self.log_output.append(
                         {"level": "error",
-                         "msg": "Exception on [%s] %s: %s" % (section,
-                                                              option,
-                                                              exc)}
+                         "msg": "Exception on [%s] %s: %s"
+                         % (section, option, exc)}
                     )
                     self.__config[section][option] = None
 
@@ -231,7 +230,7 @@ class JsonConfig(object):
         """Setup the class at first usage
         Arguments:
             1. filepath: Path to the json-file (including file-name)"""
-        self.log.debug("Loading JSON-file (" + filepath + ")")
+        self.log.debug("Loading JSON-file (%s)", filepath)
         self.load_json(filepath)
 
     def load_json(self, filepath):
