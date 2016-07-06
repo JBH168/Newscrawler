@@ -323,10 +323,10 @@ Cleanup db:
                 )
 
         if not confirm:
-            self.log.warn("Did not type yes. Thus aborting.")
+            print("Did not type yes. Thus aborting.")
             return
 
-        self.log.info("Resetting database...")
+        print("Resetting database...")
 
         try:
             self.cursor.execute("TRUNCATE TABLE CurrentVersions")
@@ -357,10 +357,10 @@ Cleanup files:
                 )
 
         if not confirm:
-            self.log.warn("Did not type yes. Thus aborting.")
+            print("Did not type yes. Thus aborting.")
             return
 
-        self.log.info("Removing: %s", path)
+        print("Removing: %s", path)
 
         try:
             shutil.rmtree(path)
