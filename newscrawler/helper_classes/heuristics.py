@@ -12,7 +12,7 @@ class Heuristics(HeuristicsManager):
     """
     only_article_alike_crawlers = ["rssCrawler", "sitemapCrawler"]
 
-    def crawler_contains_only_article_alikes(self, response, site_object):
+    def crawler_contains_only_article_alikes(self, response, site_dict):
         """
         Some crawlers (rssCrawlers, sitemapCrawlers) only return sites, which
         are actually articles or article-collections.
@@ -20,20 +20,20 @@ class Heuristics(HeuristicsManager):
         crawlers is used, it returns true.
 
         :param obj response: The scrapy response
-        :param obj site_object: The site object from the JSON-File
+        :param dict site_dict: The site object from the JSON-File
 
         :return bool: true if it is a crawler which only returns articles or
                       article-collections
         """
         return self.crawler_class.name in self.only_article_alike_crawlers
 
-    def meta_contains_article_keyword(self, response, site_object):
+    def meta_contains_article_keyword(self, response, site_dict):
         """
         Determines wether the response's meta data contains the keyword
         'article'
 
         :param obj response: The scrapy response
-        :param obj site_object: The site object from the JSON-File
+        :param dict site_dict: The site object from the JSON-File
 
         :return bool: Determines wether the reponse's meta data contains the
                       keyword 'article'
@@ -46,13 +46,13 @@ class Heuristics(HeuristicsManager):
         return True
 
     @staticmethod
-    def og_type(response, site_object):
+    def og_type(response, site_dict):
         """
         Check if the site contains a meta-tag which contains
         property="og:type" and content="article"
 
         :param obj response: The scrapy response
-        :param obj site_object: The site object from the JSON-File
+        :param dict site_dict: The site object from the JSON-File
 
         :return bool: True if the tag is contained.
         """
@@ -64,12 +64,12 @@ class Heuristics(HeuristicsManager):
 
         return True
 
-    def linked_headlines(self, response, site_object, check_self=False):
+    def linked_headlines(self, response, site_dict, check_self=False):
         """
         Checks how many of the headlines on the site contain links.
 
         :param obj response: The scrapy response
-        :param obj site_object: The site object from the JSON-File
+        :param dict site_dict: The site object from the JSON-File
         :param bool check_self: Check headlines/
                                 headlines_containing_link_to_same_domain
                                 instead of headline/headline_containing_link
@@ -79,7 +79,7 @@ class Heuristics(HeuristicsManager):
         h_all = 0
         h_linked = 0
         domain = UrlExtractor.get_allowed_domains_without_subdomains(
-            site_object["url"])
+            site_dict["url"])
 
         # This regex checks, if a link containing site_domain as domain
         # is contained in a string.
@@ -103,25 +103,25 @@ class Heuristics(HeuristicsManager):
 
         return float(h_linked) / float(h_all)
 
-    def self_linked_headlines(self, response, site_object):
+    def self_linked_headlines(self, response, site_dict):
         """
         Checks how many of the headlines on the site contain links.
 
-        :param response: The scrapy response
-        :param site_object: The site object from the JSON-File
+        :param obj response: The scrapy response
+        :param dict site_dict: The site object from the JSON-File
 
         :return float: ratio headlines/headlines_containing_link_to_same_domain
         """
-        return self.linked_headlines(response, site_object, True)
+        return self.linked_headlines(response, site_dict, True)
 
-    def is_not_from_subdomain(self, response, site_object):
+    def is_not_from_subdomain(self, response, site_dict):
         """
         Ensures the response's url isn't from a subdomain.
 
         :param obj response: The scrapy response
-        :param obj site_object: The site object from the JSON-File
+        :param dict site_dict: The site object from the JSON-File
 
         :return bool: Determines if the response's url is from a subdomain
         """
         return UrlExtractor.get_allowed_domains(response.url) \
-            == site_object["url"]
+            == site_dict["url"]
