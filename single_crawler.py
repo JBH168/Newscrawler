@@ -28,9 +28,9 @@ from newscrawler.helper import Helper
 
 class SingleCrawler(object):
     """
-    This class is called when this script is executed
+    This class is called when this script is executed.
 
-    for each url in the URL-input-json-file, it starts a crawler
+    It starts a single crawler, that is passed along to this script.
     """
     cfg = None
     json = None
@@ -80,7 +80,6 @@ class SingleCrawler(object):
         else:
             ignore_regex = ''
 
-
         # Get the default crawler. The crawler can be overwritten by fallbacks.
         if "crawler" in site:
             self.crawler = site["crawler"]
@@ -88,7 +87,6 @@ class SingleCrawler(object):
             self.crawler = self.cfg.section("Crawler")["default"]
         # Get the real crawler-class (already "fallen back")
         crawler_class = self.get_crawler(self.crawler, site["url"])
-
 
         self.helper = Helper(self.cfg.section('Heuristics'),
                              self.cfg.section('Crawler')['savepath'],
@@ -114,6 +112,8 @@ class SingleCrawler(object):
         """
         Update the JOBDIR in __scrapy_options for the crawler,
         so each crawler gets its own jobdir.
+
+        :param object site: a site object extracted from the json file
         """
         jobdir = self.__scrapy_options["JOBDIR"]
         if not jobdir.endswith("/"):
@@ -125,11 +125,12 @@ class SingleCrawler(object):
     def get_crawler(self, crawler, url):
         """
         Checks if a crawler supports a website (the website offers e.g. RSS
-        or sitemap) and falls back to the fallbacks defined in the config if the
-        site is not supported.
+        or sitemap) and falls back to the fallbacks defined in the config if
+        the site is not supported.
 
-        :param crawler: Crawler-string (from the crawler-module)
-        :return crawler-class or None
+        :param str crawler: Crawler-string (from the crawler-module)
+        :param str url: the url this crawler is supposed to be loaded with
+        :rtype: crawler-class or None
         """
         checked_crawlers = []
         while crawler is not None and crawler not in checked_crawlers:
@@ -139,7 +140,8 @@ class SingleCrawler(object):
                 supports_site = getattr(current, "supports_site")
                 if callable(supports_site):
                     if supports_site(url):
-                        self.log.debug("Using crawler %s for %s.", crawler, url)
+                        self.log.debug("Using crawler %s for %s.",
+                                       crawler, url)
                         return current
                     elif (crawler in self.cfg_crawler["fallbacks"] and
                           self.cfg_crawler["fallbacks"][crawler] is not None):
@@ -157,6 +159,13 @@ class SingleCrawler(object):
         return None
 
     def get_crawler_class(self, crawler):
+        """
+        Searches through the modules in self.__crawer_module for a crawler with
+        the name passed along.
+
+        :param str crawler: Name of the crawler to load
+        :rtype: crawler-class
+        """
         settings = Settings()
         settings.set('SPIDER_MODULES', [self.__crawer_module])
         spider_loader = SpiderLoader(settings)
@@ -164,7 +173,12 @@ class SingleCrawler(object):
 
     def load_crawler(self, crawler, url, ignore_regex):
         """
-        loads the given crawler with the given url
+        Loads the given crawler with the given url.
+
+        :param class crawler: class of the crawler to load
+        :param str url: url to start the crawler with
+        :param regex ignore_regex: to be able to ignore urls that match this
+                                   regex code
         """
         self.process = CrawlerProcess(self.cfg.get_scrapy_options())
         self.process.crawl(
@@ -176,9 +190,9 @@ class SingleCrawler(object):
 
     def remove_jobdir_if_not_resume(self):
         """
-        if '--resume' isn't passed to this script, this method ensures that
-        there's no JOBDIR (with the name and path stated in the config file)
-        any crawler would automatically resume crawling with
+        This method ensures that there's no JOBDIR (with the name and path
+        stated in the config file) any crawler would automatically resume
+        crawling with if '--resume' isn't passed to this script.
         """
         jobdir = os.path.abspath(self.__scrapy_options["JOBDIR"])
 

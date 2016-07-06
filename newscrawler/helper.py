@@ -11,8 +11,7 @@ from helper_classes.parse_crawler import ParseCrawler
 
 class Helper(object):
     """
-    This class contains helper classes from ./helper_classes
-    This class and its helper-classes is passed to all crawlers
+    This class contains helper classes from ./helper_classes.
     """
     heuristics = None
     url_extractor = None

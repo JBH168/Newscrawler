@@ -1,5 +1,5 @@
 """
-helper class for parsing the in the config defined savepath
+Helper class for parsing the savepath defined in the config.
 """
 import os
 import time
@@ -37,8 +37,12 @@ class SavepathParser(object):
     @staticmethod
     def time_replacer(match, timestamp):
         """
-        returns the timestamp formated with strftime the way the regex-match
-        within the first set of braces defines
+        Transforms the timestamp to the format the regex match determines.
+
+        :param str match: the regex match
+        :param time timestamp: the timestamp to format with match.group(1)
+        :return str: the timestamp formated with strftime the way the
+                     regex-match within the first set of braces defines
         """
         # match.group(0) = entire match
         # match.group(1) = match in braces #1
@@ -46,6 +50,14 @@ class SavepathParser(object):
 
     @staticmethod
     def append_md5_if_too_long(component, size):
+        """
+        Trims the component if it is longer than size and appends the
+        component's md5. Total must be of length size.
+
+        :param str component: component to work on
+        :param int size: component's size limit
+        :return str: component and appended md5 trimmed to be of length size
+        """
         if len(component) > size:
             if size > 32:
                 component_size = size - 32 - 1
@@ -58,7 +70,10 @@ class SavepathParser(object):
 
     def get_savepath(self, url):
         """
-        returns the evaluated savepath for the given url
+        Evaluates the savepath with the help of the given url.
+
+        :param str url: url to evaluate the savepath with
+        :return str: the evaluated savepath for the given url
         """
         timestamp = int(time.time())
 
@@ -149,7 +164,10 @@ class SavepathParser(object):
     @staticmethod
     def remove_not_allowed_chars(savepath):
         """
-        returns the given savepath without invalid savepath characters
+        Removes invalid filepath characters from the savepath.
+
+        :param str savepath: the savepath to work on
+        :return str: the savepath without invalid filepath characters
         """
         split_savepath = os.path.splitdrive(savepath)
         # https://msdn.microsoft.com/en-us/library/aa365247.aspx
@@ -158,33 +176,42 @@ class SavepathParser(object):
         return split_savepath[0] + savepath_without_invalid_chars
 
     @staticmethod
-    def get_abs_path_static(savepath, cfg_file_path):
+    def get_abs_path_static(savepath, relative_to):
         """
-        returns an absolute version of savepath
-        relative paths are relative to the config file
+        Figures out the savepath's absolute version.
+
+        :param str savepath: the savepath to return an absolute version of
+        :param str relative_to: the file path this savepath should be relative
+                                to
+        :return str: absolute version of savepath
         """
         if os.path.isabs(savepath):
             return os.path.abspath(savepath)
         else:
             return os.path.abspath(
-                os.path.join(os.path.dirname(cfg_file_path), (savepath))
+                os.path.join(os.path.dirname(relative_to), (savepath))
                 )
 
     def get_abs_path(self, savepath):
         """
-        returns an absolute version of savepath
-        relative paths are relative to the config file
+        Determines the savepath's absolute version relative to the cfg file
+        path.
+
+        :param str savepath: the savepath to return an absolute version of
+        :return str: absolute version of savepath
         """
         return self.get_abs_path_static(savepath, self.cfg_file_path)
 
     @staticmethod
     def get_base_path(path):
         """
-        Returns the path until the first %
-        So
+        Determines the longest possible beginning of a path that does not
+        contain a %-Symbol.
+
         /this/is/a/pa%th would become /this/is/a
 
-        :param path: String, the path to get the base from
+        :param str path: the path to get the base from
+        :return: the path's base
         """
         if "%" not in path:
             return path
@@ -199,7 +226,10 @@ class SavepathParser(object):
     @staticmethod
     def get_max_url_file_name_length(savepath):
         """
-        returns the first max. allowed number of chars of the url_file_name
+        Determines the max length for any max... parts.
+
+        :param str savepath: absolute savepath to work on
+        :return: max. allowed number of chars for any of the max... parts
         """
         number_occurrences = savepath.count('%max_url_file_name')
         number_occurrences += savepath.count('%appendmd5_max_url_file_name')

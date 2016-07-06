@@ -20,7 +20,10 @@ from newscrawler.config import CrawlerConfig
 
 
 class StartProcesses(object):
-
+    """
+    This class is supposed to be called initially to start all processes.  It
+    sets up and manages all crawlers.
+    """
     python_command = None
     crawlers = []
     cfg = None
@@ -42,6 +45,10 @@ class StartProcesses(object):
         configure_logging({"LOG_LEVEL": "CRITICAL"})
         self.log = logging.getLogger(__name__)
 
+        # Sets an environmental variable called 'CColon', so scripts can import
+        # modules of this project in relation to this script's dir
+        # example: sitemap_crawler can import UrlExtractor via
+        #   from newscrawler.helper_classes.url_extractor import UrlExtractor
         os.environ['CColon'] = os.path.dirname(__file__)
 
         if len(sys.argv) > 1 and (sys.argv[1] == 'help' or
@@ -56,7 +63,7 @@ class StartProcesses(object):
 
         self.thread_event = threading.Event()
 
-        # Get & set CFG and JSON locally
+        # Get & set CFG and JSON locally.
         self.cfg = CrawlerConfig.get_instance()
         self.cfg_file_path = self.get_config_file_path()
         self.cfg.setup(self.cfg_file_path)
@@ -94,11 +101,19 @@ class StartProcesses(object):
 
     @staticmethod
     def has_arg(string):
+        """
+        Determines if the string passed to this method was passed to the
+        script.
+
+        :param str string: string to test
+        :rtype: bool
+        """
         return len([arg for arg in sys.argv if arg == string]) != 0
 
     def manage_crawlers(self):
         """
-        Starts a thread for each site and a crawler for it
+        Manages all crawlers, threads and limites the number of parallel
+        running threads.
         """
         sites = self.json.get_site_objects()
         for index, site in enumerate(sites):
@@ -133,12 +148,18 @@ class StartProcesses(object):
             try:
                 time.sleep(10)
             except IOError:
-                # This exception will only occur on kill-process on windows
+                # This exception will only occur on kill-process on windows.
                 # The process should be killed, thus this exception is
-                # irrelevant
+                # irrelevant.
                 pass
 
     def manage_crawler(self):
+        """
+        Manages a normal crawler thread.
+
+        When a crawler finished, it loads another one if there are still sites
+        to crawl.
+        """
         index = True
         while not self.shutdown and index is not None:
             index = self.crawler_list.get_next_item()
@@ -147,6 +168,11 @@ class StartProcesses(object):
             self.start_crawler(index)
 
     def manage_daemon(self):
+        """
+        Manages a daemonized crawler thread.
+
+        Once a crawler it finished, it loads the next one.
+        """
         while not self.shutdown:
             # next scheduled daemon, tuple (time, index)
             item = self.daemon_list.get_next_item()
@@ -159,9 +185,11 @@ class StartProcesses(object):
 
     def start_crawler(self, index, daemonize=0):
         """
-        Starts a crawler from the input-array
+        Starts a crawler from the input-array.
 
-        :param index: The array-index of the site
+        :param int index: The array-index of the site
+        :param int daemonize: Bool if the crawler is supposed to be daemonized
+                              (to delete the JOBDIR)
         """
         python = self.get_python_command()
         call_process = [python,
@@ -182,9 +210,9 @@ class StartProcesses(object):
 
     def get_python_command(self):
         """
-        Get the correct command for executing python2.7
+        Get the correct command for executing python 2.7.
 
-        :return string: python or python2.7
+        :return str: 'python' or 'python2.7'
         """
         if self.python_command is not None:
             return self.python_command
@@ -205,7 +233,7 @@ class StartProcesses(object):
 
     def graceful_stop(self, signal_number=None, stack_frame=None):
         """
-        This function will be called when a graceful-stop is initiated
+        This function will be called when a graceful-stop is initiated.
         """
         stop_msg = "Hard" if self.shutdown else "Graceful"
         if signal_number is None:
@@ -223,10 +251,12 @@ class StartProcesses(object):
 
     def get_config_file_path(self):
         """
-        returns the config file path
+        Returns the config file path
          - if passed to this script, ensures it's a valid file path
          - if not passed to this script or not valid, falls back to the
            standard ./newscrawler.cfg
+
+        :return str: config's absolute file path
         """
         # test if the config file path was passed to this script
         # argv[0] should be this script's name
@@ -252,6 +282,9 @@ class StartProcesses(object):
                      stdout=subprocess.PIPE).communicate()[0]
 
     def print_help(self):
+        """
+        Prints this scripts help message.
+        """
         _help = \
             """
         CColon Newscrawler
@@ -283,10 +316,17 @@ Arguments:
 
     def get_abs_file_path(self, rel_file_path, quit_on_error=None):
         """
-        returns the absolute file path of the given relative file path
+        Returns the absolute file path of the given [relative] file path
         to either this script or to the config file.
 
-        May throw a RuntimeError if quit_on_error is True
+        May throw a RuntimeError if quit_on_error is True.
+
+        :param str rel_file_path: relative file path
+        :param bool quit_on_error: determines if the script may throw an
+                                   exception
+        :return str: absolute file path of the given relative file path
+        :raises RuntimeError: if the file path does not exist and
+                              quit_on_error is True
         """
         if self.cfg_file_path is not None and \
                 not self.cfg.section('General')['relativetoinitial']:
@@ -306,6 +346,9 @@ Arguments:
         return abs_file_path
 
     def reset_db(self):
+        """
+        Resets the Database.
+        """
         # initialize DB connection
         self.conn = mysql.connector.connect(host=self.database["host"],
                                             port=self.database["port"],
@@ -340,6 +383,9 @@ Cleanup db:
             self.log.error("Database reset error: %s", error)
 
     def reset_files(self):
+        """
+        Resets the local data directory.
+        """
         confirm = self.has_arg("--noconfirm")
 
         path = SavepathParser.get_base_path(
@@ -373,6 +419,10 @@ Cleanup files:
             self.log.error(error)
 
     class CrawlerList(object):
+        """
+        Class that manages all crawlers that aren't supposed to be daemonized.
+        Exists to be able to use threading.Lock().
+        """
         lock = None
         crawler_list = []
         graceful_stop = False
@@ -381,6 +431,11 @@ Cleanup files:
             self.lock = threading.Lock()
 
         def append_item(self, item):
+            """
+            Appends the given item to the crawler_list.
+
+            :param: item to append to the crawler_list.
+            """
             self.lock.acquire()
             try:
                 self.crawler_list.append(item)
@@ -388,9 +443,19 @@ Cleanup files:
                 self.lock.release()
 
         def len(self):
+            """
+            Determines the number of crawler in the list.
+
+            :return int: crawler_list's length
+            """
             return len(self.crawler_list)
 
         def get_next_item(self):
+            """
+            Pops the first crawler in the list.
+
+            :return: crawler_list's first item
+            """
             if self.graceful_stop:
                 return None
             self.lock.acquire()
@@ -408,6 +473,10 @@ Cleanup files:
             self.graceful_stop = True
 
     class DaemonList(object):
+        """
+        Class that manages all crawlers that are supposed to be daemonized.
+        Exists to be able to use threading.Lock().
+        """
         lock = None
 
         daemons = {}
@@ -424,6 +493,11 @@ Cleanup files:
             self.queue_times = sorted(self.queue_times)
 
         def len(self):
+            """
+            Determines the number of daemonized crawlers in the list.
+
+            :return int: crawler_list's length
+            """
             return len(self.daemons)
 
         def add_daemon(self, index, _time):

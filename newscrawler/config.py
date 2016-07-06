@@ -55,8 +55,11 @@ class CrawlerConfig(object):
     __config = None
 
     def __init__(self):
-        """The constructor
-        (keep in mind: this is a singleton, so just called once)"""
+        """
+        The constructor
+
+        (keep in mind: this is a singleton, so just called once)
+        """
 
         if CrawlerConfig.instance is not None:
             self.log_output.append(
@@ -65,9 +68,10 @@ class CrawlerConfig(object):
             raise RuntimeError('Multiple instances of singleton-class')
 
     def setup(self, filepath):
-        """Setup the actual class.
-        Arguments:
-            1. filepath: Path to the config-file (including file-name)
+        """
+        Setup the actual class.
+
+        :param str filepath: path to the config-file (including file-name)
         """
         if self.log is not None:
             self.log.warning("Disallowed multiple setup of config.")
@@ -83,7 +87,9 @@ class CrawlerConfig(object):
         self.handle_logging()
 
     def load_config(self):
-        """Load the config-file"""
+        """
+        Loads the config-file
+        """
         self.__config = {}
 
         # Parse sections, its options and put it in self.config.
@@ -123,7 +129,7 @@ class CrawlerConfig(object):
 
     def get_scrapy_options(self):
         """
-        returns all the options listed in the config section 'Scrapy'
+        :return: all options listed in the config section 'Scrapy'
         """
         if self.__scrapy_options is None:
             self.__scrapy_options = {}
@@ -134,7 +140,10 @@ class CrawlerConfig(object):
         return self.__scrapy_options
 
     def handle_logging(self):
-        """To allow devs to log as early as possible, logging will already be handled here"""
+        """
+        To allow devs to log as early as possible, logging will already be
+        handled here
+        """
 
         configure_logging(self.get_scrapy_options())
 
@@ -219,17 +228,22 @@ class JsonConfig(object):
     __json_object = None
 
     def __init__(self):
-        """The constructor
-        (keep in mind: this is a singleton, so just called once),"""
+        """
+        The constructor
+
+        (keep in mind: this is a singleton, so just called once)
+        """
         self.log = logging.getLogger(__name__)
         if JsonConfig.instance is not None:
             self.log.error('Multiple instances of singleton-class')
             raise RuntimeError('Multiple instances of singleton-class')
 
     def setup(self, filepath):
-        """Setup the class at first usage
-        Arguments:
-            1. filepath: Path to the json-file (including file-name)"""
+        """
+        Setup the actual class.
+
+        :param str filepath: path to the config-file (including file-name)
+        """
         self.log.debug("Loading JSON-file (%s)", filepath)
         self.load_json(filepath)
 

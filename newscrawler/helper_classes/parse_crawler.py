@@ -10,7 +10,7 @@ from newscrawler.crawler.items import NewscrawlerItem
 
 class ParseCrawler(object):
     """
-    helper class
+    Helper class for the crawler's parse methods.
     """
     helper = None
 
@@ -24,6 +24,16 @@ class ParseCrawler(object):
             original_url,
             rss_title=None
     ):
+        """
+        Responsible for passing a NewscrawlerItem to the pipeline if the
+        response contains an article.
+
+        :param obj response: the scrapy response to work on
+        :param str source_domain: the response's domain as set for the crawler
+        :param str original_url: the url set in the json file
+        :param str rss_title: the title extracted by an rssCrawler
+        :return NewscrawlerItem: NewscrawlerItem to pass to the pipeline
+        """
         if self.helper.heuristics.is_article(response, original_url):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
@@ -52,6 +62,19 @@ class ParseCrawler(object):
     @staticmethod
     def recursive_requests(response, spider, ignore_regex='',
                            ignore_file_extensions='pdf'):
+        """
+        Manages recursive requests.
+        Determines urls to recursivly crawl if they do not match certain file
+        extensions and do not match a certain regex set in the config file.
+
+        :param obj response: the response to extract any urls from
+        :param obj spider: the crawler the callback should be called on
+        :param str ignore_regex: a regex that should that any extracted url
+                                 shouldn't match
+        :param str ignore_file_extensions: a regex of file extensions that the
+                                           end of any url may not match
+        :return list: Scrapy Requests
+        """
         # Recursivly crawl all URLs on the current page
         # that do not point to irrelevant file types
         # or contain any of the given ignore_regex regexes

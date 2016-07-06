@@ -1,5 +1,5 @@
 """
-helper class for url extraction
+Helper class for url extraction.
 """
 import re
 import os
@@ -8,23 +8,32 @@ import urllib2
 from urlparse import urlparse
 
 
-class UrlExtractor(object):
+# len(".markdown") = 9
+MAX_FILE_EXTENSION_LENGTH = 9
 
+
+class UrlExtractor(object):
     """
-    This class contains methods to extract parts of any given url
+    This class contains url related methods.
     """
 
     @staticmethod
     def get_allowed_domains(url):
         """
-        returns subdomains.domain.topleveldomain of url
+        Determines the url's domain.
+
+        :param str url: the url to extract the allowed domain from
+        :return str: subdomains.domain.topleveldomain of url
         """
         return re.sub(r'^(www.)', '', re.search(r'[^/]+\.[^/]+', url).group(0))
 
     @staticmethod
     def get_allowed_domains_without_subdomains(url):
         """
-        returns domain.topleveldomain of url
+        Determines the url's domain ignoreing any subdomains.
+
+        :param str url: the url to extract the allowed domain from
+        :return str: domain.topleveldomain of url
         """
         return re.search(r'[^/.]+\.[^/.]+$',
                          UrlExtractor.get_allowed_domains(url)).group(0)
@@ -32,7 +41,10 @@ class UrlExtractor(object):
     @staticmethod
     def get_subdomains(url):
         """
-        returns subdomains of url
+        Determines the domain's subdomains.
+
+        :param str url: the url to extract any subdomains from
+        :return str: subdomains of url
         """
         allowed_domains = UrlExtractor.get_allowed_domains(url)
         return allowed_domains[:len(allowed_domains) - len(
@@ -40,15 +52,25 @@ class UrlExtractor(object):
 
     @staticmethod
     def follow_redirects(url):
+        """
+        Get's the url actual address by following forwards
+
+        :param str url: the url to work on
+        :return str: actual address of url
+        """
         opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
         return opener.open(url).url
 
     @staticmethod
     def get_sitemap_urls(url, allow_subdomains):
         """
-        returns http://subdomains.domain.topleveldomain/robots.txt of url
+        Determines the domain's robot.txt
 
-        allow_subdomains decides if the return contains the subdomains
+        :param str url: the url to work on
+        :param bool allow_subdomains: Determines if the robot.txt may be the
+                                      subdomain's
+        :return: the robot.txt's address
+        :raises Exception: if there's no robot.txt on the site's domain
         """
         if allow_subdomains:
             redirect = UrlExtractor.follow_redirects(
@@ -78,7 +100,10 @@ class UrlExtractor(object):
     def sitemap_check(url):
         """
         Sitemap-Crawler are supported by every site which have a
-        Sitemap set in the robots.txt
+        Sitemap set in the robots.txt.
+
+        :param str url: the url to work on
+        :return bool: Determines if Sitemap is set in the site's robots.txt
         """
         response = urllib2.urlopen(UrlExtractor.get_sitemap_urls(url, True))
 
@@ -87,8 +112,10 @@ class UrlExtractor(object):
 
     def get_rss_url(self, response):
         """
-        return the rss url
-        a link of type "application/rss+rml" of the webpage to the given url
+        Extracts the rss feed's url from the scrapy response.
+
+        :param scrapy_response response: the site to extract the rss feed from
+        :return str: rss feed url
         """
         # if this throws an IndexError, then the webpage with the given url
         # does not contain a link of type "application/rss+xml"
@@ -99,14 +126,20 @@ class UrlExtractor(object):
     @staticmethod
     def get_start_urls(url):
         """
-        returns http://subdomains.domain.topleveldomain/ of url
+        Determines the start url to start a crawler from
+
+        :param str url: the url to extract the start url from
+        :return str: http://subdomains.domain.topleveldomain/ of url
         """
         return "http://" + UrlExtractor.get_allowed_domains(url) + "/"
 
     @staticmethod
     def get_url_directory_string(url):
         """
-        returns the directory string on the server
+        Determines the url's directory string.
+
+        :param str url: the url to extract the directory string from
+        :return str: the directory string on the server
         """
         domain = UrlExtractor.get_allowed_domains(url)
 
@@ -129,12 +162,14 @@ class UrlExtractor(object):
     @staticmethod
     def get_url_file_name(url):
         """
-        returns the filename (without the file extension) on the server
+        Determines the url's file name.
+
+        :param str url: the url to extract the file name from
+        :return str: the filename (without the file extension) on the server
         """
         url_root_ext = os.path.splitext(url)
 
-        # len(".markdown") = 9
-        if len(url_root_ext[1]) < 10:
+        if len(url_root_ext[1]) <= MAX_FILE_EXTENSION_LENGTH:
             return os.path.split(url_root_ext[0])[1]
         else:
             return os.path.split(url)[1]

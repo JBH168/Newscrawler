@@ -33,10 +33,10 @@ class HeuristicsManager(object):
         Tests if the given response is an article by calling and checking
         the heuristics set in newscrawler.cfg and input_data.json
 
-        :param response: The response of the site.
-        :param url: The base_url
-                    (needed to get the site-specific config from the JSON-file)
-        :return bool, true if the heuristics match the site as an article
+        :param obj response: The response of the site.
+        :param str url: The base_url (needed to get the site-specific config
+                        from the JSON-file)
+        :return bool: true if the heuristics match the site as an article
         """
         site = self.__sites_object[url]
         heuristics = self.__get_enabled_heuristics(url)
@@ -101,12 +101,11 @@ class HeuristicsManager(object):
     def __evaluate_result(self, result, condition):
         """
         Evaluates a result of a heuristic
-        with the condition given in the config
+        with the condition given in the config.
 
-        Arguments:
         :param result: The result of the heuristic
         :param condition: The condition string to evaluate on the result
-        :return bool, whether the heuristic result matches the condition
+        :return bool: Whether the heuristic result matches the condition
         """
 
         # If result is bool this means, that the heuristic
