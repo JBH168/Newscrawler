@@ -372,10 +372,10 @@ Cleanup db:
                 .format(yes='yes' if confirm else ''))
 
         if not confirm:
-            print("Did not type yes. Thus aborting.")
+            print "Did not type yes. Thus aborting."
             return
 
-        print("Resetting database...")
+        print "Resetting database..."
 
         try:
             self.cursor.execute("TRUNCATE TABLE CurrentVersions")
@@ -409,7 +409,7 @@ Cleanup files:
                 .format(yes='yes' if confirm else ''))
 
         if not confirm:
-            print("Did not type yes. Thus aborting.")
+            print "Did not type yes. Thus aborting."
             return
 
         print("Removing: %s", path)
