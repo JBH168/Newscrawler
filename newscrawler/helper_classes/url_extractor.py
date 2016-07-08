@@ -119,9 +119,11 @@ class UrlExtractor(object):
         """
         # if this throws an IndexError, then the webpage with the given url
         # does not contain a link of type "application/rss+xml"
-        return response.xpath(
-            '//link[contains(@type, "application/rss+xml")]').xpath(
-                '@href').extract()[0]
+        return response.urljoin(
+            response.xpath(
+                '//link[contains(@type, "application/rss+xml")]'
+                ).xpath('@href').extract()[0]
+            )
 
     @staticmethod
     def get_start_url(url):
