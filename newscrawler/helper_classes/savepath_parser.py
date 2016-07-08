@@ -87,41 +87,41 @@ class SavepathParser(object):
 
         savepath = re.sub(r'%domain\(([^\)]+)\)',
                           lambda match: UrlExtractor
-                          .get_allowed_domains_without_subdomains(url)[
+                          .get_allowed_domain_without_subdomain(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_domain\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
                               UrlExtractor
-                              .get_allowed_domains_without_subdomains(url),
+                              .get_allowed_domain_without_subdomain(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_domain\(([^\)]+)\)',
                           lambda match: hashlib.md5(
                               UrlExtractor
-                              .get_allowed_domains_without_subdomains(url))
+                              .get_allowed_domain_without_subdomain(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%full_domain\(([^\)]+)\)',
-                          lambda match: UrlExtractor.get_allowed_domains(url)[
+                          lambda match: UrlExtractor.get_allowed_domain(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_full_domain\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              UrlExtractor.get_allowed_domains(url),
+                              UrlExtractor.get_allowed_domain(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_full_domain\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              UrlExtractor.get_allowed_domains(url))
+                              UrlExtractor.get_allowed_domain(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%subdomains\(([^\)]+)\)',
-                          lambda match: UrlExtractor.get_subdomains(url)[
+                          lambda match: UrlExtractor.get_subdomain(url)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_subdomains\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              UrlExtractor.get_subdomains(url),
+                              UrlExtractor.get_subdomain(url),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_subdomains\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              UrlExtractor.get_subdomains(url))
+                              UrlExtractor.get_subdomain(url))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%url_directory_string\(([^\)]+)\)',

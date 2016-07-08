@@ -78,7 +78,7 @@ class Heuristics(HeuristicsManager):
         """
         h_all = 0
         h_linked = 0
-        domain = UrlExtractor.get_allowed_domains_without_subdomains(
+        domain = UrlExtractor.get_allowed_domain_without_subdomain(
             site_dict["url"])
 
         # This regex checks, if a link containing site_domain as domain
@@ -123,5 +123,5 @@ class Heuristics(HeuristicsManager):
 
         :return bool: Determines if the response's url is from a subdomain
         """
-        return UrlExtractor.get_allowed_domains(response.url) \
+        return UrlExtractor.get_allowed_domain(response.url) \
             == site_dict["url"]

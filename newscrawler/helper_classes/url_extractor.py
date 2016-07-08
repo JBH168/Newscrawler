@@ -18,7 +18,7 @@ class UrlExtractor(object):
     """
 
     @staticmethod
-    def get_allowed_domains(url):
+    def get_allowed_domain(url):
         """
         Determines the url's domain.
 
@@ -28,7 +28,7 @@ class UrlExtractor(object):
         return re.sub(r'^(www.)', '', re.search(r'[^/]+\.[^/]+', url).group(0))
 
     @staticmethod
-    def get_allowed_domains_without_subdomains(url):
+    def get_allowed_domain_without_subdomain(url):
         """
         Determines the url's domain ignoreing any subdomains.
 
@@ -36,19 +36,19 @@ class UrlExtractor(object):
         :return str: domain.topleveldomain of url
         """
         return re.search(r'[^/.]+\.[^/.]+$',
-                         UrlExtractor.get_allowed_domains(url)).group(0)
+                         UrlExtractor.get_allowed_domain(url)).group(0)
 
     @staticmethod
-    def get_subdomains(url):
+    def get_subdomain(url):
         """
         Determines the domain's subdomains.
 
         :param str url: the url to extract any subdomains from
         :return str: subdomains of url
         """
-        allowed_domains = UrlExtractor.get_allowed_domains(url)
-        return allowed_domains[:len(allowed_domains) - len(
-            UrlExtractor.get_allowed_domains_without_subdomains(url))]
+        allowed_domain = UrlExtractor.get_allowed_domain(url)
+        return allowed_domain[:len(allowed_domain) - len(
+            UrlExtractor.get_allowed_domain_without_subdomain(url))]
 
     @staticmethod
     def follow_redirects(url):
@@ -62,7 +62,7 @@ class UrlExtractor(object):
         return opener.open(url).url
 
     @staticmethod
-    def get_sitemap_urls(url, allow_subdomains):
+    def get_sitemap_url(url, allow_subdomains):
         """
         Determines the domain's robot.txt
 
@@ -74,12 +74,12 @@ class UrlExtractor(object):
         """
         if allow_subdomains:
             redirect = UrlExtractor.follow_redirects(
-                "http://" + UrlExtractor.get_allowed_domains(url)
+                "http://" + UrlExtractor.get_allowed_domain(url)
                 )
         else:
             redirect = UrlExtractor.follow_redirects(
                 "http://" +
-                UrlExtractor.get_allowed_domains_without_subdomains(url)
+                UrlExtractor.get_allowed_domain_without_subdomain(url)
                 )
         redirect = UrlExtractor.follow_redirects(url)
 
@@ -92,7 +92,7 @@ class UrlExtractor(object):
             return robots
         except:
             if allow_subdomains:
-                return UrlExtractor.get_sitemap_urls(url, False)
+                return UrlExtractor.get_sitemap_url(url, False)
             else:
                 raise Exception('Fatal: no robots.txt found.')
 
@@ -105,7 +105,7 @@ class UrlExtractor(object):
         :param str url: the url to work on
         :return bool: Determines if Sitemap is set in the site's robots.txt
         """
-        response = urllib2.urlopen(UrlExtractor.get_sitemap_urls(url, True))
+        response = urllib2.urlopen(UrlExtractor.get_sitemap_url(url, True))
 
         # Check if "Sitemap" is set
         return "Sitemap:" in response.read()
@@ -124,14 +124,14 @@ class UrlExtractor(object):
                 '@href').extract()[0]
 
     @staticmethod
-    def get_start_urls(url):
+    def get_start_url(url):
         """
         Determines the start url to start a crawler from
 
         :param str url: the url to extract the start url from
         :return str: http://subdomains.domain.topleveldomain/ of url
         """
-        return "http://" + UrlExtractor.get_allowed_domains(url) + "/"
+        return "http://" + UrlExtractor.get_allowed_domain(url) + "/"
 
     @staticmethod
     def get_url_directory_string(url):
@@ -141,7 +141,7 @@ class UrlExtractor(object):
         :param str url: the url to extract the directory string from
         :return str: the directory string on the server
         """
-        domain = UrlExtractor.get_allowed_domains(url)
+        domain = UrlExtractor.get_allowed_domain(url)
 
         splitted_url = url.split('/')
 

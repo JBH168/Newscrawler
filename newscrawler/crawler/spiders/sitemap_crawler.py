@@ -25,8 +25,8 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
         self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
-                                .get_allowed_domains(url)]
-        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_urls(
+                                .get_allowed_domain(url)]
+        self.sitemap_urls = [self.helper.url_extractor.get_sitemap_url(
             url, config.section('Crawler')['sitemapallowsubdomains'])]
 
         self.log.debug(self.sitemap_urls)
