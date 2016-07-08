@@ -12,7 +12,7 @@ class NewscrawlerItem(scrapy.Item):
     # Path of the file on the local filesystem
     local_path = scrapy.Field()
     # absolute path of the file on the local filesystem
-    absLocalPath = scrapy.Field()
+    abs_local_path = scrapy.Field()
     # When the article was last modified
     modified_date = scrapy.Field()
     # When the article was downloaded
@@ -29,6 +29,6 @@ class NewscrawlerItem(scrapy.Item):
     # Number of versions of the article in the DB
     version = scrapy.Field()
     # Reponse object from crawler
-    spiderResponse = scrapy.Field()
+    spider_response = scrapy.Field()
     # Title of the article as store in the RSS feed
     rss_title = scrapy.Field()

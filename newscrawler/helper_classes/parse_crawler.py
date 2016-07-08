@@ -45,8 +45,8 @@ class ParseCrawler(object):
             article = NewscrawlerItem()
             article['local_path'] = self.helper.savepath_parser \
                 .get_savepath(response.url)
-            article['absLocalPath'] = self.helper.savepath_parser.get_abs_path(
-                article['local_path'])
+            article['abs_local_path'] = self.helper.savepath_parser \
+                .get_abs_path(article['local_path'])
             article['modified_date'] = timestamp
             article['download_date'] = timestamp
             article['source_domain'] = source_domain.encode("utf-8")
@@ -60,7 +60,7 @@ class ParseCrawler(object):
             article['ancestor'] = 'NULL'
             article['descendant'] = 'NULL'
             article['version'] = '1'
-            article['spiderResponse'] = response
+            article['spider_response'] = response
             return article
 
     @staticmethod

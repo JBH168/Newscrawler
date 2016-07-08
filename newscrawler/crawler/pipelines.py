@@ -25,7 +25,7 @@ class HTMLCodeHandling(object):
 
     def process_item(self, item, spider):
         # For the case where something goes wrong
-        if item['spiderResponse'].status != 200:
+        if item['spider_response'].status != 200:
             # Item is no longer processed in the pipeline
             raise DropItem("%s: Non-200 response" % item['url'])
         else:
@@ -254,15 +254,15 @@ class LocalStorage(object):
     # Save the html and filename to the local storage folder
     def process_item(self, item, spider):
         # Add a log entry confirming the save
-        self.log.info("Saving to %s", item['absLocalPath'])
+        self.log.info("Saving to %s", item['abs_local_path'])
 
         # Ensure path exists
-        dir_ = os.path.dirname(item['absLocalPath'])
+        dir_ = os.path.dirname(item['abs_local_path'])
         if not os.path.exists(dir_):
             os.makedirs(dir_)
 
         # Write raw html to local file system
-        with open(item['absLocalPath'], 'wb') as file_:
-            file_.write(item['spiderResponse'].body)
+        with open(item['abs_local_path'], 'wb') as file_:
+            file_.write(item['spider_response'].body)
 
         return item
