@@ -330,7 +330,7 @@ Arguments:
                               quit_on_error is True
         """
         if self.cfg_file_path is not None and \
-                not self.cfg.section('General')['relativetoinitial']:
+                not self.cfg.section('Files')['relativetoinitial']:
             script_dir = os.path.dirname(self.cfg_file_path)
         else:
             # absolute dir this script is in
