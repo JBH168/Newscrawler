@@ -42,11 +42,14 @@ class ParseCrawler(object):
             timestamp = time.strftime('%y-%m-%d %H:%M:%S',
                                       time.gmtime(time.time()))
 
+            relative_local_path = self.helper.savepath_parser \
+                .get_savepath(response.url)
+
             article = NewscrawlerItem()
             article['local_path'] = self.helper.savepath_parser \
-                .get_savepath(response.url)
+                .get_formatted_relative_path(relative_local_path)
             article['abs_local_path'] = self.helper.savepath_parser \
-                .get_abs_path(article['local_path'])
+                .get_abs_path(relative_local_path)
             article['modified_date'] = timestamp
             article['download_date'] = timestamp
             article['source_domain'] = source_domain.encode("utf-8")

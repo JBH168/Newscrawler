@@ -16,8 +16,15 @@ class SavepathParser(object):
     helper = None
     cfg_savepath = None
     cfg_file_path = None
+    format_relative_path = None
 
-    def __init__(self, cfg_savepath, cfg_file_path, helper):
+    def __init__(
+            self,
+            cfg_savepath,
+            cfg_file_path,
+            format_relative_path,
+            helper
+            ):
         self.helper = helper
 
         # this part can be replaced right now; no need to replace it over and
@@ -33,6 +40,8 @@ class SavepathParser(object):
         self.cfg_savepath = cfg_savepath
 
         self.cfg_file_path = cfg_file_path
+
+        self.format_relative_path = format_relative_path
 
     @staticmethod
     def time_replacer(match, timestamp):
@@ -222,6 +231,20 @@ class SavepathParser(object):
             path = os.path.split(path)[0]
 
         return path
+
+    def get_formatted_relative_path(self, path):
+        """
+        Formates path to not start with a leading './' or '.\' if enables in
+        the config
+
+        :param str path: the path to format
+        :return str: the [formatted] path
+        """
+        if self.format_relative_path and \
+                (path.startswith('./') or path.startswith('.\\')):
+            return path[2:]
+        else:
+            return path
 
     @staticmethod
     def get_max_url_file_name_length(savepath):
