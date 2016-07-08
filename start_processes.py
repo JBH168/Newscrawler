@@ -218,19 +218,22 @@ class StartProcesses(object):
         if self.python_command is not None:
             return self.python_command
 
-        string = "python2.7"
+        self.python_command = self.cfg.section('General')['pythoncommand']
+
         try:
-            self.__get_python(string)
+            self.__get_python(self.python_command)
         except OSError:
-            string = "python"
-            output = self.__get_python(string)
-            if not output.startswith("Python 2.7"):
-                print "ERROR: You need to have Python 2.7.* installed " \
-                      "and in your PATH. It must be executable by invoking " \
-                      "python or python2.7."
-                sys.exit(1)
-        self.python_command = string
-        return string
+            print "ERROR: You need to have Python installed and in your " \
+                  "PATH. It must be executable by invoking the command set " \
+                  "in the config file's 'General' section 'PythonCommand'."
+            sys.exit(1)
+
+        return self.python_command
+
+    def __get_python(self, string):
+        return Popen([string, "--version"],
+                     stderr=subprocess.STDOUT,
+                     stdout=subprocess.PIPE).communicate()[0]
 
     def graceful_stop(self, signal_number=None, stack_frame=None):
         """
@@ -276,11 +279,6 @@ class StartProcesses(object):
 
         # Default
         return self.get_abs_file_path("./newscrawler.cfg", quit_on_error=True)
-
-    def __get_python(self, string):
-        return Popen([string, "--version"],
-                     stderr=subprocess.STDOUT,
-                     stdout=subprocess.PIPE).communicate()[0]
 
     def print_help(self):
         """
