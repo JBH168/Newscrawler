@@ -80,7 +80,7 @@ class StartProcesses(object):
             self.reset_files()
             sys.exit(0)
 
-        urlinput_file_path = self.cfg.section('Files')['urlinput']
+        urlinput_file_path = self.cfg.section('Files')['url_input']
         self.json_file_path = self.get_abs_file_path(
             urlinput_file_path, quit_on_error=True)
 
@@ -122,7 +122,8 @@ class StartProcesses(object):
             else:
                 self.crawler_list.append_item(index)
 
-        num_threads = self.cfg.section('Crawler')['numberofparallelcrawlers']
+        num_threads = self.cfg.section('Crawler')[
+            'number_of_parallel_crawlers']
         if self.crawler_list.len() < num_threads:
             num_threads = self.crawler_list.len()
 
@@ -133,7 +134,7 @@ class StartProcesses(object):
             self.threads.append(thread)
             thread.start()
 
-        num_daemons = self.cfg.section('Crawler')['numberofparalleldaemons']
+        num_daemons = self.cfg.section('Crawler')['number_of_parallel_daemons']
         if self.daemon_list.len() < num_daemons:
             num_daemons = self.daemon_list.len()
 
@@ -218,14 +219,14 @@ class StartProcesses(object):
         if self.python_command is not None:
             return self.python_command
 
-        self.python_command = self.cfg.section('General')['pythoncommand']
+        self.python_command = self.cfg.section('General')['python_command']
 
         try:
             self.__get_python(self.python_command)
         except OSError:
             print "ERROR: You need to have Python installed and in your " \
                   "PATH. It must be executable by invoking the command set " \
-                  "in the config file's 'General' section 'PythonCommand'."
+                  "in the config file's 'General' section 'python_command'."
             sys.exit(1)
 
         return self.python_command
@@ -328,7 +329,7 @@ Arguments:
                               quit_on_error is True
         """
         if self.cfg_file_path is not None and \
-                not self.cfg.section('Files')['relativetoinitial']:
+                not self.cfg.section('Files')['relative_to_initial_file']:
             script_dir = os.path.dirname(self.cfg_file_path)
         else:
             # absolute dir this script is in
@@ -389,7 +390,7 @@ Cleanup db:
 
         path = SavepathParser.get_base_path(
             SavepathParser.get_abs_path_static(
-                self.cfg.section('Crawler')["savepath"],
+                self.cfg.section('Crawler')["local_data_directory"],
                 self.cfg_file_path
                 )
             )

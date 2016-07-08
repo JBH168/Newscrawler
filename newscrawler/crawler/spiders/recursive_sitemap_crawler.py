@@ -28,14 +28,14 @@ class RecursiveSitemapCrawler(scrapy.spiders.SitemapSpider):
 
         self.ignore_regex = ignore_regex
         self.ignore_file_extensions = self.config.section(
-            'Crawler')['ignorefileextensions']
+            'Crawler')['ignore_file_extensions']
 
         self.original_url = url
 
         self.allowed_domains = [self.helper.url_extractor
                                 .get_allowed_domain(url)]
         self.sitemap_urls = [self.helper.url_extractor.get_sitemap_url(
-            url, config.section('Crawler')['sitemapallowsubdomains'])]
+            url, config.section('Crawler')['sitemap_allow_subdomains'])]
 
         super(RecursiveSitemapCrawler, self).__init__(*args, **kwargs)
 

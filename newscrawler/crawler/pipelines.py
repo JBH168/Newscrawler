@@ -45,7 +45,8 @@ class RSSCrawlCompare(object):
         self.log = logging.getLogger(__name__)
 
         self.cfg = CrawlerConfig.get_instance()
-        self.delta_time = self.cfg.section("Crawler")["deltatime"]
+        self.delta_time = self.cfg.section("Crawler")[
+            "time_to_pass_for_redownload_by_rss_crawler"]
         self.database = self.cfg.section("Database")
 
         # Establish DB connection

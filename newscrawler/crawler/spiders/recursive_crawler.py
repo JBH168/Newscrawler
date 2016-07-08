@@ -26,7 +26,7 @@ class RecursiveCrawler(scrapy.Spider):
 
         self.ignore_regex = ignore_regex
         self.ignore_file_extensions = self.config.section(
-            'Crawler')['ignorefileextensions']
+            'Crawler')['ignore_file_extensions']
 
         self.original_url = url
 

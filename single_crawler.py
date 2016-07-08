@@ -90,9 +90,9 @@ class SingleCrawler(object):
         crawler_class = self.get_crawler(self.crawler, site["url"])
 
         self.helper = Helper(self.cfg.section('Heuristics'),
-                             self.cfg.section('Files')['savepath'],
+                             self.cfg.section('Files')['local_data_directory'],
                              self.cfg_file_path,
-                             self.cfg.section('Files')['formatrelativepath'],
+                             self.cfg.section('Files')['format_relative_path'],
                              self.json.get_site_objects(),
                              crawler_class)
 
