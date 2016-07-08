@@ -76,9 +76,10 @@ class SingleCrawler(object):
         site = self.json.get_site_objects()[self.site_number]
 
         if "ignore_regex" in site:
-            ignore_regex = "(%s)|", site["ignoreRegex"]
+            ignore_regex = "(%s)|" % site["ignore_regex"]
         else:
-            ignore_regex = ''
+            ignore_regex = "(%s)|" % \
+                self.cfg.section('Crawler')['ignore_regex']
 
         # Get the default crawler. The crawler can be overwritten by fallbacks.
         if "crawler" in site:

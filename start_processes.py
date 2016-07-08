@@ -410,7 +410,7 @@ Cleanup files:
             print "Did not type yes. Thus aborting."
             return
 
-        print("Removing: %s", path)
+        print "Removing: %s" % path
 
         try:
             shutil.rmtree(path)
