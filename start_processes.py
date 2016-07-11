@@ -90,7 +90,8 @@ class StartProcesses(object):
         self.crawler_list = self.CrawlerList()
         self.daemon_list = self.DaemonList()
 
-        self.__single_crawler = self.get_abs_file_path("./single_crawler.py")
+        self.__single_crawler = self.get_abs_file_path("./single_crawler.py",
+                                                       True, False)
 
         self.manage_crawlers()
 
@@ -314,7 +315,8 @@ Arguments:
             """
         print _help % (self.get_python_command(), __file__)
 
-    def get_abs_file_path(self, rel_file_path, quit_on_error=None):
+    def get_abs_file_path(self, rel_file_path,
+                          quit_on_error=None, check_relative_to_path=True):
         """
         Returns the absolute file path of the given [relative] file path
         to either this script or to the config file.
@@ -329,6 +331,7 @@ Arguments:
                               quit_on_error is True
         """
         if self.cfg_file_path is not None and \
+                check_relative_to_path and \
                 not self.cfg.section('Files')['relative_to_initial_file']:
             script_dir = os.path.dirname(self.cfg_file_path)
         else:
@@ -490,8 +493,8 @@ Cleanup files:
 
         def sort_queue(self):
             """
-            Sorts the queue, so the tuple with the lowest index (first value) is
-            the first element in the array.
+            Sorts the queue, so the tuple with the lowest index (first value)
+            is the first element in the array.
             """
             self.queue = sorted(self.queue, key=lambda t: t[0])
             self.queue_times = sorted(self.queue_times)

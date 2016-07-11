@@ -15,13 +15,13 @@ class SavepathParser(object):
     """
     helper = None
     cfg_savepath = None
-    cfg_file_path = None
+    relative_to_path = None
     format_relative_path = None
 
     def __init__(
             self,
             cfg_savepath,
-            cfg_file_path,
+            relative_to_path,
             format_relative_path,
             helper
             ):
@@ -39,7 +39,7 @@ class SavepathParser(object):
                               str(timestamp_execution), cfg_savepath)
         self.cfg_savepath = cfg_savepath
 
-        self.cfg_file_path = cfg_file_path
+        self.relative_to_path = relative_to_path
 
         self.format_relative_path = format_relative_path
 
@@ -71,7 +71,7 @@ class SavepathParser(object):
             if size > 32:
                 component_size = size - 32 - 1
                 return "%s_%s" % (component[:component_size],
-                    hashlib.md5(component).hexdigest())
+                                  hashlib.md5(component).hexdigest())
             else:
                 return hashlib.md5(component).hexdigest()[:size]
         else:
@@ -185,12 +185,12 @@ class SavepathParser(object):
         return split_savepath[0] + savepath_without_invalid_chars
 
     @staticmethod
-    def get_abs_path_static(savepath, relative_to):
+    def get_abs_path_static(savepath, relative_to_path):
         """
         Figures out the savepath's absolute version.
 
         :param str savepath: the savepath to return an absolute version of
-        :param str relative_to: the file path this savepath should be relative
+        :param str relative_to_path: the file path this savepath should be relative
                                 to
         :return str: absolute version of savepath
         """
@@ -198,7 +198,7 @@ class SavepathParser(object):
             return os.path.abspath(savepath)
         else:
             return os.path.abspath(
-                os.path.join(os.path.dirname(relative_to), (savepath))
+                os.path.join(relative_to_path, (savepath))
                 )
 
     def get_abs_path(self, savepath):
@@ -209,7 +209,7 @@ class SavepathParser(object):
         :param str savepath: the savepath to return an absolute version of
         :return str: absolute version of savepath
         """
-        return self.get_abs_path_static(savepath, self.cfg_file_path)
+        return self.get_abs_path_static(savepath, self.relative_to_path)
 
     @staticmethod
     def get_base_path(path):

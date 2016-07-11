@@ -22,7 +22,7 @@ class Helper(object):
             self,
             cfg_heuristics,
             cfg_savepath,
-            cfg_file_path,
+            relative_to_path,
             format_relative_path,
             sites_object,
             crawler_class
@@ -31,5 +31,5 @@ class Helper(object):
             cfg_heuristics, sites_object, crawler_class)
         self.url_extractor = UrlExtractor()
         self.savepath_parser = SavepathParser(
-            cfg_savepath, cfg_file_path, format_relative_path, self)
+            cfg_savepath, relative_to_path, format_relative_path, self)
         self.parse_crawler = ParseCrawler(self)
