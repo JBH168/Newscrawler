@@ -126,7 +126,7 @@ class SingleCrawler(object):
         jobdir = self.__scrapy_options["JOBDIR"]
         if not jobdir.endswith("/"):
             jobdir = jobdir + "/"
-        hashed = hashlib.md5(site["url"] + self.crawler)
+        hashed = hashlib.md5(str(site["url"]) + self.crawler)
 
         self.__scrapy_options["JOBDIR"] = jobdir + hashed.hexdigest()
 

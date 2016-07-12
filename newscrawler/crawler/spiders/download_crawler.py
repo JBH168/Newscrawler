@@ -7,8 +7,6 @@ class Download(scrapy.Spider):
     name = "Download"
     start_urls = None
 
-    original_url = None
-
     log = None
 
     config = None
@@ -20,8 +18,10 @@ class Download(scrapy.Spider):
         self.config = config
         self.helper = helper
 
-        self.original_url = url
-        self.start_urls = [url]
+        if isinstance(url, list):
+            self.start_urls = url
+        else:
+            self.start_urls = [url]
 
         super(Download, self).__init__(*args, **kwargs)
 
