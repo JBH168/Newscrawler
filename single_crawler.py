@@ -159,7 +159,7 @@ class SingleCrawler(object):
                     else:
                         self.log.error("No crawlers (incl. fallbacks) "
                                        "found for url %s.", url)
-                        return None
+                        raise RuntimeError("No crawler found. Quit.")
             else:
                 self.log.warning("The crawler %s has no "
                                  "supports_site-method defined", crawler)
