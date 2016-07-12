@@ -39,32 +39,41 @@ class ParseCrawler(object):
         :return NewscrawlerItem: NewscrawlerItem to pass to the pipeline
         """
         if self.helper.heuristics.is_article(response, original_url):
-            timestamp = time.strftime('%y-%m-%d %H:%M:%S',
-                                      time.gmtime(time.time()))
+            return self.pass_to_pipeline(
+                response, source_domain, rss_title=None)
 
-            relative_local_path = self.helper.savepath_parser \
-                .get_savepath(response.url)
+    def pass_to_pipeline(
+            self,
+            response,
+            source_domain,
+            rss_title=None
+    ):
+        timestamp = time.strftime('%y-%m-%d %H:%M:%S',
+                                  time.gmtime(time.time()))
 
-            article = NewscrawlerItem()
-            article['local_path'] = self.helper.savepath_parser \
-                .get_formatted_relative_path(relative_local_path)
-            article['abs_local_path'] = self.helper.savepath_parser \
-                .get_abs_path(relative_local_path)
-            article['modified_date'] = timestamp
-            article['download_date'] = timestamp
-            article['source_domain'] = source_domain.encode("utf-8")
-            article['url'] = response.url
-            article['html_title'] = response.selector.xpath('//title/text()') \
-                .extract_first().encode("utf-8")
-            if rss_title is None:
-                article['rss_title'] = 'NULL'
-            else:
-                article['rss_title'] = rss_title.encode("utf-8")
-            article['ancestor'] = 'NULL'
-            article['descendant'] = 'NULL'
-            article['version'] = '1'
-            article['spider_response'] = response
-            return article
+        relative_local_path = self.helper.savepath_parser \
+            .get_savepath(response.url)
+
+        article = NewscrawlerItem()
+        article['local_path'] = self.helper.savepath_parser \
+            .get_formatted_relative_path(relative_local_path)
+        article['abs_local_path'] = self.helper.savepath_parser \
+            .get_abs_path(relative_local_path)
+        article['modified_date'] = timestamp
+        article['download_date'] = timestamp
+        article['source_domain'] = source_domain.encode("utf-8")
+        article['url'] = response.url
+        article['html_title'] = response.selector.xpath('//title/text()') \
+            .extract_first().encode("utf-8")
+        if rss_title is None:
+            article['rss_title'] = 'NULL'
+        else:
+            article['rss_title'] = rss_title.encode("utf-8")
+        article['ancestor'] = 'NULL'
+        article['descendant'] = 'NULL'
+        article['version'] = '1'
+        article['spider_response'] = response
+        return article
 
     @staticmethod
     def recursive_requests(response, spider, ignore_regex='',
