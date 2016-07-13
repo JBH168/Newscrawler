@@ -12,16 +12,13 @@ import mysql.connector
 from scrapy.exceptions import DropItem
 from newscrawler.config import CrawlerConfig
 
-################
-#
-# Handles reponses to HTML responses other than 200 (accept).
-# As of 22.06.16 not active, but serves as an example of new
-#     functionality
-#
-################
-
 
 class HTMLCodeHandling(object):
+    """
+    Handles reponses to HTML responses other than 200 (accept).
+    As of 22.06.16 not active, but serves as an example of new
+    functionality
+    """
 
     def process_item(self, item, spider):
         # For the case where something goes wrong
@@ -31,15 +28,21 @@ class HTMLCodeHandling(object):
         else:
             return item
 
-################
-#
-# Compares the item's age to the current version in the DB.
-# If the difference is greater than delta_time, then save the newer version.
-#
-###############
-
 
 class RSSCrawlCompare(object):
+    """
+    Compares the item's age to the current version in the DB.
+    If the difference is greater than delta_time, then save the newer version.
+    """
+    log = None
+    cfg = None
+    delta_time = None
+    database = None
+    conn = None
+    cursor = None
+
+    # Defined DB query to retrieve the last version of the article
+    compare_versions = ("SELECT * FROM CurrentVersions WHERE url=%s")
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
@@ -58,9 +61,6 @@ class RSSCrawlCompare(object):
                                             passwd=self.database["password"],
                                             buffered=True)
         self.cursor = self.conn.cursor()
-
-        # Defined DB query to retrieve the last version of the article
-        self.compare_versions = ("SELECT * FROM CurrentVersions WHERE url=%s")
 
     def process_item(self, item, spider):
         if spider.name == 'rssCrawler':
@@ -89,14 +89,38 @@ class RSSCrawlCompare(object):
         # Close DB connection - garbage collection
         self.conn.close()
 
-################
-#
-# Handles remote storage of the meta data in the DB
-#
-################
-
 
 class DatabaseStorage(object):
+    """
+    Handles remote storage of the meta data in the DB
+    """
+
+    log = None
+    cfg = None
+    database = None
+    conn = None
+    cursor = None
+    # initialize necessary DB queries for this pipe
+    compare_versions = ("SELECT * FROM CurrentVersions WHERE url=%s")
+    insert_current = ("INSERT INTO CurrentVersions(local_path,\
+                          modified_date,download_date,source_domain,url,\
+                          html_title, ancestor, descendant, version,\
+                          rss_title) VALUES (%(local_path)s,\
+                          %(modified_date)s, %(download_date)s,\
+                          %(source_domain)s, %(url)s, %(html_title)s,\
+                          %(ancestor)s, %(descendant)s, %(version)s,\
+                          %(rss_title)s)")
+
+    insert_archive = ("INSERT INTO ArchiveVersions(id, local_path,\
+                          modified_date,download_date,source_domain,url,\
+                          html_title, ancestor, descendant, version,\
+                          rss_title) VALUES (%(db_id)s, %(local_path)s,\
+                          %(modified_date)s, %(download_date)s,\
+                          %(source_domain)s, %(url)s, %(html_title)s,\
+                          %(ancestor)s, %(descendant)s, %(version)s,\
+                          %(rss_title)s)")
+
+    delete_from_current = ("DELETE FROM CurrentVersions WHERE url = %s")
 
     # init database connection
     def __init__(self):
@@ -114,35 +138,13 @@ class DatabaseStorage(object):
                                             buffered=True)
         self.cursor = self.conn.cursor()
 
-        # initialize necessary DB queries for this pipe
-        self.compare_versions = ("SELECT * FROM CurrentVersions WHERE url=%s")
-
-        self.insert_current = ("INSERT INTO CurrentVersions(local_path,\
-                              modified_date,download_date,source_domain,url,\
-                              html_title, ancestor, descendant, version,\
-                              rss_title) VALUES (%(local_path)s,\
-                              %(modified_date)s, %(download_date)s,\
-                              %(source_domain)s, %(url)s, %(html_title)s,\
-                              %(ancestor)s, %(descendant)s, %(version)s,\
-                              %(rss_title)s)")
-
-        self.insert_archive = ("INSERT INTO ArchiveVersions(id, local_path,\
-                              modified_date,download_date,source_domain,url,\
-                              html_title, ancestor, descendant, version,\
-                              rss_title) VALUES (%(dbID)s, %(local_path)s,\
-                              %(modified_date)s, %(download_date)s,\
-                              %(source_domain)s, %(url)s, %(html_title)s,\
-                              %(ancestor)s, %(descendant)s, %(version)s,\
-                              %(rss_title)s)")
-
-        self.delete_from_current = (
-            "DELETE FROM CurrentVersions WHERE url = %s")
-
-    # Store item data in DB.
-    # First determine if a version of the article already exists,
-    #   if so then 'migrate' the older version to the archive table.
-    # Second store the new article in the current version table
     def process_item(self, item, spider):
+        """
+        Store item data in DB.
+        First determine if a version of the article already exists,
+          if so then 'migrate' the older version to the archive table.
+        Second store the new article in the current version table
+        """
 
         # Search the CurrentVersion table for a version of the article
         try:
@@ -159,7 +161,7 @@ class DatabaseStorage(object):
         #   CurrentVersion table
         if old_version is not None:
             old_version_list = {
-                'dbID': old_version[0],
+                'db_id': old_version[0],
                 'local_path': old_version[1],
                 'modified_date': old_version[2],
                 'download_date': old_version[3],
@@ -219,7 +221,7 @@ class DatabaseStorage(object):
 
         # populate item field with db ID number
         try:
-            item['dbID'] = self.cursor.lastrowid
+            item['db_id'] = self.cursor.lastrowid
         except mysql.connector.Error as error:
             self.log.error("Something went wrong in id query: %s", error)
 
@@ -228,7 +230,7 @@ class DatabaseStorage(object):
             try:
                 self.cursor.execute(
                     "UPDATE ArchiveVersions SET descendant=%s WHERE\
-                    id=%s", (item['dbID'], old_version[0],)
+                    id=%s", (item['db_id'], old_version[0],)
                     )
             except mysql.connector.Error as error:
                 self.log.error("Something went wrong in version update: %s",
@@ -240,14 +242,11 @@ class DatabaseStorage(object):
         # Close DB connection - garbage collection
         self.conn.close()
 
-################
-#
-# Handles storage of the file on the local system
-#
-################
-
 
 class LocalStorage(object):
+    """
+    Handles storage of the file on the local system
+    """
 
     def __init__(self):
         self.log = logging.getLogger(__name__)

@@ -8,7 +8,7 @@ import scrapy
 
 class NewscrawlerItem(scrapy.Item):
     # ID of the article in the DB
-    dbID = scrapy.Field()
+    db_id = scrapy.Field()
     # Path of the file on the local filesystem
     local_path = scrapy.Field()
     # absolute path of the file on the local filesystem

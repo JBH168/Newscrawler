@@ -50,7 +50,6 @@ class CrawlerConfig(object):
     sections = None
     parser = None
     __current_section = None
-    __logging = None
     __scrapy_options = None
     __config = None
 

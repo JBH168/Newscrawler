@@ -99,12 +99,11 @@ class SingleCrawler(object):
                              self.cfg.section('Files')['local_data_directory'],
                              relative_to_path,
                              self.cfg.section('Files')['format_relative_path'],
-                             self.json.get_site_objects(),
-                             crawler_class)
+                             self.json.get_site_objects())
 
         self.__scrapy_options = self.cfg.get_scrapy_options()
 
-        self.update_job_dir(site)
+        self.update_jobdir(site)
 
         # make sure the crawler does not resume crawling
         # if not stated otherwise in the arguments passed to this script
@@ -116,12 +115,12 @@ class SingleCrawler(object):
 
         self.process.start()
 
-    def update_job_dir(self, site):
+    def update_jobdir(self, site):
         """
         Update the JOBDIR in __scrapy_options for the crawler,
         so each crawler gets its own jobdir.
 
-        :param object site: a site object extracted from the json file
+        :param object site: a site dict extracted from the json file
         """
         jobdir = self.__scrapy_options["JOBDIR"]
         if not jobdir.endswith("/"):

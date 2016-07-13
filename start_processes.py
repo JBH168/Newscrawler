@@ -29,12 +29,12 @@ class StartProcesses(object):
     cfg = None
     log = None
     cfg_file_path = None
+    json_file_path = None
     shall_resume = False
     threads = []
     threads_daemonized = []
     crawler_list = None
     daemon_list = None
-    json_file_path = None
     shutdown = False
     thread_event = None
     database = None
