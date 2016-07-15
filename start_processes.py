@@ -294,7 +294,7 @@ class StartProcesses(object):
 
 Usage:
 
-    %s %s [help] [cfg_file_path] [arg] ...
+    python %s [help] [cfg_file_path] [arg] ...
 
 
 
@@ -313,7 +313,7 @@ Arguments:
                 --reset         Reset the databse and the local savepath
                 --noconfirm     Skip confirm dialogs
             """
-        print _help % (self.get_python_command(), __file__)
+        print _help % (os.path.basename(__file__))
 
     def get_abs_file_path(self, rel_file_path,
                           quit_on_error=None, check_relative_to_path=True):
