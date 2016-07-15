@@ -78,8 +78,7 @@ class Heuristics(HeuristicsManager):
         """
         h_all = 0
         h_linked = 0
-        domain = UrlExtractor.get_allowed_domain_without_subdomain(
-            site_dict["url"])
+        domain = UrlExtractor.get_allowed_domain(site_dict["url"], False)
 
         # This regex checks, if a link containing site_domain as domain
         # is contained in a string.

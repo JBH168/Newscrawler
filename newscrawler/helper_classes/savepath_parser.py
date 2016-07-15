@@ -96,17 +96,15 @@ class SavepathParser(object):
 
         savepath = re.sub(r'%domain\(([^\)]+)\)',
                           lambda match: UrlExtractor
-                          .get_allowed_domain_without_subdomain(url)[
+                          .get_allowed_domain(url, False)[
                               :int(match.group(1))], savepath)
         savepath = re.sub(r'%appendmd5_domain\(([^\)]+)\)',
                           lambda match: SavepathParser.append_md5_if_too_long(
-                              UrlExtractor
-                              .get_allowed_domain_without_subdomain(url),
+                              UrlExtractor.get_allowed_domain(url, False),
                               int(match.group(1))), savepath)
         savepath = re.sub(r'%md5_domain\(([^\)]+)\)',
                           lambda match: hashlib.md5(
-                              UrlExtractor
-                              .get_allowed_domain_without_subdomain(url))
+                              UrlExtractor.get_allowed_domain(url, False))
                           .hexdigest()[:int(match.group(1))], savepath)
 
         savepath = re.sub(r'%full_domain\(([^\)]+)\)',
@@ -190,8 +188,8 @@ class SavepathParser(object):
         Figures out the savepath's absolute version.
 
         :param str savepath: the savepath to return an absolute version of
-        :param str relative_to_path: the file path this savepath should be relative
-                                to
+        :param str relative_to_path: the file path this savepath should be
+                                     relative to
         :return str: absolute version of savepath
         """
         if os.path.isabs(savepath):

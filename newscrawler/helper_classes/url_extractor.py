@@ -18,25 +18,20 @@ class UrlExtractor(object):
     """
 
     @staticmethod
-    def get_allowed_domain(url):
+    def get_allowed_domain(url, allow_subdomains=True):
         """
         Determines the url's domain.
 
         :param str url: the url to extract the allowed domain from
-        :return str: subdomains.domain.topleveldomain of url
+        :param bool allow_subdomains: determines wether to include subdomains
+        :return str: subdomains.domain.topleveldomain or domain.topleveldomain
         """
-        return re.sub(r'^(www.)', '', re.search(r'[^/]+\.[^/]+', url).group(0))
-
-    @staticmethod
-    def get_allowed_domain_without_subdomain(url):
-        """
-        Determines the url's domain ignoreing any subdomains.
-
-        :param str url: the url to extract the allowed domain from
-        :return str: domain.topleveldomain of url
-        """
-        return re.search(r'[^/.]+\.[^/.]+$',
-                         UrlExtractor.get_allowed_domain(url)).group(0)
+        if allow_subdomains:
+            return re.sub(r'^(www.)',
+                          '', re.search(r'[^/]+\.[^/]+', url).group(0))
+        else:
+            return re.search(r'[^/.]+\.[^/.]+$',
+                             UrlExtractor.get_allowed_domain(url)).group(0)
 
     @staticmethod
     def get_subdomain(url):
@@ -48,7 +43,7 @@ class UrlExtractor(object):
         """
         allowed_domain = UrlExtractor.get_allowed_domain(url)
         return allowed_domain[:len(allowed_domain) - len(
-            UrlExtractor.get_allowed_domain_without_subdomain(url))]
+            UrlExtractor.get_allowed_domain(url, False))]
 
     @staticmethod
     def follow_redirects(url):
@@ -79,13 +74,20 @@ class UrlExtractor(object):
         else:
             redirect = UrlExtractor.follow_redirects(
                 "http://" +
-                UrlExtractor.get_allowed_domain_without_subdomain(url)
+                UrlExtractor.get_allowed_domain(url, False)
                 )
         redirect = UrlExtractor.follow_redirects(url)
 
         # Get robots.txt
         parsed = urlparse(redirect)
-        robots = '{url.scheme}://{url.netloc}/robots.txt'.format(url=parsed)
+        if allow_subdomains:
+            url_netloc = parsed.netloc
+        else:
+            url_netloc = UrlExtractor.get_allowed_domain(
+                parsed.netloc, False)
+
+        robots = '{url.scheme}://{url_netloc}/robots.txt'.format(
+            url=parsed, url_netloc=url_netloc)
 
         try:
             urllib2.urlopen(robots)
