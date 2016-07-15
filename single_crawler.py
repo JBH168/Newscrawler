@@ -163,7 +163,9 @@ class SingleCrawler(object):
                 self.log.warning("The crawler %s has no "
                                  "supports_site-method defined", crawler)
                 return current
-        return None
+        self.log.error("Could not fall back since you created a fall back "
+                       "loop for %s in the config file.", crawler)
+        sys.exit(1)
 
     def get_crawler_class(self, crawler):
         """
