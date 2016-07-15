@@ -42,7 +42,7 @@ class StartProcesses(object):
     __single_crawler = False
 
     def __init__(self):
-        configure_logging({"LOG_LEVEL": "CRITICAL"})
+        configure_logging({"LOG_LEVEL": "ERROR"})
         self.log = logging.getLogger(__name__)
 
         # Sets an environmental variable called 'CColon', so scripts can import
