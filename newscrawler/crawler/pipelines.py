@@ -49,7 +49,7 @@ class RSSCrawlCompare(object):
 
         self.cfg = CrawlerConfig.get_instance()
         self.delta_time = self.cfg.section("Crawler")[
-            "time_to_pass_for_redownload_by_rss_crawler"]
+            "hours_to_pass_for_redownload_by_rss_crawler"]
         self.database = self.cfg.section("Database")
 
         # Establish DB connection
@@ -63,7 +63,7 @@ class RSSCrawlCompare(object):
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
-        if spider.name == 'rssCrawler':
+        if spider.name == 'RssCrawler':
             # Search the CurrentVersion table for a version of the article
             try:
                 self.cursor.execute(self.compare_versions, (item['url'],))
@@ -76,9 +76,9 @@ class RSSCrawlCompare(object):
 
             if old_version is not None:
                 # Compare the two download dates. index 3 of old_version
-                #   corresponds to the downloadDate attribute in the DB
+                #   corresponds to the download_date attribute in the DB
                 if (datetime.datetime.strptime(
-                        item['downloadDate'], "%y-%m-%d %H:%M:%S") -
+                        item['download_date'], "%y-%m-%d %H:%M:%S") -
                         old_version[3]) \
                         < datetime.timedelta(hours=self.delta_time):
                     raise DropItem("Article in DB too recent. Not saving.")
