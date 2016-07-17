@@ -1,10 +1,11 @@
 {
     "base_urls" : [
         {
-          "url": "http://www.faz.net/",
-          "crawler": "RecursiveCrawler",
-          "pass_heuristics_condition": "meta_contains_article_keyword",
+          "url": "http://www.zeit.de/",
+          "crawler": "RssCrawler",
+          "pass_heuristics_condition": "crawler_contains_only_article_alikes",
           "overwrite_heuristics": {
+            "crawler_contains_only_article_alikes": true,
             "meta_contains_article_keyword": true
           }
         }

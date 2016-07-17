@@ -99,7 +99,8 @@ class SingleCrawler(object):
                              self.cfg.section('Files')['local_data_directory'],
                              relative_to_path,
                              self.cfg.section('Files')['format_relative_path'],
-                             self.json.get_site_objects())
+                             self.json.get_site_objects(),
+                             crawler_class)
 
         self.__scrapy_options = self.cfg.get_scrapy_options()
 
@@ -125,7 +126,8 @@ class SingleCrawler(object):
         jobdir = self.__scrapy_options["JOBDIR"]
         if not jobdir.endswith("/"):
             jobdir = jobdir + "/"
-        hashed = hashlib.md5(str(site["url"]) + self.crawler)
+        site_string = site["url"] + self.crawler
+        hashed = hashlib.md5(site_string.encode('utf-8'))
 
         self.__scrapy_options["JOBDIR"] = jobdir + hashed.hexdigest()
 

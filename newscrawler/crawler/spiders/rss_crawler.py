@@ -1,4 +1,8 @@
-import urllib2
+# import urllib2
+try:
+    import urllib2
+except ImportError:
+    import urllib.request as urllib2
 
 import re
 import logging
@@ -67,6 +71,14 @@ class RssCrawler(scrapy.Spider):
             rss_title)
 
     @staticmethod
+    def only_extracts_articles():
+        """
+        Meta-Method, so if the heuristic "crawler_contains_only_article_alikes"
+        is called, the heuristic will return True on this crawler.
+        """
+        return True
+
+    @staticmethod
     def supports_site(url):
         """
         Rss Crawler are supported if by every site containing an rss feed.
@@ -84,6 +96,6 @@ class RssCrawler(scrapy.Spider):
 
         # Check if a standard rss feed exists
         return re.search(
-            r'(<link[^>]*href[^>]*type ?= ?"application\/rss\+xml"|'
-            + r'<link[^>]*type ?= ?"application\/rss\+xml"[^>]*href)',
-            response) is not None
+            r'(<link[^>]*href[^>]*type ?= ?"application\/rss\+xml"|' +
+            r'<link[^>]*type ?= ?"application\/rss\+xml"[^>]*href)',
+            response.decode('utf-8')) is not None

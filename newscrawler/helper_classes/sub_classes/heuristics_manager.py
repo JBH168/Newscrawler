@@ -1,5 +1,10 @@
 import logging
 
+try:
+    basestring = basestring
+except NameError:
+    basestring = (str, bytes)
+
 
 class HeuristicsManager(object):
     """
@@ -20,11 +25,12 @@ class HeuristicsManager(object):
     __heuristics_condition = None
     __condition_allowed = ["(", ")", "and", "or", "not"]
 
-    def __init__(self, cfg_heuristics, sites_object):
+    def __init__(self, cfg_heuristics, sites_object, crawler_class):
         self.cfg_heuristics = cfg_heuristics
         for site in sites_object:
             self.__sites_object[site["url"]] = site
         self.log = logging.getLogger(__name__)
+        self.crawler_class = crawler_class
 
     def is_article(self, response, url):
         """
@@ -44,7 +50,7 @@ class HeuristicsManager(object):
         statement = self.__get_condition(url)
         self.log.info("Condition (original): %s", statement)
 
-        for heuristic, condition in heuristics.iteritems():
+        for heuristic, condition in heuristics.items():
             heuristic_func = getattr(self, heuristic)
             result = heuristic_func(response, site)
             check = self.__evaluate_result(result, condition)
@@ -85,7 +91,7 @@ class HeuristicsManager(object):
         for allowed in self.__condition_allowed:
             disalloweds = disalloweds.replace(allowed, "")
 
-        for heuristic, _ in heuristics.iteritems():
+        for heuristic, _ in heuristics.items():
             disalloweds = disalloweds.replace(heuristic, "")
 
         disalloweds = disalloweds.split(" ")
@@ -224,7 +230,7 @@ class HeuristicsManager(object):
         site = self.__sites_object[url]
         heuristics = dict(self.cfg_heuristics["enabled_heuristics"])
         if "overwrite_heuristics" in site:
-            for heuristic, value in site["overwrite_heuristics"].iteritems():
+            for heuristic, value in site["overwrite_heuristics"].items():
                 if value is False and heuristic in heuristics:
                     del heuristics[heuristic]
                 else:
