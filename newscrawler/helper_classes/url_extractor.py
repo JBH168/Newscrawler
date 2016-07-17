@@ -79,12 +79,12 @@ class UrlExtractor(object):
         if allow_subdomains:
             redirect = UrlExtractor.follow_redirects(
                 "http://" + UrlExtractor.get_allowed_domain(url)
-                )
+            )
         else:
             redirect = UrlExtractor.follow_redirects(
                 "http://" +
                 UrlExtractor.get_allowed_domain(url, False)
-                )
+            )
         redirect = UrlExtractor.follow_redirects(url)
 
         # Get robots.txt
@@ -119,7 +119,7 @@ class UrlExtractor(object):
         response = urllib2.urlopen(UrlExtractor.get_sitemap_url(url, True))
 
         # Check if "Sitemap" is set
-        return "Sitemap:" in response.read()
+        return "Sitemap:" in response.read().decode('utf-8')
 
     def get_rss_url(self, response):
         """
@@ -133,8 +133,8 @@ class UrlExtractor(object):
         return response.urljoin(
             response.xpath(
                 '//link[contains(@type, "application/rss+xml")]'
-                ).xpath('@href').extract()[0]
-            )
+            ).xpath('@href').extract()[0]
+        )
 
     @staticmethod
     def get_start_url(url):

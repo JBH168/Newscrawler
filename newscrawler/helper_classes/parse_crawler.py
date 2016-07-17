@@ -108,7 +108,7 @@ class ParseCrawler(object):
         :param obj response: The scrapy response
         :return bool: Determines wether the response is of the correct type
         """
-        if not re.match('text/html', response.headers.get('Content-Type')):
+        if not re.match('text/html', response.headers.get('Content-Type').decode('utf-8')):
             self.log.warn("Dropped: %s's content is not of type "
                           "text/html but %s", response.url,
                           response.headers.get('Content-Type'))

@@ -2,15 +2,14 @@
 Helper class for testing heuristics
 """
 import re
-from sub_classes.heuristics_manager import HeuristicsManager
-from url_extractor import UrlExtractor
+from newscrawler.helper_classes.sub_classes.heuristics_manager import HeuristicsManager
+from newscrawler.helper_classes.url_extractor import UrlExtractor
 
 
 class Heuristics(HeuristicsManager):
     """
     Helper class for testing heuristics
     """
-    only_article_alike_crawlers = ["rssCrawler", "sitemapCrawler"]
 
     def crawler_contains_only_article_alikes(self, response, site_dict):
         """
@@ -25,7 +24,10 @@ class Heuristics(HeuristicsManager):
         :return bool: true if it is a crawler which only returns articles or
                       article-collections
         """
-        return self.crawler_class.name in self.only_article_alike_crawlers
+        try:
+            return self.crawler_class.only_extracts_articles()
+        except AttributeError:
+            return False
 
     def meta_contains_article_keyword(self, response, site_dict):
         """
