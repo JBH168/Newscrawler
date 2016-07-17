@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import shutil
+import builtins
 
 import subprocess
 from subprocess import Popen
@@ -225,9 +226,9 @@ class StartProcesses(object):
         try:
             self.__get_python(self.python_command)
         except OSError:
-            print "ERROR: You need to have Python installed and in your " \
-                  "PATH. It must be executable by invoking the command set " \
-                  "in the config file's 'General' section 'python_command'."
+            print("ERROR: You need to have Python installed and in your "
+                  "PATH. It must be executable by invoking the command set "
+                  "in the config file's 'General' section 'python_command'.")
             sys.exit(1)
 
         return self.python_command
@@ -294,7 +295,7 @@ class StartProcesses(object):
 
 Usage:
 
-    python %s [help] [cfg_file_path] [arg] ...
+    python {} [help] [cfg_file_path] [arg] ...
 
 
 
@@ -313,7 +314,7 @@ Arguments:
                 --reset         Reset the databse and the local savepath
                 --noconfirm     Skip confirm dialogs
             """
-        print _help % (os.path.basename(__file__))
+        print(_help.format(os.path.basename(__file__)))
 
     def get_abs_file_path(self, rel_file_path,
                           quit_on_error=None, check_relative_to_path=True):
@@ -362,22 +363,22 @@ Arguments:
 
         confirm = self.has_arg("--noconfirm")
 
-        print """
+        print("""
 Cleanup db:
     This will truncate all tables and reset the whole database.
-"""
+""")
 
         if not confirm:
-            confirm = 'yes' in raw_input(
+            confirm = 'yes' in builtins.input(
                 """
     Do you really want to do this? Write 'yes' to confirm: {yes}"""
                 .format(yes='yes' if confirm else ''))
 
         if not confirm:
-            print "Did not type yes. Thus aborting."
+            print("Did not type yes. Thus aborting.")
             return
 
-        print "Resetting database..."
+        print("Resetting database...")
 
         try:
             self.cursor.execute("TRUNCATE TABLE CurrentVersions")
@@ -398,23 +399,22 @@ Cleanup db:
                 )
             )
 
-        print """
+        print("""
 Cleanup files:
     This will delete {path} and all its contents.
-""" \
-        .format(path=path)
+""".format(path=path))
 
         if not confirm:
-            confirm = 'yes' in raw_input(
+            confirm = 'yes' in builtins.input(
                 """
     Do you really want to do this? Write 'yes' to confirm: {yes}"""
                 .format(yes='yes' if confirm else ''))
 
         if not confirm:
-            print "Did not type yes. Thus aborting."
+            print("Did not type yes. Thus aborting.")
             return
 
-        print "Removing: %s" % path
+        print("Removing: {}".format(path))
 
         try:
             shutil.rmtree(path)

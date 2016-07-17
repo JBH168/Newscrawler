@@ -4,8 +4,17 @@ Helper class for url extraction.
 import re
 import os
 
-import urllib2
-from urlparse import urlparse
+# import urlparse
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
+
+# import urllib2
+try:
+    import urllib2
+except ImportError:
+    import urllib.request as urllib2
 
 
 # len(".markdown") = 9
