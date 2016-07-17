@@ -6,7 +6,7 @@ import time
 import re
 import hashlib
 
-from url_extractor import UrlExtractor
+from .url_extractor import UrlExtractor
 
 
 class SavepathParser(object):
