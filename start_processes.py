@@ -397,8 +397,8 @@ Cleanup db:
 
         path = SavepathParser.get_base_path(
             SavepathParser.get_abs_path_static(
-                self.cfg.section('Crawler')["local_data_directory"],
-                self.cfg_file_path
+                self.cfg.section('Files')["local_data_directory"],
+                os.path.dirname(self.cfg_file_path)
                 )
             )
 
@@ -423,6 +423,8 @@ Cleanup files:
         try:
             shutil.rmtree(path)
         except OSError as error:
+            if not os.path.exists(path):
+                self.log.error("%s does not exist.", path)
             self.log.error(error)
 
     class CrawlerList(object):
