@@ -12,7 +12,7 @@ from copy import deepcopy
 
 import logging
 import ConfigParser
-import json
+import hjson
 from ast import literal_eval
 from scrapy.utils.log import configure_logging
 
@@ -252,7 +252,7 @@ class JsonConfig(object):
 
         :param filepath (string): The location of the JSON-file.
         """
-        self.__json_object = json.load(open(filepath, 'r'))
+        self.__json_object = hjson.load(open(filepath, 'r'))
 
     def config(self):
         """
