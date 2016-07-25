@@ -183,9 +183,9 @@ class StartProcesses(object):
             if pajama_time > 0:
                 self.thread_event.wait(pajama_time)
             if not self.shutdown:
-                self.start_crawler(item[1])
+                self.start_crawler(item[1], daemonize=True)
 
-    def start_crawler(self, index, daemonize=0):
+    def start_crawler(self, index, daemonize=False):
         """
         Starts a crawler from the input-array.
 

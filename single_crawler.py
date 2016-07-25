@@ -45,7 +45,7 @@ class SingleCrawler(object):
     __crawer_module = "newscrawler.crawler.spiders"
     site_number = None
     shall_resume = False
-    daemonize = 0
+    daemonize = False
 
     def __init__(self, cfg_file_path, json_file_path,
                  site_index, shall_resume, daemonize):
@@ -60,7 +60,8 @@ class SingleCrawler(object):
         self.site_number = int(site_index)
         self.shall_resume = shall_resume \
             if isinstance(shall_resume, bool) else literal_eval(shall_resume)
-        self.daemonize = int(daemonize)
+        self.daemonize = daemonize \
+            if isinstance(daemonize, bool) else literal_eval(daemonize)
 
         # set up the config file
         self.cfg = CrawlerConfig.get_instance()
@@ -205,7 +206,7 @@ class SingleCrawler(object):
         """
         jobdir = os.path.abspath(self.__scrapy_options["JOBDIR"])
 
-        if (not self.shall_resume or self.daemonize > 0) \
+        if (not self.shall_resume or self.daemonize) \
                 and os.path.exists(jobdir):
             shutil.rmtree(jobdir)
 
