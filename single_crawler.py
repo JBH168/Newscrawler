@@ -83,7 +83,9 @@ class SingleCrawler(object):
                 self.cfg.section('Crawler')['ignore_regex']
 
         # Get the default crawler. The crawler can be overwritten by fallbacks.
-        if "crawler" in site:
+        if "additional_rss_daemon" in site and self.daemonize:
+            self.crawler = "RssCrawler"
+        elif "crawler" in site:
             self.crawler = site["crawler"]
         else:
             self.crawler = self.cfg.section("Crawler")["default"]

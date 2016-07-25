@@ -120,6 +120,10 @@ class StartProcesses(object):
         for index, site in enumerate(sites):
             if "daemonize" in site:
                 self.daemon_list.add_daemon(index, site["daemonize"])
+            elif "additional_rss_daemon" in site:
+                self.daemon_list.add_daemon(index,
+                                            site["additional_rss_daemon"])
+                self.crawler_list.append_item(index)
             else:
                 self.crawler_list.append_item(index)
 
