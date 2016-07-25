@@ -332,7 +332,7 @@ Arguments:
         """
         if self.cfg_file_path is not None and \
                 check_relative_to_path and \
-                not self.cfg.section('Files')['relative_to_initial_file']:
+                not self.cfg.section('Files')['relative_to_start_processes_file']:
             script_dir = os.path.dirname(self.cfg_file_path)
         else:
             # absolute dir this script is in

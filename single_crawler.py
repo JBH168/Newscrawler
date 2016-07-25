@@ -89,7 +89,7 @@ class SingleCrawler(object):
         # Get the real crawler-class (already "fallen back")
         crawler_class = self.get_crawler(self.crawler, site["url"])
 
-        if not self.cfg.section('Files')['relative_to_initial_file']:
+        if not self.cfg.section('Files')['relative_to_start_processes_file']:
             relative_to_path = os.path.dirname(self.cfg_file_path)
         else:
             # absolute dir this script is in
