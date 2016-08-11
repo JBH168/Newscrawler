@@ -18,7 +18,7 @@ class HeuristicsManager(object):
     __sites_object = {}
     __sites_heuristics = {}
     __heuristics_condition = None
-    __condition_allowed = ["(", ")", "and", "or", "not"]
+    __condition_allowed = ["(", ")", " and ", " or " , " not "]
 
     def __init__(self, cfg_heuristics, sites_object):
         self.cfg_heuristics = cfg_heuristics
@@ -83,7 +83,7 @@ class HeuristicsManager(object):
         heuristics = self.__get_enabled_heuristics(url)
 
         for allowed in self.__condition_allowed:
-            disalloweds = disalloweds.replace(allowed, "")
+            disalloweds = disalloweds.replace(allowed, " ")
 
         for heuristic, _ in heuristics.iteritems():
             disalloweds = disalloweds.replace(heuristic, "")
