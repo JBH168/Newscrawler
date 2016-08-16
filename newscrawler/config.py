@@ -11,8 +11,14 @@ All object-getters create deepcopies.
 from copy import deepcopy
 
 import logging
-import ConfigParser
-import hjson
+
+# import ConfigParser
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+
+import json
 from ast import literal_eval
 from scrapy.utils.log import configure_logging
 
@@ -134,7 +140,7 @@ class CrawlerConfig(object):
             self.__scrapy_options = {}
             options = self.section("Scrapy")
 
-            for key, value in options.iteritems():
+            for key, value in options.items():
                 self.__scrapy_options[key.upper()] = value
         return self.__scrapy_options
 

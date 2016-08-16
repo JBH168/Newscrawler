@@ -47,6 +47,14 @@ class SitemapCrawler(scrapy.spiders.SitemapSpider):
             response, self.allowed_domains[0], self.original_url)
 
     @staticmethod
+    def only_extracts_articles():
+        """
+        Meta-Method, so if the heuristic "crawler_contains_only_article_alikes"
+        is called, the heuristic will return True on this crawler.
+        """
+        return True
+
+    @staticmethod
     def supports_site(url):
         """
         Sitemap-Crawler are supported by every site which have a
