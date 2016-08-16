@@ -11,6 +11,7 @@ All object-getters create deepcopies.
 from copy import deepcopy
 
 import logging
+import hjson
 
 # import ConfigParser
 try:
@@ -18,7 +19,6 @@ try:
 except ImportError:
     import configparser as ConfigParser
 
-import json
 from ast import literal_eval
 from scrapy.utils.log import configure_logging
 
