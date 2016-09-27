@@ -5,6 +5,6 @@ CColon Newscrawler is a software developed by the CColon-team in the context of 
 Its goal is to download news-article (and only news-article) multiple sites given by multiple URLs.
 
 
-## [Further information](https://bitbucket.org/sciplore/ccolon_newscrawler/wiki/Home)
+## [Further information](https://github.com/JBH168/ccolon_newscrawler/wiki)
 
-[For further information check out the wiki!](https://bitbucket.org/sciplore/ccolon_newscrawler/wiki/Home)
+[For further information check out the wiki!](https://github.com/JBH168/ccolon_newscrawler/wiki)
