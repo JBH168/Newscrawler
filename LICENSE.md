@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2016 Jonathan Hassler (@JBH168), @franziscl, @msharing, @claudeeee, Moritz Bock (@movabo)
+Copyright (c) 2016 Jonathan Hassler (@JBH168), Franziska Schlor (@franziscl), Matt Sharinghousen (@msharing), Claudio Spener (@claudeeee), Moritz Bock (@movabo)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
