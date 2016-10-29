@@ -4,7 +4,8 @@ Newscrawler is a software developed by the CColon-team in the context of the lec
 
 The team consisted of Jonathan Hassler (@JBH168), Franziska Schlor (@franziscl), Matt Sharinghousen (@msharing), Claudio Spener (@claudeeee) and Moritz Bock (@movabo).
 
-Its goal is to download the HTML-source of news-articles from multiple domains.
+Its goal is to independently crawl multiple domains, recognise news-articles and download their html-source.
+Furthermore, it saves meta data to a database and is able to keep a downloaded collection of news-articles up to date.
 
 ## [Further information](https://github.com/JBH168/Newscrawler/wiki)
 
